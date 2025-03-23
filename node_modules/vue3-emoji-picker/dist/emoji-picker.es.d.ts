@@ -1,0 +1,215 @@
+import { AllowedComponentProps } from 'vue';
+import { ComponentCustomProps } from 'vue';
+import { ComponentOptionsMixin } from 'vue';
+import { DefineComponent } from 'vue';
+import { ExtractPropTypes } from 'vue';
+import { PropType } from 'vue';
+import { Ref } from 'vue';
+import { VNodeProps } from 'vue';
+
+declare type ColorTheme = 'dark' | 'light' | 'auto';
+
+declare const _default: DefineComponent<{
+    native: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    hideSearch: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    hideGroupIcons: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    hideGroupNames: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    staticTexts: {
+        type: ObjectConstructor;
+        default: () => {};
+    };
+    disableStickyGroupNames: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    disabledGroups: {
+        type: ArrayConstructor;
+        default: () => never[];
+    };
+    groupNames: {
+        type: ObjectConstructor;
+        default: () => {};
+    };
+    disableSkinTones: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    text: {
+        type: StringConstructor;
+        default: string;
+    };
+    mode: {
+        type: StringConstructor;
+        default: string;
+    };
+    offset: {
+        type: NumberConstructor;
+        default: number;
+    };
+    additionalGroups: {
+        type: ObjectConstructor;
+        default: () => {};
+    };
+    groupOrder: {
+        type: ArrayConstructor;
+        default: () => never[];
+    };
+    groupIcons: {
+        type: ObjectConstructor;
+        default: () => {};
+    };
+    pickerType: {
+        type: StringConstructor;
+        default: string;
+    };
+    displayRecent: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    theme: {
+        type: PropType<ColorTheme>;
+        default: string;
+    };
+}, {
+    type: string;
+    input: Ref<string>;
+    onChangeText: (text: string | undefined) => void;
+}, unknown, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {
+    'update:text': (text: string) => true;
+    select: (emoji: EmojiExt) => true;
+}, string, VNodeProps & AllowedComponentProps & ComponentCustomProps, Readonly<ExtractPropTypes<{
+    native: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    hideSearch: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    hideGroupIcons: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    hideGroupNames: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    staticTexts: {
+        type: ObjectConstructor;
+        default: () => {};
+    };
+    disableStickyGroupNames: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    disabledGroups: {
+        type: ArrayConstructor;
+        default: () => never[];
+    };
+    groupNames: {
+        type: ObjectConstructor;
+        default: () => {};
+    };
+    disableSkinTones: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    text: {
+        type: StringConstructor;
+        default: string;
+    };
+    mode: {
+        type: StringConstructor;
+        default: string;
+    };
+    offset: {
+        type: NumberConstructor;
+        default: number;
+    };
+    additionalGroups: {
+        type: ObjectConstructor;
+        default: () => {};
+    };
+    groupOrder: {
+        type: ArrayConstructor;
+        default: () => never[];
+    };
+    groupIcons: {
+        type: ObjectConstructor;
+        default: () => {};
+    };
+    pickerType: {
+        type: StringConstructor;
+        default: string;
+    };
+    displayRecent: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    theme: {
+        type: PropType<ColorTheme>;
+        default: string;
+    };
+}>> & {
+    onSelect?: ((emoji: EmojiExt) => any) | undefined;
+    "onUpdate:text"?: ((text: string) => any) | undefined;
+}, {
+    native: boolean;
+    hideSearch: boolean;
+    hideGroupIcons: boolean;
+    hideGroupNames: boolean;
+    staticTexts: Record<string, any>;
+    disabledGroups: unknown[];
+    groupNames: Record<string, any>;
+    displayRecent: boolean;
+    additionalGroups: Record<string, any>;
+    groupOrder: unknown[];
+    groupIcons: Record<string, any>;
+    mode: string;
+    disableStickyGroupNames: boolean;
+    text: string;
+    disableSkinTones: boolean;
+    offset: number;
+    pickerType: string;
+    theme: ColorTheme;
+}>;
+export default _default;
+
+export declare interface Emoji {
+    [EMOJI_NAME_KEY]: string[];
+    [EMOJI_UNICODE_KEY]: string;
+    [EMOJI_VARIATIONS_KEY]?: string[];
+    [EMOJI_RESULT_KEY]: string;
+    src?: string;
+}
+
+declare const EMOJI_EMOJI_KEY = "i";
+
+declare const EMOJI_NAME_KEY = "n";
+
+declare const EMOJI_RESULT_KEY = "r";
+
+declare const EMOJI_SKIN_TONE_KEY = "t";
+
+declare const EMOJI_UNICODE_KEY = "u";
+
+declare const EMOJI_VARIATIONS_KEY = "v";
+
+export declare interface EmojiExt extends Emoji {
+    [EMOJI_SKIN_TONE_KEY]: string;
+    [EMOJI_EMOJI_KEY]: string;
+}
+
+export { }
