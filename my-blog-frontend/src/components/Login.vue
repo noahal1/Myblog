@@ -1,24 +1,58 @@
 <template>
-  <div class="login-container">
-    <form @submit.prevent="handleSubmit">
-      <h2>{{ isLogin ? '登录' : '注册' }}</h2>
-      
-      <div class="form-group">
-        <label>用户名</label>
-        <input v-model="form.username" type="text" required />
-      </div>
+  <v-card
+    class="mx-auto"
+    max-width="500"
+    :title="isLogin ? 'Login' : 'Register'"
 
-      <div class="form-group">
-        <label>密码</label>
-        <input v-model="form.password" type="password" required />
-      </div>
+  >
+    <v-form @submit.prevent="handleSubmit" class="pa-6">
+      <v-row>
+        <v-col cols="12">
+          <v-text-field
+            v-model="form.username"
+            label="用户名"
+            variant="outlined"
+            prepend-inner-icon="mdi-account"
+            density="comfortable"
+            :rules="[requiredRule]"
+          />
+        </v-col>
 
-      <button type="submit">{{ isLogin ? '登录' : '注册' }}</button>
-      <p class="toggle-mode" @click="isLogin = !isLogin">
-        {{ isLogin ? '没有账号？立即注册' : '已有账号？立即登录' }}
-      </p>
-    </form>
-  </div>
+        <v-col cols="12">
+          <v-text-field
+            v-model="form.password"
+            label="密码"
+            variant="outlined"
+            prepend-inner-icon="mdi-lock"
+            type="password"
+            density="comfortable"
+            :rules="[requiredRule]"
+          />
+        </v-col>
+
+        <v-col cols="12">
+          <v-btn
+            block
+            size="large"
+            color="primary"
+            type="submit"
+            :loading="loading"
+          >
+            {{ isLogin ? '立即登录' : '注册账号' }}
+          </v-btn>
+        </v-col>
+
+        <v-col cols="12" class="text-center">
+          <a 
+            class="text-caption text-primary text-decoration-none"
+            @click="isLogin = !isLogin"
+          >
+            {{ isLogin ? '没有账号？立即注册' : '已有账号？立即登录' }}
+          </a>
+        </v-col>
+      </v-row>
+    </v-form>
+  </v-card>
 </template>
 
 <script setup>
@@ -28,60 +62,53 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const isLogin = ref(true)
+const loading = ref(false)
 const form = ref({
   username: '',
   password: ''
 })
 
+const requiredRule = value => !!value || '该字段为必填项'
+
 const handleSubmit = async () => {
   try {
+    loading.value = true
     const url = isLogin.value ? '/api/login' : '/api/register'
-    const response = await axios.post(url, form.value)
+    const { data } = await axios.post(url, form.value)
     
     if (isLogin.value) {
-      localStorage.setItem('token', response.data.access_token)
-      router.push('/dashboard')
+      localStorage.setItem('token', data.access_token)
+      router.replace('/dashboard')
     } else {
-      alert('注册成功，请登录')
       isLogin.value = true
     }
   } catch (error) {
-    alert(isLogin.value ? '登录失败' : '注册失败')
-    console.error(error)
+    const message = error.response?.data?.message || 
+      (isLogin.value ? '登录失败' : '注册失败')
+  } finally {
+    loading.value = false
   }
 }
 </script>
 
 <style scoped>
-.login-container {
-  max-width: 400px;
-  margin: 2rem auto;
-  padding: 2rem;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+.v-card {
+  margin-top: 25vh;
+  background-color: rgba(116, 107, 137, 0.433);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.793);
+  transition: transform 0.3s ease;
 }
 
-.form-group {
-  margin-bottom: 1rem;
+.v-card:hover {
+  transform: translateY(-2px);
 }
 
-input {
-  width: 100%;
-  padding: 0.5rem;
-  margin-top: 0.3rem;
+.text-primary {
+  color: rgb(var(--v-theme-primary));
+  transition: opacity 0.2s;
 }
 
-button {
-  width: 100%;
-  padding: 0.7rem;
-  background: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.toggle-mode {
-  margin-top: 1rem;
-  cursor: pointer;
-  color: #007bff;
+.text-primary:hover {
+  opacity: 0.8;
 }
 </style>
