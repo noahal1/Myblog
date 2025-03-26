@@ -19,7 +19,10 @@
   /* 文本与边框 */
   --text-primary: 33, 33, 33;
   --text-secondary: 97, 97, 97;
+  --text-tertiary: 120, 120, 120; /* 添加第三级文本颜色 */
   --border-radius: 12px;
+  --border-radius-md: 8px; /* 添加中等圆角 */
+  --border-subtle: 1px solid rgba(var(--primary-blue), 0.1); /* 添加通用边框样式 */
   
   /* 动画速度 */
   --transition-default: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -33,6 +36,14 @@
   --z-index-nav: 1000;
   --z-index-modal: 2000;
   --z-index-top: 9999;
+  
+  /* 布局 */
+  --header-gradient: linear-gradient(
+    var(--gradient-angle),
+    rgba(var(--primary-blue), 0.05),
+    rgba(var(--secondary-purple), 0.03),
+    rgba(var(--accent-orange), 0.01)
+  );
   
   font-family: var(--font-body);
   line-height: 1.6;
@@ -61,6 +72,7 @@ body {
   --hover-shadow: 0 12px 36px rgba(var(--primary-blue), 0.35);
   --text-primary: 240, 240, 240;
   --text-secondary: 200, 200, 200;
+  --text-tertiary: 170, 170, 170;
 }
 
 /* 卡片全局样式 */
@@ -127,9 +139,46 @@ body {
   transform: translateY(15px);
 }
 
+/* 性能优化类 */
+.hardware-accelerated {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.reduce-flicker {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
 /* 响应式调整 */
 @media (max-width: 768px) {
   :root {
     --border-radius: 10px;
   }
+}
+
+/* 添加滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(var(--v-theme-surface), 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--primary-blue), 0.3);
+  border-radius: 4px;
+  transition: background var(--transition-default);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--primary-blue), 0.5);
+}
+
+/* 主题过渡控制 */
+.theme-transitioning * {
+  transition: none !important;
 }

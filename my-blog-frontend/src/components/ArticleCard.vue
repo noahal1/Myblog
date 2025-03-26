@@ -114,7 +114,7 @@ const viewArticle = (id) => {
 }
 
 .article-card:hover {
-  transform: translateY(-8px) scale(1.01);
+  transform: translateY(-8px) scale(1.02);
   box-shadow: var(--hover-shadow);
   border-color: rgba(var(--primary-blue), 0.15);
 }
@@ -125,14 +125,14 @@ const viewArticle = (id) => {
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 4px;
   background: linear-gradient(90deg,
     rgba(var(--primary-blue), 0.7),
     rgba(var(--secondary-purple), 0.5),
     rgba(var(--accent-orange), 0.3)
   );
   transform: scaleX(0);
-  transform-origin: left;
+  transform-origin: top;
   transition: transform var(--transition-default);
 }
 
@@ -187,7 +187,8 @@ const viewArticle = (id) => {
 
 .actions {
   margin-top: auto;
-  padding-top: 12px;
+  padding-bottom: 0%;
+  padding-top: 4px;
   border-top: 1px solid rgba(var(--text-primary), 0.1);
 }
 

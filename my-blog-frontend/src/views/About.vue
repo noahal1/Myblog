@@ -52,10 +52,10 @@
                   👋 Hello，this is Noah.
                 </p>
                 <p class="text-body-1 mb-4" style="font-size: 1.1rem; line-height: 1.8;">
-                  🎯 目标成为具有全栈开发能力的全端工程师。
+                  🎯 目标成为具有全栈开发能力的全栈工程师。
                 </p>
                 <p class="text-body-1 mb-4" style="font-size: 1.1rem; line-height: 1.8;">
-                  🚀 目前在学习前端、网络、数据库等技术。focus on Python,MySQL and JavaScript.
+                  🚀 目前在学习前端、网络、数据库多领域技术。focus on Python, MySQL and JavaScript.
                 </p>
                 <p class="text-body-1 mb-4" style="font-size: 1.1rem; line-height: 1.8;">
                   我热衷于探索新技术，解决复杂问题，并构建能够改善用户体验的应用程序。在技术学习的路上，我相信持续学习和实践是提升自己的最佳方式。
@@ -124,7 +124,6 @@
 </template>
 
 <script setup>
-// 导入你需要的依赖和组件
 </script>
 
 <style scoped>
