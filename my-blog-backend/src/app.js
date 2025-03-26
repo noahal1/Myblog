@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 
 dotenv.config();
 
@@ -13,8 +12,8 @@ app.use(cors());
 app.use(express.json());
 
 // 数据库连接
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
+MYSQL_URI.connect(process.env.MYSQL_URI)
+  .then(() => console.log('Mysql connected'))
   .catch(err => console.error(err));
 
 // 测试路由

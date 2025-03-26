@@ -6,19 +6,42 @@
     :class="{ 'scrolled': isScrolled }"
     :color="toolbarColor"
   >
-    <v-toolbar-title class="logo-item">
-      <v-icon icon="mdi-book-open-outline" size="28" />
-      <span class="text-h6 font-weight-bold ml-2">Noah's Blog</span>
+    <v-toolbar-title class="logo-container">
+      <div class="logo-item d-flex align-center">
+        <logo-icon 
+          :width="35" 
+          :height="35" 
+          :color="logoColor" 
+          :theme="logoTheme" 
+          class="logo-svg" 
+        />
+        <span class="site-title">Noah's Blog</span>
+      </div>
     </v-toolbar-title>
 
+    <v-spacer></v-spacer>
+    
+    <div class="nav-buttons">
+      <v-btn
+        v-for="(item, index) in navItems"
+        :key="index"
+        variant="text"
+        :to="item.to"
+        :prepend-icon="item.icon"
+        class="nav-btn"
+      >{{ item.label }}</v-btn>
+    </div>
+  
+    
+    <!-- 主题切换按钮 -->
     <v-btn
-      v-for="(item, index) in navItems"
-      :key="index"
+      icon
       variant="text"
-      :to="item.to"
-      :prepend-icon="item.icon"
-      class="nav-btn"
-    >{{ item.label }}</v-btn>
+      @click="toggleTheme"
+      class="theme-toggle-btn mx-2"
+    >
+      <v-icon :icon="themeIcon" />
+    </v-btn>
 
     <v-menu location="bottom end" :close-on-content-click="false">
       <template #activator="{ props }">
@@ -63,44 +86,66 @@
   z-index: var(--z-index-nav);
   width: 100%;
   max-width: 100%;
-  backdrop-filter: blur(12px) saturate(180%);
+  backdrop-filter: blur(8px) saturate(100%);
   background: linear-gradient(
     var(--gradient-angle),
     rgba(var(--primary-blue), 0.1),
-    rgba(var(--secondary-purple), 0.05),
-    rgba(var(--accent-orange), 0.08)
-  ) !important;
+    rgba(var(--secondary-purple), 0.06),
+    rgba(var(--accent-orange), 0.02)
+  );
   transition: all var(--transition-default);
 }
 
 .neon-navbar.scrolled {
   background: linear-gradient(
     var(--gradient-angle),
-    rgba(var(--primary-blue), 0.25),
-    rgba(var(--secondary-purple), 0.15),
-    rgba(var(--accent-orange), 0.1)
+    rgba(var(--primary-blue), 0.1),
+    rgba(var(--secondary-purple), 0.06),
+    rgba(var(--accent-orange), 0.02)
   ) !important;
   box-shadow: 0 6px 24px rgba(var(--primary-blue), 0.2);
   backdrop-filter: blur(20px) saturate(200%);
 }
 
+.logo-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
 .logo-item {
   position: relative;
   transition: all var(--transition-default);
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
-.logo-item span {
+.site-title {
   background: var(--neon-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   font-weight: bold;
   transition: all var(--transition-default);
-  letter-spacing: 0.5px;
+  margin-left: 10px;
+  font-size: 1.25rem;
+  line-height: 1;
+  position: relative;
+  top: 1px;
 }
 
-.logo-item:hover span {
+.logo-item:hover .site-title {
   letter-spacing: 1px;
+}
+
+.logo-svg {
+  transition: transform var(--transition-default);
+  display: flex;
+}
+
+.logo-item:hover .logo-svg {
+  transform: rotate(10deg) scale(1.1);
 }
 
 .nav-btn {
@@ -184,15 +229,41 @@
     display: none;
   }
 }
+
+/* 添加导航按钮容器样式 */
+.nav-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 修改主题切换按钮样式，简化以确保正常工作 */
+.theme-toggle-btn {
+  position: relative;
+  transition: all var(--transition-default);
+}
+
+.theme-toggle-btn:hover {
+  transform: rotate(12deg);
+  background: rgba(var(--primary-blue), 0.1);
+}
+
+/* 添加主题过渡控制类 */
+.theme-transitioning * {
+  transition-duration: 0.s;
+  transition-delay: 0s !important; 
+}
 </style>
 
 <script setup>
 import { useUserStore } from '../stores/user'
-import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { useDisplay } from 'vuetify'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
+import { useDisplay, useTheme } from 'vuetify'
+import LogoIcon from './icons/LogoIcon.vue'
 
 const userStore = useUserStore()
 const display = useDisplay()
+const theme = useTheme()
 
 // 使用Vuetify提供的断点系统替代手动媒体查询
 const isMobile = computed(() => display.mdAndDown.value)
@@ -205,16 +276,84 @@ const navItems = [
   { to: '/about', icon: 'mdi-information', label: '关于' }
 ]
 
-// 使用Vuetify主题API获取当前主题
-const theme = computed(() => {
-  return useDisplay().theme
-})
+// 修复主题检测逻辑
+const isDarkTheme = computed(() => {
+  try {
+    // 尝试安全地访问dark属性
+    return !!theme.global.current.value?.dark;
+  } catch (e) {
+    console.warn('无法确定主题状态:', e);
+    // 回退到检查系统偏好
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+});
+
+// 修改 Logo 主题属性绑定
+const logoTheme = computed(() => {
+  return isDarkTheme.value ? 'dark' : 'light';
+});
+
+// 修改图标显示逻辑
+const themeIcon = computed(() => {
+  const currentTheme = theme.global.name.value;
+  // 检查是否使用系统主题
+  const isSystemTheme = localStorage.getItem('theme') === 'system';
+  
+  if (isSystemTheme) return 'mdi-theme-light-dark';
+  if (currentTheme === 'dark') return 'mdi-weather-sunny';
+  return 'mdi-weather-night';
+});
+
+// 改进主题切换函数
+const toggleTheme = () => {
+  // 添加过渡类，控制动画
+  document.body.classList.add('theme-transitioning');
+  
+  // 延迟执行实际主题切换，让浏览器有时间准备渲染
+  setTimeout(() => {
+    // 获取当前主题设置
+    const currentSetting = localStorage.getItem('theme') || theme.global.name.value;
+    
+    // 循环切换：light -> dark -> system -> light
+    let nextTheme;
+    if (currentSetting === 'light') {
+      nextTheme = 'dark';
+    } else if (currentSetting === 'dark') {
+      nextTheme = 'system';
+      // 设置为系统主题时，根据系统偏好设置实际主题
+      const prefersDark = window.matchMedia && 
+                          window.matchMedia('(prefers-color-scheme: dark)').matches;
+      theme.global.name.value = prefersDark ? 'dark' : 'light';
+    } else {
+      nextTheme = 'light';
+    }
+    
+    // 保存主题设置
+    localStorage.setItem('theme', nextTheme);
+    
+    // 如果不是系统主题，直接设置
+    if (nextTheme !== 'system') {
+      theme.global.name.value = nextTheme;
+    }
+    
+    // 切换后移除过渡类
+    setTimeout(() => {
+      document.body.classList.remove('theme-transitioning');
+    }, 300); // 与过渡时间匹配
+  }, 10);
+}
 
 const toolbarColor = computed(() => 
-  theme.value?.global?.current?.dark ? 'surface' : 'background'
+  isDarkTheme.value ? 'surface' : 'background'
 )
 
-// 添加滚动行为优化
+// 根据主题设置Logo颜色
+const logoColor = computed(() => {
+  return isDarkTheme.value
+    ? 'rgba(156, 39, 176, 0.9)' // 深色主题时的颜色
+    : 'rgba(63, 81, 181, 0.9)'  // 浅色主题时的颜色
+})
+
 const isScrolled = ref(false)
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 20
@@ -222,6 +361,19 @@ const handleScroll = () => {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
+  
+  try {
+    // 从localStorage读取用户主题偏好
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      theme.global.name.value = savedTheme;
+    } else {
+      // 如果没有保存的主题，则使用系统主题
+      theme.global.name.value = 'system';
+    }
+  } catch (e) {
+    console.error('设置初始主题时出错:', e);
+  }
 })
 
 onUnmounted(() => {

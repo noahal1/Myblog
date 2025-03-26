@@ -3,8 +3,11 @@
     <!-- 头部横幅 -->
     <div class="hero-banner">
       <v-container>
-        <h1 class="hero-title">抒情与逻辑之间的<span class="gradient-text">自留地</span></h1>
-        <p class="hero-subtitle">在这里，未编译的诗歌，以及持续生长的胡思乱想</p>
+        <h1 class="hero-title">
+          <span class="tagline-prefix slow-transition">抒情与逻辑之间的</span>
+          <span class="gradient-text">自留地</span>
+        </h1>
+        <p class="hero-subtitle subtitle-text">在这里，未编译的诗歌，以及持续生长的胡思乱想</p>
         
         <v-text-field
           v-model="searchQuery"
@@ -44,6 +47,7 @@
         class="mx-auto"
       />
       
+      <!-- 文章列表 -->
       <div v-else class="articles-container">
         <transition-group name="article-list" tag="div" class="article-grid">
           <article-card
@@ -55,6 +59,7 @@
           />
         </transition-group>
         
+        <!-- 空状态 -->
         <div v-if="filteredArticles.length === 0" class="empty-state text-center py-8">
           <v-icon icon="mdi-text-search" size="64" class="mb-4 empty-icon"></v-icon>
           <h3 class="text-h5">无法找到符合条件的文章</h3>
@@ -87,14 +92,51 @@
   min-height: 100vh;
 }
 
+.hero-section {
+  padding: 5rem 0 3rem;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    var(--gradient-angle),
+    rgba(var(--primary-blue), 0.05),
+    rgba(var(--secondary-purple), 0.03),
+    rgba(var(--accent-orange), 0.05)
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.site-name {
+  background: var(--neon-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+.tagline-text {
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: rgb(var(--accent-orange));
+  transition: color 1.5s ease;
+}
+
+.subtitle-text {
+  font-style: italic;
+  transition: color 2.0s ease;
+}
+
 .hero-banner {
   background: linear-gradient(
     var(--gradient-angle),
     rgba(var(--primary-blue), 0.1),
-    rgba(var(--secondary-purple), 0.05),
-    rgba(var(--accent-orange), 0.08)
+    rgba(var(--secondary-purple), 0.06),
+    rgba(var(--accent-orange), 0.02)
   );
-  padding: 64px 0;
+  padding:32px 0;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -103,13 +145,10 @@
 .hero-banner::before {
   content: '';
   position: absolute;
-  top: -10%;
-  left: -10%;
-  width: 120%;
-  height: 120%;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(var(--primary-blue), 0.05) 0%, transparent 70%),
-    radial-gradient(circle at 80% 60%, rgba(var(--accent-orange), 0.05) 0%, transparent 70%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: -1;
 }
 
@@ -126,6 +165,7 @@
   opacity: 0.8;
   max-width: 600px;
   margin: 0 auto;
+  transition: color var(--transition-slow-text), opacity var(--transition-slow-text);
 }
 
 .search-input {
@@ -222,6 +262,53 @@
     width: 90%;
   }
 }
+
+/* 添加标语前缀样式 */
+.tagline-prefix {
+  position: relative;
+  transition: color var(--transition-slow-text);
+  display: inline-block;
+}
+
+/* 在夜间模式下显示渐变色 */
+:deep(.v-theme--dark) .tagline-prefix {
+  background: linear-gradient(
+    var(--gradient-angle),
+    rgba(var(--primary-blue), 0.9),
+    rgba(var(--accent-orange), 0.7)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+
+/* 调整字幕文字样式，添加慢速过渡 */
+.hero-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.8;
+  max-width: 600px;
+  margin: 0 auto;
+  transition: color var(--transition-slow-text), opacity var(--transition-slow-text);
+}
+
+/* 在夜间模式下微调字幕颜色 */
+:deep(.v-theme--dark) .hero-subtitle {
+  color: rgba(var(--accent-orange), 0.9);
+  opacity: 0.9;
+}
+
+/* 简化渐变文本效果 */
+.gradient-text {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--primary-blue)),
+    rgb(var(--accent-orange))
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 </style>
 
 <script setup>
@@ -237,6 +324,7 @@ const totalPages = ref(0)
 const searchQuery = ref('')
 const selectedCategory = ref(null)
 
+// 示例分类
 const categories = [
   { id: 'all', name: '全部' },
   { id: 'Frontend', name: '前端' },
@@ -246,9 +334,11 @@ const categories = [
   { id: 'backend', name: '后端' },
 ]
 
+// 模拟获取文章数据
 const fetchArticles = async (page = 1) => {
   loading.value = true
   try {
+    // 模拟API延迟
     await new Promise(resolve => setTimeout(resolve, 800))
     
     // 模拟文章数据
@@ -298,6 +388,7 @@ const filteredArticles = computed(() => {
 
 // 搜索文章
 const searchArticles = () => {
+  // 重置到第一页
   currentPage.value = 1
 }
 
@@ -313,6 +404,7 @@ const viewArticle = (id) => {
   router.push(`/article/${id}`)
 }
 
+// 监听页码变化
 watch(currentPage, () => {
   // 在实际应用中，这里应该重新请求对应页码的数据
   window.scrollTo({ top: 0, behavior: 'smooth' })

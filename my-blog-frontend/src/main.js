@@ -10,11 +10,26 @@ import * as directives from 'vuetify/directives'
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 
+// 检测系统主题偏好
+const prefersDarkTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+
+// 获取保存的主题设置
+const savedTheme = localStorage.getItem('theme')
+
+// 确定初始主题
+let initialTheme = 'light'
+if (savedTheme) {
+  initialTheme = savedTheme
+} else if (prefersDarkTheme) {
+  initialTheme = 'dark'
+}
+
 const vuetify = createVuetify({
   components,
   directives,
   theme: {
-    defaultTheme: 'light',
+    // 不使用'system'主题，而是根据系统偏好设置初始主题
+    defaultTheme: initialTheme,
     themes: {
       light: {
         colors: {
@@ -42,3 +57,15 @@ app.use(vuetify)
 app.use(router)
 
 app.mount('#app')
+
+// 监听系统主题变化
+if (window.matchMedia) {
+  const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  colorSchemeQuery.addEventListener('change', (e) => {
+    // 只有当用户选择了"系统"主题时才自动切换
+    if (localStorage.getItem('theme') === 'system') {
+      const newTheme = e.matches ? 'dark' : 'light'
+      vuetify.theme.global.name.value = newTheme
+    }
+  })
+}

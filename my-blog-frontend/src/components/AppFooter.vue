@@ -1,130 +1,449 @@
 <template>
-  <v-footer app class="footer pa-0" style="position: relative;">
+  <v-footer app class="footer-container" style="position: relative;">
     <v-container>
       <v-row>
-        <v-col cols="12" md="4" class="text-center text-md-left">
-          <div class="text-h6 mb-2">Noah的博客</div>
-          <p class="mb-0 text-body-2">分享技术，记录生活</p>
-        </v-col>
-        
-        <v-col cols="12" md="4" class="text-center">
-          <div class="text-subtitle-2 mb-2">友情链接</div>
-          <div class="d-flex justify-center flex-wrap">
-            <a href="https://vuejs.org" target="_blank" class="text-decoration-none mx-2 text-body-2">Vue官网</a>
-            <a href="https://fastapi.tiangolo.com" target="_blank" class="text-decoration-none mx-2 text-body-2">FastAPI官网</a>
-            <a href="https://developer.mozilla.org" target="_blank" class="text-decoration-none mx-2 text-body-2">MDN文档</a>
+        <!-- Logo & 简介 -->
+        <v-col cols="12" md="4" class="footer-section">
+          <div class="footer-logo d-flex align-center mb-4">
+            <logo-icon :width="40" :height="40" :color="logoColor" class="footer-icon" />
+            <h3 class="footer-title">Noah's Blog</h3>
+          </div>
+          
+          <p class="footer-description">
+            抒情与逻辑之间的自留地，记录技术、思考与生活的点滴。
+          </p>
+          
+          <div class="social-links mt-4">
+            <v-tooltip location="top">
+              <template v-slot:activator="{ props }">
+                <v-btn 
+                  v-bind="props"
+                  variant="text"
+                  icon="mdi-github"
+                  href="https://github.com/yourusername"
+                  target="_blank"
+                  class="social-btn"
+                ></v-btn>
+              </template>
+              <span>GitHub</span>
+            </v-tooltip>
+            
+            <v-tooltip location="top">
+              <template v-slot:activator="{ props }">
+                <v-btn 
+                  v-bind="props"
+                  variant="text"
+                  icon="mdi-twitter"
+                  href="https://twitter.com/yourusername"
+                  target="_blank"
+                  class="social-btn"
+                ></v-btn>
+              </template>
+              <span>Twitter</span>
+            </v-tooltip>
+            
+            <v-tooltip location="top">
+              <template v-slot:activator="{ props }">
+                <v-btn 
+                  v-bind="props"
+                  variant="text"
+                  icon="mdi-email-outline"
+                  @click="showContactForm = true"
+                  class="social-btn"
+                ></v-btn>
+              </template>
+              <span>联系我</span>
+            </v-tooltip>
           </div>
         </v-col>
         
-        <v-col cols="12" md="4" class="text-center text-md-right">
-          <div class="text-subtitle-2 mb-2">联系我</div>
-          <div class="social-links">
-            <v-btn icon="mdi-github" variant="text" href="https://github.com/noahal1" target="_blank" class="mx-1"></v-btn>
-            <v-btn icon="mdi-email" variant="text" href="mailto:noahall127@outlook.com" class="mx-1"></v-btn>
-            <v-btn icon="mdi-sina-weibo" variant="text" href="#" target="_blank" class="mx-1"></v-btn>
-          </div>
+        <!-- 快速链接 -->
+        <v-col cols="6" md="2" class="footer-section">
+          <h4 class="footer-heading">快速链接</h4>
+          <ul class="footer-links">
+            <li v-for="(link, i) in quickLinks" :key="i">
+              <router-link :to="link.to" class="footer-link">
+                {{ link.text }}
+              </router-link>
+            </li>
+          </ul>
+        </v-col>
+        
+        <!-- 分类 -->
+        <v-col cols="6" md="2" class="footer-section">
+          <h4 class="footer-heading">内容分类</h4>
+          <ul class="footer-links">
+            <li v-for="(category, i) in categories" :key="i">
+              <router-link 
+                :to="`/categories/${category.id}`" 
+                class="footer-link"
+              >
+                {{ category.name }}
+              </router-link>
+            </li>
+          </ul>
+        </v-col>
+        
+        <!-- 订阅 -->
+        <v-col cols="12" md="4" class="footer-section">
+          <h4 class="footer-heading">订阅更新</h4>
+          <p class="footer-text mb-3">
+            订阅我的博客更新，获取最新文章和技术分享。
+          </p>
+          
+          <v-form @submit.prevent="subscribeNewsletter">
+            <div class="d-flex">
+              <v-text-field
+                v-model="email"
+                label="您的邮箱"
+                placeholder="example@domain.com"
+                variant="outlined"
+                density="compact"
+                hide-details
+                class="subscribe-input"
+              ></v-text-field>
+              
+              <v-btn
+                type="submit"
+                color="primary"
+                class="ml-2 subscribe-btn"
+                :loading="subscribing"
+              >
+                订阅
+              </v-btn>
+            </div>
+          </v-form>
         </v-col>
       </v-row>
       
-      <v-divider class="my-4" />
+      <!-- 版权与备案 -->
+      """<v-divider class="my-4"></v-divider>
       
-      <div class="text-center copyright pb-2">
-        &copy; {{ new Date().getFullYear() }} Noah的博客 | 
-        <span class="powered-by">Powered by <span class="gradient-text"> noahall</span> </span>
+      <div class="footer-bottom d-flex flex-wrap justify-space-between align-center">
+        <div class="copyright">
+          &copy; {{ new Date().getFullYear() }} Noah's Blog. All rights reserved.
+        </div>
+        <div class="beian">
+          <a 
+            href="https://beian.miit.gov.cn/" 
+            target="_blank"
+            class="beian-link"
+          >浙ICP备XXXXXXXX号</a>
+        </div>
       </div>
-    </v-container>
+    </v-container>""''
+    
+    <!-- 联系表单对话框 -->
+    <v-dialog v-model="showContactForm" max-width="600px">
+      <v-card class="contact-dialog">
+        <v-card-title class="dialog-title">
+          <span>联系我</span>
+          <v-btn icon @click="showContactForm = false" class="close-btn">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        
+        <v-card-text>
+          <v-form @submit.prevent="submitContactForm">
+            <v-text-field
+              v-model="contactForm.name"
+              label="您的姓名"
+              variant="outlined"
+              required
+            ></v-text-field>
+            
+            <v-text-field
+              v-model="contactForm.email"
+              label="您的邮箱"
+              variant="outlined"
+              type="email"
+              required
+            ></v-text-field>
+            
+            <v-textarea
+              v-model="contactForm.message"
+              label="您的留言"
+              variant="outlined"
+              rows="4"
+              required
+            ></v-textarea>
+            
+            <div class="d-flex justify-end">
+              <v-btn
+                variant="text"
+                @click="showContactForm = false"
+                class="mr-2"
+              >
+                取消
+              </v-btn>
+              
+              <v-btn
+                type="submit"
+                color="primary"
+                :loading="sending"
+              >
+                发送
+              </v-btn>
+            </div>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+    
+    <!-- 订阅成功提示 -->
+    <v-snackbar v-model="showSubscribeSuccess" color="success">
+      订阅成功！感谢您的关注。
+      <template v-slot:actions>
+        <v-btn
+          variant="text"
+          @click="showSubscribeSuccess = false"
+        >
+          关闭
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-footer>
 </template>
 
-<script setup>
-</script>
-
 <style scoped>
-.footer {
-  background: linear-gradient(
-    to right,
-    rgba(var(--primary-blue), 0.05),
-    rgba(var(--secondary-purple), 0.03),
-    rgba(var(--accent-orange), 0.05)
-  );
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(var(--primary-blue), 0.1);
-  padding: 32px 0 16px;
+.footer-container {
+  background: var(--header-gradient);
+  border-top: var(--border-subtle);
+  padding: 48px 0 24px;
+  color: rgba(var(--text-primary), 0.9);
+  width: 100%;
+  height: auto;
 }
 
-.footer .text-h6 {
+.footer-logo {
+  display: flex;
+  align-items: center;
+}
+
+.footer-icon {
+  margin-right: 12px;
+}
+
+.footer-title {
+  font-size: 1.5rem;
+  font-weight: 700;
   background: var(--neon-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  font-weight: bold;
+  margin: 0;
+}
+
+.footer-description {
+  color: rgba(var(--text-secondary), 1);
+  margin-top: 12px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.footer-heading {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  position: relative;
   display: inline-block;
 }
 
-.social-links .v-btn {
-  transition: all var(--transition-default);
-  position: relative;
-  overflow: hidden;
-}
-
-.social-links .v-btn::after {
+.footer-heading::after {
   content: '';
   position: absolute;
-  inset: 0;
+  bottom: -8px;
+  left: 0;
+  width: 40px;
+  height: 3px;
   background: var(--neon-gradient);
-  opacity: 0;
-  transition: opacity var(--transition-default);
-  border-radius: 50%;
-  z-index: -1;
+  border-radius: 2px;
 }
 
-.social-links .v-btn:hover {
-  transform: translateY(-3px);
-  color: white;
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.social-links .v-btn:hover::after {
-  opacity: 0.8;
+.footer-links li {
+  margin-bottom: 8px;
 }
 
-a {
-  color: inherit;
+.footer-link {
+  color: rgba(var(--text-secondary), 1);
+  text-decoration: none;
+  font-size: 0.95rem;
   transition: all var(--transition-default);
   position: relative;
   display: inline-block;
 }
 
-a::after {
+.footer-link::after {
   content: '';
   position: absolute;
   bottom: -2px;
   left: 0;
   width: 0;
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    rgba(var(--primary-blue), 0.7),
-    rgba(var(--accent-orange), 0.7)
-  );
+  background: var(--neon-gradient);
   transition: width var(--transition-default);
 }
 
-a:hover {
-  color: rgb(var(--primary-blue));
-  transform: translateX(2px);
+.footer-link:hover {
+  color: rgba(var(--primary-blue), 1);
+  transform: translateX(4px);
 }
 
-a:hover::after {
+.footer-link:hover::after {
   width: 100%;
 }
 
-.copyright {
-  opacity: 0.8;
-  font-size: 0.9rem;
+.footer-text {
+  color: rgba(var(--text-secondary), 1);
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
-.powered-by {
-  font-weight: 500;
-  letter-spacing: 0.5px;
+.social-links {
+  display: flex;
+  gap: 8px;
 }
-</style> 
+
+.social-btn {
+  color: rgba(var(--text-secondary), 1);
+  transition: all var(--transition-default);
+}
+
+.social-btn:hover {
+  color: rgba(var(--primary-blue), 1);
+  transform: translateY(-2px);
+}
+
+.copyright, .beian {
+  font-size: 0.85rem;
+  color: rgba(var(--text-tertiary), 1);
+}
+
+.beian-link {
+  color: rgba(var(--text-tertiary), 1);
+  text-decoration: none;
+  transition: color var(--transition-default);
+}
+
+.beian-link:hover {
+  color: rgba(var(--primary-blue), 0.8);
+}
+
+.subscribe-input {
+  max-width: 280px;
+}
+
+.subscribe-btn {
+  height: 40px;
+}
+
+.dialog-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contact-dialog {
+  background: rgba(var(--v-theme-surface), 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: var(--border-radius-md);
+  border: var(--border-subtle);
+}
+
+@media (max-width: 960px) {
+  .footer-section {
+    margin-bottom: 32px;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+</style>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useTheme } from 'vuetify'
+import LogoIcon from './icons/LogoIcon.vue'
+
+const theme = useTheme()
+
+// 快速链接
+const quickLinks = [
+  { text: '首页', to: '/' },
+  { text: '归档', to: '/archive' },
+  { text: '标签', to: '/tags' },
+  { text: '关于', to: '/about' },
+  { text: '友链', to: '/friends' }
+]
+
+// 分类
+const categories = [
+  { id: 'frontend', name: '前端开发' },
+  { id: 'backend', name: '后端技术' },
+  { id: 'design', name: '设计与UI' },
+  { id: 'devops', name: 'DevOps' },
+  { id: 'thoughts', name: '随想随笔' }
+]
+
+// 根据主题设置Logo颜色
+const logoColor = computed(() => {
+  return theme.global.current.value.dark
+    ? 'rgba(156, 39, 176, 0.9)' // 深色主题时的颜色
+    : 'rgba(63, 81, 181, 0.9)'  // 浅色主题时的颜色
+})
+
+// 订阅状态
+const email = ref('')
+const subscribing = ref(false)
+const showSubscribeSuccess = ref(false)
+
+// 联系表单
+const showContactForm = ref(false)
+const contactForm = ref({
+  name: '',
+  email: '',
+  message: ''
+})
+const sending = ref(false)
+
+// 订阅处理
+const subscribeNewsletter = async () => {
+  if (!email.value) return
+  
+  subscribing.value = true
+  
+  // 模拟API请求
+  setTimeout(() => {
+    subscribing.value = false
+    showSubscribeSuccess.value = true
+    email.value = ''
+  }, 1500)
+}
+
+// 联系表单提交
+const submitContactForm = async () => {
+  sending.value = true
+  
+  // 模拟API请求
+  setTimeout(() => {
+    sending.value = false
+    showContactForm.value = false
+    
+    // 重置表单
+    contactForm.value = {
+      name: '',
+      email: '',
+      message: ''
+    }
+  }, 1500)
+}
+</script> 
