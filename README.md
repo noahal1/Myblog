@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Noah's Blog
 
 一个现代化的个人博客系统，前端使用Vue 3和Vuetify 3构建，后端使用FastAPI和SQLAlchemy。
@@ -31,5 +32,15 @@
 
 基于Vue3+fastapi的个人博客系统
 #本地部署
+=======
+基于Vue3+fastapi的个人博客全栈项目
+
+#本地前端部署
+>>>>>>> 8f1bf9c8785b8f45b1fdfebfaaacbe89ca77d745
 npm install
 npm run dev
+#本地后端部署
+//进入虚拟环境
+source blogenv/bin/activate
+//使用npm启动uvicorn
+npm start
