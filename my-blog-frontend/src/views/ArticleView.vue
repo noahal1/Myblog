@@ -125,9 +125,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { fetchArticle as fetchMockArticle } from '../utils/mock-api'
 import { renderMarkdown } from '../utils/markdown'  // 导入 markdown 渲染函数
 
-// 定义一个变量来保存环境信息
-const isDev = import.meta.env.DEV
-
 const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
@@ -153,7 +150,6 @@ const fetchArticle = async () => {
   loading.value = true
   try {
     console.log('获取文章ID:', route.params.id)
-    
     const response = await fetch(`/api/articles/${route.params.id}`)
     if (!response.ok) {
       console.error('API响应不成功:', response.status, response.statusText)
@@ -185,8 +181,6 @@ const fetchArticle = async () => {
     } else {
       data.tags = []
     }
-    
-    // 可能内容字段名不是content
     const possibleContentFields = ['content', 'body', 'text', 'article_content', 'contents']
     const contentField = possibleContentFields.find(field => data[field])
     

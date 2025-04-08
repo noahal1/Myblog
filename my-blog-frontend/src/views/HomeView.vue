@@ -326,10 +326,7 @@ const hasMore = ref(true)
 
 // 从文章中获取唯一标签来生成分类列表
 const availableCategories = computed(() => {
-  // 始终包含"全部"选项
   const categories = [{ id: 'all', name: '全部' }];
-  
-  // 从所有文章中收集唯一标签
   const uniqueTags = new Set();
   
   articles.value.forEach(article => {
@@ -349,18 +346,18 @@ const availableCategories = computed(() => {
 });
 
 // 获取文章列表
-const fetchArticles = async () => {
-  loading.value = true
-  try {
-    const response = await getArticles(currentPage.value, 10)
-    articles.value = response.data
-    totalPages.value = Math.ceil(response.headers['x-total-count'] / 10) || 1
-  } catch (error) {
-    console.error('获取文章失败:', error)
-  } finally {
-    loading.value = false
+  const fetchArticles = async () => {
+    loading.value = true
+    try {
+      const response = await getArticles(currentPage.value, 10)
+      articles.value = response.data
+      totalPages.value = Math.ceil(response.headers['x-total-count'] / 10) || 1
+    } catch (error) {
+      console.error('获取文章失败:', error)
+    } finally {
+      loading.value = false
+    }
   }
-}
 
 // 筛选文章
 const filteredArticles = computed(() => {
