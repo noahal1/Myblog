@@ -416,7 +416,7 @@ watch(selectedCategory, () => {
 })
 
 const loadMoreArticles = async () => {
-  if (loading.value || !hasMore.value) return
+  if (loading.value || !hasMore.va6lue) return
   
   loading.value = true
   try {
