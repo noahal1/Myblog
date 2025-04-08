@@ -68,7 +68,6 @@ const categoryName = computed(() => {
 const fetchArticlesByCategory = async () => {
   loading.value = true
   try {
-    // 替换为实际的API调用
     const response = await fetch(`/api/articles?category=${route.params.category}`)
     if (!response.ok) throw new Error('获取文章失败')
     const data = await response.json()

@@ -17,8 +17,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
 from redis import Redis
 
-# 使用绝对路径加载 .env 文件
-load_dotenv(dotenv_path='/home/noah/Myblog/Myblog/my-blog-backend/.env')
+load_dotenv(dotenv_path='./.env')
 
 # 创建FastAPI应用
 app = FastAPI(title="Noah's Blog API", 
