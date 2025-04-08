@@ -71,6 +71,12 @@
             prepend-icon="mdi-logout"
             title="退出登录"
           />
+          <v-list-item
+            v-if="userStore.isLogin"
+            to="/create-article"
+            prepend-icon="mdi-pencil"
+            title="创建文章"
+          />
         </v-list>
       </v-card>
     </v-menu>
@@ -230,14 +236,12 @@
   }
 }
 
-/* 添加导航按钮容器样式 */
 .nav-buttons {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 修改主题切换按钮样式，简化以确保正常工作 */
 .theme-toggle-btn {
   position: relative;
   transition: all var(--transition-default);
@@ -248,9 +252,7 @@
   background: rgba(var(--primary-blue), 0.1);
 }
 
-/* 添加主题过渡控制类 */
 .theme-transitioning * {
-  transition-duration: 0.s;
   transition-delay: 0s !important; 
 }
 </style>
@@ -288,7 +290,6 @@ const isDarkTheme = computed(() => {
   }
 });
 
-// 修改 Logo 主题属性绑定
 const logoTheme = computed(() => {
   return isDarkTheme.value ? 'dark' : 'light';
 });
@@ -304,44 +305,28 @@ const themeIcon = computed(() => {
   return 'mdi-weather-night';
 });
 
-// 改进主题切换函数
 const toggleTheme = () => {
-  // 添加过渡类，控制动画
-  document.body.classList.add('theme-transitioning');
-  
-  // 延迟执行实际主题切换，让浏览器有时间准备渲染
-  setTimeout(() => {
-    // 获取当前主题设置
-    const currentSetting = localStorage.getItem('theme') || theme.global.name.value;
+  if (isThemeChanging.value) return
+  isThemeChanging.value = true
+  requestAnimationFrame(() => {
+    const currentSetting = localStorage.getItem('theme') || theme.global.name.value
+    const nextTheme = currentSetting === 'light' ? 'dark' : 'light'
+    document.documentElement.classList.add('theme-minimal-transition')
     
-    // 循环切换：light -> dark -> system -> light
-    let nextTheme;
-    if (currentSetting === 'light') {
-      nextTheme = 'dark';
-    } else if (currentSetting === 'dark') {
-      nextTheme = 'system';
-      // 设置为系统主题时，根据系统偏好设置实际主题
-      const prefersDark = window.matchMedia && 
-                          window.matchMedia('(prefers-color-scheme: dark)').matches;
-      theme.global.name.value = prefersDark ? 'dark' : 'light';
-    } else {
-      nextTheme = 'light';
-    }
+    // 保存并应用新主题
+    localStorage.setItem('theme', nextTheme)
+    theme.global.name.value = nextTheme
     
-    // 保存主题设置
-    localStorage.setItem('theme', nextTheme);
-    
-    // 如果不是系统主题，直接设置
-    if (nextTheme !== 'system') {
-      theme.global.name.value = nextTheme;
-    }
-    
-    // 切换后移除过渡类
+    // 切换完成后允许再次切换
     setTimeout(() => {
-      document.body.classList.remove('theme-transitioning');
-    }, 300); // 与过渡时间匹配
-  }, 10);
+      document.documentElement.classList.remove('theme-minimal-transition')
+      isThemeChanging.value = false
+    }, 100)
+  })
 }
+
+// 添加状态变量来防止频繁切换
+const isThemeChanging = ref(false)
 
 const toolbarColor = computed(() => 
   isDarkTheme.value ? 'surface' : 'background'

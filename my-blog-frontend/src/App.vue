@@ -13,28 +13,56 @@ export default {
 
 <template>
   <v-app>
-    <NavBar class="hardware-accelerated reduce-flicker" />
-    
-    <v-main class="hardware-accelerated">
-      <v-container fluid class="page-container pa-0">
-        <router-view v-slot="{ Component }">
-          <keep-alive :include="['HomeView', 'ArchiveView']">
-            <component :is="Component" />
-          </keep-alive>
-        </router-view>
-      </v-container>
+    <nav-bar @toggle-theme="toggleTheme" :current-theme="currentTheme" />
+    <v-main>
+      <router-view v-slot="{ Component }">
+        <keep-alive :include="['HomeView', 'ArchiveView']">
+          <component :is="Component" />
+        </keep-alive>
+      </router-view>
     </v-main>
     <app-footer />
   </v-app>
 </template>
 
 <style>
+@import './assets/styles.css';
+
+/* 全局样式 */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--background);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+* {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease, 
+              box-shadow 0.3s ease;
+}
+
+/* 过渡动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 :root {
   --primary-blue: 63, 81, 181;
   --accent-orange: 255, 145, 55;
   --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   --transition-default: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow-text: 2.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-slow-text: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
   --transition-medium: 1.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -42,7 +70,6 @@ export default {
   min-height: calc(100vh - 64px);
 }
 
-/* 添加页面过渡效果 */
 .page-transition-enter-active,
 .page-transition-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -64,7 +91,7 @@ export default {
 }
 
 body, .v-application {
-  transition: background-color 0.5s ease;
+  transition: background-color 0.3s ease;
 }
 
 .v-application {
@@ -80,24 +107,35 @@ body, .v-application {
 </style>
 
 <script setup>
-import { onMounted, nextTick } from 'vue';
-import NavBar from '@/components/NavBar.vue';
-import AppFooter from '@/components/AppFooter.vue';
+import { ref, provide, onMounted, watch } from 'vue'
+import NavBar from './components/NavBar.vue'
+import AppFooter from './components/AppFooter.vue'
+import { useTheme } from 'vuetify'
 
-onMounted(async () => {
-  document.title = 'Noah\'s Blog';
-  
-  // 使用更简单的favicon生成方式
-  const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 80 80"><circle cx="40" cy="40" r="36" fill="#3f51b5"/><path d="M24 25v30c0 3 8 3 16 0 8 3 16 3 16 0V25c0-3-8-3-16 0-8-3-16-3-16 0z" fill="#fff"/><path d="M40 25v30" stroke="#3f51b5" stroke-width="2" stroke-linecap="round"/><path d="M50 23v12l-4-3-4 3V23z" fill="#ff913d"/><path d="M30 50v-8l6 6v-8" stroke="#3f51b5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
-  
-  // 避免在主渲染流程中执行，减少卡顿
-  await nextTick();
-  
-  const iconUrl = `data:image/svg+xml;base64,${btoa(iconSvg)}`;
-  let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-  link.type = 'image/svg+xml';
-  link.rel = 'shortcut icon';
-  link.href = iconUrl;
-  document.head.appendChild(link);
-});
+const theme = useTheme()
+const currentTheme = ref('light')
+
+// 提供主题给子组件
+provide('theme', currentTheme)
+
+const toggleTheme = () => {
+  requestAnimationFrame(() => {
+    currentTheme.value = currentTheme.value === 'light' ? 'dark' : 'light'
+    theme.global.name.value = currentTheme.value
+    localStorage.setItem('theme', currentTheme.value)
+  })
+}
+
+// 初始化主题
+onMounted(() => {
+  const savedTheme = localStorage.getItem('theme')
+  if (savedTheme) {
+    currentTheme.value = savedTheme
+    theme.global.name.value = savedTheme
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    // 如果用户系统偏好暗色模式
+    currentTheme.value = 'dark'
+    theme.global.name.value = 'dark'
+  }
+})
 </script>

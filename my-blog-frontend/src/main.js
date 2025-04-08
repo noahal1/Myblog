@@ -1,71 +1,55 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-
-import './style.css'
 import App from './App.vue'
 import router from './router'
+import '@mdi/font/css/materialdesignicons.css'
+import './assets/styles.css' 
+import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-import '@mdi/font/css/materialdesignicons.css'
-import 'vuetify/styles'
 
-// 检测系统主题偏好
-const prefersDarkTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-
-// 获取保存的主题设置
-const savedTheme = localStorage.getItem('theme')
-
-// 确定初始主题
-let initialTheme = 'light'
-if (savedTheme) {
-  initialTheme = savedTheme
-} else if (prefersDarkTheme) {
-  initialTheme = 'dark'
-}
-
+// 创建 Vuetify 实例
 const vuetify = createVuetify({
   components,
   directives,
   theme: {
-    // 不使用'system'主题，而是根据系统偏好设置初始主题
-    defaultTheme: initialTheme,
+    defaultTheme: 'light',
     themes: {
       light: {
         colors: {
-          primary: '#3f51b5',
-          secondary: '#b0bec5',
-          accent: '#8c9eff',
-          background: '#f5f5f5'
+          primary: '#3F51B5',
+          secondary: '#9C27B0', 
+          accent: '#FF9800',
+          error: '#F44336',
+          warning: '#FFC107',
+          info: '#2196F3',
+          success: '#4CAF50',
+          background: '#F5F5F5'
         },
       },
       dark: {
         colors: {
-          primary: '#7986cb',
-          secondary: '#546e7a',
-          accent: '#82b1ff',
-          surface: '#212121'
+          primary: '#5C6BC0',
+          secondary: '#BA68C8',
+          accent: '#FFB74D',
+          error: '#EF5350',
+          warning: '#FFD54F',
+          info: '#64B5F6',
+          success: '#81C784',
+          background: '#121212'
         },
       },
     },
   },
 })
 
+// 创建 Vue 应用并应用 Vuetify
 const app = createApp(App)
+
+// 使用 Pinia 和 Router
 app.use(createPinia())
-app.use(vuetify)
 app.use(router)
+app.use(vuetify) // 注册 Vuetify
 
 app.mount('#app')
-
-// 监听系统主题变化
-if (window.matchMedia) {
-  const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)')
-  colorSchemeQuery.addEventListener('change', (e) => {
-    // 只有当用户选择了"系统"主题时才自动切换
-    if (localStorage.getItem('theme') === 'system') {
-      const newTheme = e.matches ? 'dark' : 'light'
-      vuetify.theme.global.name.value = newTheme
-    }
-  })
-}

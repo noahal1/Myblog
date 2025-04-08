@@ -30,10 +30,11 @@ class Article(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     views = Column(Integer, default=0)
     likes = Column(Integer, default=0)
+    tags = Column(String(255))
     
     author = relationship("User", back_populates="articles")
     comments = relationship("Comment", back_populates="article")
-    tags = relationship("ArticleTag", back_populates="article")
+    tags_relationship = relationship('Tag', secondary='article_tags', back_populates='articles')
 
 class Comment(Base):
     __tablename__ = 'comments'
@@ -51,16 +52,13 @@ class Comment(Base):
 class Tag(Base):
     __tablename__ = 'tags'
     
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(50), unique=True, index=True)
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
     
-    articles = relationship("ArticleTag", back_populates="tag")
+    articles = relationship('Article', secondary='article_tags', back_populates='tags_relationship')
 
 class ArticleTag(Base):
     __tablename__ = 'article_tags'
     
     article_id = Column(Integer, ForeignKey('articles.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
-    
-    article = relationship("Article", back_populates="tags")
-    tag = relationship("Tag", back_populates="articles") 

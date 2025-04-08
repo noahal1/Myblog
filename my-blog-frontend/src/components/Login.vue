@@ -46,7 +46,7 @@
             <v-text-field
               v-model="form.username"
               label="用户名"
-              variant="outlined"
+              variant="solo-filled"
               prepend-inner-icon="mdi-account"
               density="comfortable"
               :rules="[rules.required, rules.username]"
@@ -60,7 +60,7 @@
             <v-text-field
               v-model="form.password"
               label="密码"
-              variant="outlined"
+              variant="solo-filled"
               prepend-inner-icon="mdi-lock"
               :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
               @click:append-inner="showPassword = !showPassword"
@@ -73,14 +73,30 @@
             />
           </v-col>
           
+          <!-- 仅在注册模式显示邮箱字段 -->
           <v-col cols="12">
+            <v-text-field
+              v-if="!isLogin"
+              v-model="form.email"
+              label="邮箱"
+              variant="outlined"
+              prepend-inner-icon="mdi-email"
+              density="comfortable"
+              :rules="[rules.required, rules.email]"
+              autocomplete="email"
+              @focus="errorMessage = ''"
+              class="input-field"
+            />
+          </v-col>
+
+          <v-col cols="12" style="padding: 0%;">
             <v-checkbox
               v-if="isLogin"
               v-model="rememberMe"
               label="记住我"
               color="primary"
               hide-details
-              class="mb-2"
+              class="mb-2"  
             ></v-checkbox>
           </v-col>
 
@@ -103,17 +119,12 @@
       </v-form>
       
       <!-- 卡片底部 -->
-      <v-card-actions class="d-flex justify-center py-4 switch-mode">
-        <p class="text-body-2 mr-2">
-          {{ isLogin ? '还没有账号？' : '已有账号？' }}
-        </p>
-        <a 
-          class="switch-link"
-          @click="switchMode"
-        >
-          {{ isLogin ? '立即注册' : '去登录' }}
+      <div class="text-center py-4 switch-mode">
+        <span>{{ isLogin ? '还没有账号？' : '已有账号？' }}</span>
+        <a class="switch-link ml-1" @click="switchMode">
+          {{ isLogin ? '立即注册' : '立即登录' }}
         </a>
-      </v-card-actions>
+      </div>
       
       <div class="social-login pa-6 d-flex flex-column align-center">
         <div class="divider-container">
@@ -122,7 +133,7 @@
           <v-divider></v-divider>
         </div>
         
-        <div class="social-buttons d-flex justify-center mt-4">
+        <div class="social-buttons d-flex justify-center mt-4" style=" padding: 0%"> 
           <v-btn 
             variant="text" 
             icon="mdi-github" 
@@ -148,76 +159,128 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import LogoIcon from './icons/LogoIcon.vue'
+import apiClient from '../api'
 
 const router = useRouter()
 const userStore = useUserStore()
 
+// 添加调试代码
+console.log('userStore:', userStore)
+console.log('userStore.login:', userStore.login)
+console.log('typeof userStore.login:', typeof userStore.login)
+
 // 表单状态
-const isLogin = ref(true)
-const loading = ref(false)
-const errorMessage = ref('')
-const showPassword = ref(false)
-const rememberMe = ref(false)
 const form = ref({
   username: '',
+  email: '',
   password: ''
 })
+
+// 表单验证
 const isFormValid = ref(false)
 const formRef = ref(null)
+
+// 登录/注册模式切换
+const isLogin = ref(true)
+const showPassword = ref(false)
+const rememberMe = ref(false)
+const loading = ref(false)
+const errorMessage = ref('')
 
 // 表单验证规则
 const rules = {
   required: v => !!v || '该字段为必填项',
   username: v => v.length >= 3 || '用户名至少需要3个字符',
-  password: v => v.length >= 6 || '密码至少需要6个字符'
+  password: v => v.length >= 6 || '密码至少需要6个字符',
+  email: v => /.+@.+\..+/.test(v) || '请输入有效的邮箱地址'
 }
 
 // 切换登录/注册模式
 const switchMode = () => {
   isLogin.value = !isLogin.value
   errorMessage.value = ''
-  form.value = { username: '', password: '' }
+  // 不重置表单数据，保留用户已输入的内容
 }
 
 // 处理表单提交
 const handleSubmit = async () => {
+  loading.value = true;
+  errorMessage.value = '';
+  
   try {
-    loading.value = true
-    
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
     if (isLogin.value) {
       // 登录逻辑
-      if (form.value.username === 'admin' && form.value.password === 'password') {
-        userStore.login({
+      const loginData = {
+        username: form.value.username,
+        password: form.value.password
+      };
+      
+      console.log('发送登录请求:', loginData);
+      
+      // 使用更简单的方式发送请求
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(loginData)
+      });
+      
+      console.log('收到响应状态:', response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('登录失败:', errorData);
+        throw new Error(errorData.detail || '登录失败');
+      }
+      
+      const data = await response.json();
+      console.log('登录成功:', data);
+      
+      if (data && data.access_token) {
+        // 保存用户信息
+        localStorage.setItem('user', JSON.stringify({
           username: form.value.username,
-          token: 'mock-token-12345'
-        })
-        router.replace('/')
+          token: data.access_token,
+          isLogin: true
+        }));
+        
+        // 更新状态
+        userStore.username = form.value.username;
+        userStore.token = data.access_token;
+        userStore.isLogin = true;
+        
+        // 导航到首页
+        router.replace('/');
       } else {
-        throw new Error('用户名或密码错误')
+        throw new Error('登录响应中缺少访问令牌');
       }
     } else {
       // 注册逻辑
-      if (form.value.username === 'admin') {
-        throw new Error('用户名已被占用')
-      }
-      // 注册成功后切换到登录页
-      isLogin.value = true
-      form.value.password = ''
-      errorMessage.value = '注册成功，请登录'
+      const response = await apiClient.post('/api/register', {
+        username: form.value.username,
+        email: form.value.email,
+        password: form.value.password
+      });
+      
+      console.log('注册成功:', response.data);
+      isLogin.value = true;
+      errorMessage.value = '注册成功，请登录';
     }
   } catch (error) {
-    errorMessage.value = error.message || (isLogin.value ? '登录失败' : '注册失败')
+    console.error('操作失败:', error);
+    errorMessage.value = error.message || '操作失败';
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
+
+// 计算属性：表单标题
+const formTitle = computed(() => isLogin.value ? '登录' : '注册')
 </script>
 
 <style scoped>
@@ -225,7 +288,7 @@ const handleSubmit = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 160px);
+  min-height: calc(80vh - 160px);
   padding: 32px 16px;
   background: radial-gradient(circle at 30% 30%, rgba(var(--primary-blue), 0.03), transparent 400px),
               radial-gradient(circle at 70% 70%, rgba(var(--accent-orange), 0.03), transparent 400px);
@@ -264,7 +327,7 @@ const handleSubmit = async () => {
 }
 
 .login-form {
-  padding-top: 1.5rem;
+  padding-top: 1.3rem;
 }
 
 .input-field :deep(.v-field) {
@@ -277,7 +340,7 @@ const handleSubmit = async () => {
 }
 
 .submit-btn {
-  margin-top: 1rem;
+  margin-top: 0rem;
   border-radius: 8px;
   text-transform: none;
   letter-spacing: 0.5px;
