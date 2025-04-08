@@ -16,7 +16,28 @@ export const getArticles = async (page = 1, limit = 10) => {
 
 // 获取文章详情
 export const getArticle = async (id) => {
-  return apiClient.get(`/api/articles/${id}`);
+  const token = localStorage.getItem('token');
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/articles/${id}`, {
+    method: 'GET',
+    headers,
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
 };
 
 // 创建文章

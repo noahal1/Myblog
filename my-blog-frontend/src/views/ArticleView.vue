@@ -146,19 +146,13 @@ const formatDate = (dateString) => {
 }
 
 // 获取文章详情
+import { getArticle } from '../api'
+
 const fetchArticle = async () => {
   loading.value = true
   try {
     console.log('获取文章ID:', route.params.id)
-    const response = await fetch(`/api/articles/${route.params.id}`)
-    if (!response.ok) {
-      console.error('API响应不成功:', response.status, response.statusText)
-      const text = await response.text()
-      console.error('响应内容:', text)
-      throw new Error(`获取文章失败: ${response.status}`)
-    }
-    
-    const data = await response.json()
+    const data = await getArticle(route.params.id)
     for (const key in data) {
       console.log(`- ${key}: ${typeof data[key]}`, 
                  Array.isArray(data[key]) ? `[${data[key].length}]` : '')
