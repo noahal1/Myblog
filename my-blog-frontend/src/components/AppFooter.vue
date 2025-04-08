@@ -117,12 +117,13 @@
       </v-row>
       
       <!-- 版权与备案 -->
-      """<v-divider class="my-4"></v-divider>
+      <v-divider class="my-4"></v-divider>
       
       <div class="footer-bottom d-flex flex-wrap justify-space-between align-center">
         <div class="copyright">
           &copy; {{ new Date().getFullYear() }} Noah's Blog. All rights reserved.
         </div>
+        
         <div class="beian">
           <a 
             href="https://beian.miit.gov.cn/" 
@@ -131,7 +132,7 @@
           >浙ICP备XXXXXXXX号</a>
         </div>
       </div>
-    </v-container>""''
+    </v-container>
     
     <!-- 联系表单对话框 -->
     <v-dialog v-model="showContactForm" max-width="600px">
@@ -370,11 +371,12 @@
 </style>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import LogoIcon from './icons/LogoIcon.vue'
 
-const theme = useTheme()
+// 使用固定颜色，不依赖主题
+const logoColor = ref('#3F51B5')
 
 // 快速链接
 const quickLinks = [
@@ -393,13 +395,6 @@ const categories = [
   { id: 'devops', name: 'DevOps' },
   { id: 'thoughts', name: '随想随笔' }
 ]
-
-// 根据主题设置Logo颜色
-const logoColor = computed(() => {
-  return theme.global.current.value.dark
-    ? 'rgba(156, 39, 176, 0.9)' // 深色主题时的颜色
-    : 'rgba(63, 81, 181, 0.9)'  // 浅色主题时的颜色
-})
 
 // 订阅状态
 const email = ref('')

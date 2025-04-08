@@ -9,12 +9,12 @@
   >
     <div class="card-content">
       <!-- 文章标题 -->
-      <v-card-title class="title text-primary pb-0">
+      <v-card-title class="title text-primary pb-0" v-once>
         {{ article.title }}
       </v-card-title>
       <v-card-subtitle class="meta py-2">
         <v-icon icon="mdi-calendar" size="small" class="mr-1" />
-        <span class="text-caption">{{ formatDate(article.created_at) }}</span>
+        <span class="text-caption">{{ formattedDate }}</span>
         
         <v-icon icon="mdi-eye" size="small" class="ml-3 mr-1" />
         <span class="text-caption">{{ article.views || 0 }}</span>
@@ -34,11 +34,10 @@
         <v-btn
           variant="text"
           color="primary"
-          class="read-more"
           @click.stop="$emit('click')"
+          class="mt-2"
         >
           阅读更多
-          <v-icon icon="mdi-arrow-right" class="ml-1"></v-icon>
         </v-btn>
       </v-card-actions>
     </div>
@@ -46,8 +45,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 
 // 定义props
 const props = defineProps({
@@ -71,6 +70,9 @@ defineEmits(['click']);
 // 悬停状态
 const isHovered = ref(false);
 
+// 使用固定颜色，不依赖主题
+const primaryColor = '#3F51B5';
+
 // 日期格式化
 const formatDate = (date) => {
   if (!date) return '暂无日期';
@@ -88,9 +90,16 @@ const formatDate = (date) => {
 
 const router = useRouter();
 
-const viewArticle = (id) => {
-  router.push(`/article/${id}`);
+const viewArticle = () => {
+  console.log('查看文章:', props.article.id)
+  router.push({
+    name: 'article',
+    params: { id: props.article.id }
+  })
 };
+
+// 使用计算属性优化频繁计算
+const formattedDate = computed(() => formatDate(props.article.created_at))
 </script>
 
 <style scoped>

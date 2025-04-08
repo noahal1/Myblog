@@ -1,18 +1,24 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy import create_engine, func
+from sqlalchemy.orm import sessionmaker, Session, joinedload
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
+from .database import SessionLocal, engine
+from .model import models
+import json
+import math
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.decorator import cache
+from redis import Redis
 
-# 加载环境变量
-load_dotenv()
-
-from src.model.models import Base, User, Article, Comment, Tag, ArticleTag
+# 使用绝对路径加载 .env 文件
+load_dotenv(dotenv_path='/home/noah/Myblog/Myblog/my-blog-backend/.env')
 
 # 创建FastAPI应用
 app = FastAPI(title="Noah's Blog API", 
@@ -22,7 +28,7 @@ app = FastAPI(title="Noah's Blog API",
 # 配置CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 在生产环境中应该指定具体的域名
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,12 +47,30 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 10080  # 7天
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 # 创建数据库表
-Base.metadata.create_all(bind=engine)
+models.Base.metadata.create_all(bind=engine)
 
 # Pydantic模型
+class ArticleResponse(BaseModel):
+    id: int
+    title: str
+    content: str
+    summary: str
+    author_id: int
+    created_at: datetime
+    updated_at: datetime
+    views: int
+    likes: int
+    tags: list[str]
+    
+    class Config:
+        orm_mode = True
+
 class ArticleCreate(BaseModel):
     title: str
     content: str
+    summary: str
+    tags: list[int]
+
 class UserCreate(BaseModel):
     username: str
     email: str
@@ -85,18 +109,18 @@ def get_db():
 @app.post('/api/register', response_model=dict)
 async def register(user: UserCreate, db: Session = Depends(get_db)):
     # 检查用户名是否已存在
-    db_user = db.query(User).filter(User.username == user.username).first()
+    db_user = db.query(models.User).filter(models.User.username == user.username).first()
     if db_user:
         raise HTTPException(status_code=400, detail="用户名已被注册")
     
     # 检查邮箱是否已存在
-    db_email = db.query(User).filter(User.email == user.email).first()
+    db_email = db.query(models.User).filter(models.User.email == user.email).first()
     if db_email:
         raise HTTPException(status_code=400, detail="邮箱已被注册")
     
     # 创建新用户
     hashed_password = get_password_hash(user.password)
-    db_user = User(
+    db_user = models.User(
         username=user.username,
         email=user.email,
         hashed_password=hashed_password
@@ -109,17 +133,97 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
 @app.post('/api/login', response_model=Token)
 async def login(credentials: UserLogin, db: Session = Depends(get_db)):
     # 查找用户
-    user = db.query(User).filter(User.username == credentials.username).first()
+    user = db.query(models.User).filter(models.User.username == credentials.username).first()
     if not user or not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="用户名或密码错误")
     
-    # 创建访问令牌
+    # 创建访问令牌 - 修复函数名错误
     access_token = create_access_token({"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.get('/api/health')
 async def health_check():
     return {"status": "OK", "timestamp": datetime.utcnow().isoformat()}
+
+@app.get('/api/articles', response_model=list[ArticleResponse])
+
+@cache(expire=300)  # 缓存5分钟
+async def get_articles(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    """获取文章列表"""
+    # 查询文章总数用于分页
+    total_count = db.query(func.count(models.Article.id)).scalar()
+    
+    # 查询文章
+    articles = db.query(models.Article).options(
+        joinedload(models.Article.tags_relationship),
+        joinedload(models.Article.author)  # 预加载作者信息
+    ).order_by(models.Article.created_at.desc()).offset(skip).limit(limit).all()
+    
+    articles_data = []
+    for article in articles:
+        tag_names = [tag.name for tag in article.tags_relationship] if article.tags_relationship else []
+        
+        articles_data.append({
+            'id': article.id,
+            'title': article.title,
+            'content': article.content,
+            'summary': article.summary,
+            'author_id': article.author_id,
+            'author_name': article.author.username if article.author else "未知作者",
+            'created_at': article.created_at.isoformat(),
+            'updated_at': article.updated_at.isoformat(),
+            'views': article.views,
+            'likes': article.likes,
+            'tags': tag_names
+        })
+    
+    # 在响应头中添加分页信息
+    response = Response(content=json.dumps(articles_data), media_type="application/json")
+    response.headers["X-Total-Count"] = str(total_count)
+    response.headers["X-Total-Pages"] = str(math.ceil(total_count / limit))
+    return response
+
+@app.get('/api/articles/{article_id}', response_model=ArticleResponse)
+async def get_article(article_id: int, db: Session = Depends(get_db)):
+    article = db.query(models.Article).options(joinedload(models.Article.tags_relationship)).filter(models.Article.id == article_id).first()
+    if article is None:
+        raise HTTPException(status_code=404, detail="文章不存在")
+    article.views += 1
+    db.commit()
+    tag_names = [tag.name for tag in article.tags_relationship] if article.tags_relationship else []
+    
+    article_data = {
+        'id': article.id,
+        'title': article.title,
+        'content': article.content,
+        'summary': article.summary,
+        'author_id': article.author_id,
+        'created_at': article.created_at.isoformat(),
+        'updated_at': article.updated_at.isoformat(),
+        'views': article.views,
+        'likes': article.likes,
+        'tags': tag_names  # 返回标签名称列表
+    }
+    return article_data
+
+@app.post('/api/articles', response_model=ArticleResponse)
+async def create_article(article: ArticleCreate, db: Session = Depends(get_db)):
+    tag_ids = ','.join(str(tag_id) for tag_id in article.tags) 
+    db_article = models.Article(
+        title=article.title,
+        content=article.content,
+        summary=article.summary,
+        author_id=1,  
+        tags=tag_ids
+    )
+    db.add(db_article)
+    db.commit()
+    db.refresh(db_article)
+    return db_article
+@app.on_event("startup")
+async def startup():
+    redis = Redis(host="localhost", port=6379, db=0, decode_responses=True)
+    FastAPICache.init(RedisBackend(redis), prefix="myblog-cache:")
 
 # 启动服务器
 if __name__ == "__main__":

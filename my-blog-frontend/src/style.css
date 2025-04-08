@@ -1,8 +1,8 @@
 :root {
   /* 主色调 */
-  --primary-blue: 63, 81, 181;  /* 深蓝色调 */
-  --accent-orange: 255, 145, 55; /* 橙色强调 */
-  --secondary-purple: 156, 39, 176; /* 紫色辅助 */
+  --primary-blue: 0, 49, 83;/* 普鲁士蓝*/  
+  --accent-grey: 229, 221, 215; /*雾灰色*/
+  --secondary-purple: 156, 39, 176;
   
   /* 渐变与效果 */
   --gradient-angle: 135deg;
@@ -26,7 +26,7 @@
   
   /* 动画速度 */
   --transition-default: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-slow: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   
   /* 字体 */
   --font-heading: 'Space Grotesk', system-ui;
@@ -92,7 +92,6 @@ body {
   border-color: rgba(var(--primary-blue), 0.2);
 }
 
-/* 按钮全局样式 */
 .btn-glow {
   position: relative;
   overflow: hidden;

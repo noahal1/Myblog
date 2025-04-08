@@ -36,7 +36,6 @@
 基于Vue3+fastapi的个人博客全栈项目
 
 #本地前端部署
->>>>>>> 8f1bf9c8785b8f45b1fdfebfaaacbe89ca77d745
 npm install
 npm run dev
 #本地后端部署

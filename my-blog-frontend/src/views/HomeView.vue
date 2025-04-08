@@ -28,7 +28,7 @@
       <div class="category-tags mb-8">
         <v-chip-group v-model="selectedCategory">
           <v-chip 
-            v-for="category in categories" 
+            v-for="category in availableCategories" 
             :key="category.id"
             filter
             :value="category.id"
@@ -300,11 +300,7 @@
 
 /* 简化渐变文本效果 */
 .gradient-text {
-  background: linear-gradient(
-    90deg,
-    rgb(var(--primary-blue)),
-    rgb(var(--accent-orange))
-  );
+  background: var(--neon-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -315,49 +311,50 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import ArticleCard from '@/components/ArticleCard.vue'
 import { useRouter } from 'vue-router'
+import { getArticles } from '../api'
+import { useInfiniteScroll } from '@vueuse/core'
 
 const router = useRouter()
 const loading = ref(true)
 const articles = ref([])
 const currentPage = ref(1)
-const totalPages = ref(0)
+const totalPages = ref(0) 
 const searchQuery = ref('')
 const selectedCategory = ref(null)
+const page = ref(1)
+const hasMore = ref(true)
 
-// 示例分类
-const categories = [
-  { id: 'all', name: '全部' },
-  { id: 'Frontend', name: '前端' },
-  { id: 'Tech', name: '科技知识' },
-  { id: 'poem', name: '诗歌' },
-  { id: 'essay', name: '随笔' },
-  { id: 'backend', name: '后端' },
-]
+// 从文章中获取唯一标签来生成分类列表
+const availableCategories = computed(() => {
+  // 始终包含"全部"选项
+  const categories = [{ id: 'all', name: '全部' }];
+  
+  // 从所有文章中收集唯一标签
+  const uniqueTags = new Set();
+  
+  articles.value.forEach(article => {
+    if (Array.isArray(article.tags)) {
+      article.tags.forEach(tag => {
+        uniqueTags.add(tag);
+      });
+    }
+  });
+  
+  // 添加唯一标签到分类列表
+  Array.from(uniqueTags).forEach(tag => {
+    categories.push({ id: tag, name: tag });
+  });
+  
+  return categories;
+});
 
-// 模拟获取文章数据
-const fetchArticles = async (page = 1) => {
+// 获取文章列表
+const fetchArticles = async () => {
   loading.value = true
   try {
-    // 模拟API延迟
-    await new Promise(resolve => setTimeout(resolve, 800))
-    
-    // 模拟文章数据
-    articles.value = Array.from({ length: 12 }, (_, i) => ({
-      id: i + 1,
-      title: `测试文章：${i + 1}`,
-      summary: `Vue 3带来了很多新特性，学习如何充分利用这些特性可以让你的开发更高效。本文将分享最实用的Vue 3开发技巧，帮助你更好地构建应用。`,
-      created_at: new Date(Date.now() - i * 86400000),
-      views: Math.floor(Math.random() * 1000),
-      comments: Math.floor(Math.random() * 20),
-      category: i % 7 === 0 ? 'vue' : 
-                i % 7 === 1 ? 'react' : 
-                i % 7 === 2 ? 'javascript' : 
-                i % 7 === 3 ? 'css' : 
-                i % 7 === 4 ? 'backend' : 
-                i % 7 === 5 ? 'devops' : 'all'
-    }))
-    
-    totalPages.value = 3 // 模拟总页数
+    const response = await getArticles(currentPage.value, 10)
+    articles.value = response.data
+    totalPages.value = Math.ceil(response.headers['x-total-count'] / 10) || 1
   } catch (error) {
     console.error('获取文章失败:', error)
   } finally {
@@ -374,13 +371,19 @@ const filteredArticles = computed(() => {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(article => 
       article.title.toLowerCase().includes(query) || 
-      article.summary.toLowerCase().includes(query)
+      article.summary.toLowerCase().includes(query) ||
+      (Array.isArray(article.tags) && article.tags.some(tag => 
+        tag.toLowerCase().includes(query)
+      ))
     )
   }
   
   // 分类筛选
   if (selectedCategory.value && selectedCategory.value !== 'all') {
-    result = result.filter(article => article.category === selectedCategory.value)
+    result = result.filter(article => 
+      Array.isArray(article.tags) && 
+      article.tags.includes(selectedCategory.value)
+    )
   }
   
   return result
@@ -414,6 +417,32 @@ watch(currentPage, () => {
 watch(selectedCategory, () => {
   currentPage.value = 1
 })
+
+const loadMoreArticles = async () => {
+  if (loading.value || !hasMore.value) return
+  
+  loading.value = true
+  try {
+    const response = await getArticles(page.value, 10)
+    articles.value.push(...response.data)
+    
+    page.value++
+    hasMore.value = response.data.length === 10
+  } catch (error) {
+    console.error('加载更多文章失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 监听滚动到底部
+useInfiniteScroll(
+  window,
+  () => {
+    loadMoreArticles()
+  },
+  { distance: 200 }
+)
 
 onMounted(() => {
   fetchArticles()
