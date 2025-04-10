@@ -1,166 +1,321 @@
 <template>
-  <div class="about-view">
-    <div class="hero-banner mb-8">
-      <v-container class="py-8">
-        <h1 class="text-h3 font-weight-bold mb-4">关于<span class="gradient-text">我</span></h1>
-        <p class="text-subtitle-1">这里是Noah的个人空间，记录成长与思考</p>
-      </v-container>
-    </div>
-    
-    <v-container class="about-container">
-      <v-row>
-        <v-col cols="12" md="4">
-          <v-card class="card-effect h-100">
-            <v-card-item>
-              <div class="text-center">
-                <v-avatar size="150" class="mb-4 elevation-6">
-                  <v-img src="https://avatars.githubusercontent.com/u/noahal1" alt="Noah">
-                    <template v-slot:placeholder>
-                      <v-icon size="150" icon="mdi-account-circle"></v-icon>
-                    </template>
-                  </v-img>
-                </v-avatar>
-                <h2 class="text-h5 font-weight-bold mb-2">Noah</h2>
-                <p class="text-subtitle-2 text-medium-emphasis">全栈开发工程师</p>
-                
-                <v-divider class="my-4"></v-divider>
-                
-                <div class="social-links d-flex justify-center mt-4">
-                  <v-btn icon="mdi-github" variant="text" href="https://github.com/noahal1" target="_blank" class="mx-1"></v-btn>
-                  <v-btn icon="mdi-email" variant="text" href="mailto:noahall127@outlook.com" class="mx-1"></v-btn>
-                  <v-btn icon="mdi-sina-weibo" variant="text" href="#" target="_blank" class="mx-1"></v-btn>
-                </div>
-              </div>
-            </v-card-item>
-          </v-card>
-        </v-col>
+  <div class="about-page">
+    <v-container class="py-8">
+      <!-- 个人介绍卡片 -->
+      <v-card class="about-card mx-auto mb-8" max-width="900" elevation="4">
+        <div class="card-header pa-6">
+          <h1 class="text-h4 font-weight-bold gradient-text mb-2">关于我</h1>
+          <p class="text-subtitle-1 text-medium-emphasis">探索技术与思想的旅程</p>
+        </div>
         
-        <v-col cols="12" md="8">
-          <v-card class="card-effect mb-6">
-            <v-card-item>
-              <div class="d-flex align-center mb-4">
-                <v-avatar color="primary" rounded size="42" class="mr-4">
-                  <v-icon icon="mdi-account" size="24"></v-icon>
-                </v-avatar>
-                <h2 class="text-h5 font-weight-bold">自我介绍</h2>
-              </div>
-              
-              <v-divider class="mb-4"></v-divider>
-              
-              <div class="about-content pa-2">
-                <p class="text-body-1 mb-4" style="font-size: 1.1rem; line-height: 1.8;">
-                  👋 Hello，this is Noah.
-                </p>
-                <p class="text-body-1 mb-4" style="font-size: 1.1rem; line-height: 1.8;">
-                  🎯 目标成为具有全栈开发能力的全栈工程师。
-                </p>
-                <p class="text-body-1 mb-4" style="font-size: 1.1rem; line-height: 1.8;">
-                  🚀 目前在学习前端、网络、数据库多领域技术。focus on Python, MySQL and JavaScript.
-                </p>
-                <p class="text-body-1 mb-4" style="font-size: 1.1rem; line-height: 1.8;">
-                  我热衷于探索新技术，解决复杂问题，并构建能够改善用户体验的应用程序。在技术学习的路上，我相信持续学习和实践是提升自己的最佳方式。
-                </p>
-              </div>
-            </v-card-item>
-          </v-card>
+        <v-row class="pa-6">
+          <v-col cols="12" md="4" class="text-center">
+            <v-avatar size="180" class="profile-avatar mb-4">
+              <v-img src="/profile-image.jpg" alt="个人头像">
+                <template v-slot:placeholder>
+                  <v-icon size="120" icon="mdi-account-circle"></v-icon>
+                </template>
+              </v-img>
+            </v-avatar>
+            
+            <h2 class="text-h5 font-weight-bold mb-2">Noah.all</h2>
+            <p class="text-body-1 text-medium-emphasis mb-4">全栈开发者 & 技术爱好者</p>
+            
+            <div class="social-links d-flex justify-center">
+              <v-btn icon variant="text" color="primary" class="mx-1">
+                <v-icon>mdi-github</v-icon>
+              </v-btn>
+              <v-btn icon variant="text" color="info" class="mx-1">
+                <v-icon>mdi-twitter</v-icon>
+              </v-btn>
+              <v-btn icon variant="text" color="error" class="mx-1">
+                <v-icon>mdi-email</v-icon>
+              </v-btn>
+            </div>
+          </v-col>
           
-          <v-card class="card-effect mb-6">
-            <v-card-item>
-              <div class="d-flex align-center mb-4">
-                <v-avatar color="primary" rounded size="42" class="mr-4">
-                  <v-icon icon="mdi-code-tags" size="24"></v-icon>
-                </v-avatar>
-                <h2 class="text-h5 font-weight-bold">技能专长</h2>
+          <v-col cols="12" md="8">
+            <div class="bio-section">
+              <h3 class="text-h6 font-weight-bold mb-3">
+                <v-icon color="primary" class="mr-2">mdi-account-details</v-icon>
+                个人简介
+              </h3>
+              <p class="text-body-1 mb-4">
+                👋欢迎来到我的博客！我是Noahall，一名热爱技术和艺术的全栈开发者。我致力于探索最新的网络技术和开发方法，并在这里分享我的创作和开发心得。
+              </p>
+              <p class="text-body-1 mb-4">
+                🚀我的技术栈涵盖前端Vue2、3框架，后端Python、Node.js，以及Docker、云服务部署。我相信技术应该服务于人类，使生活更加便捷和美好。
+              </p>
+              <p class="text-body-1">
+                👨‍💻除了编程，我也热爱写作、观影、音乐、DIY、运动，这些爱好给了我不同的视角和灵感
+              </p>
+            </div>
+          </v-col>
+        </v-row>
+      </v-card>
+      <v-card class="about-card mx-auto mb-8" max-width="900" elevation="4">
+        <div class="card-header pa-6">
+          <h2 class="text-h5 font-weight-bold mb-2">
+            <v-icon color="primary" class="mr-2">mdi-lightbulb</v-icon>
+            专业技能
+          </h2>
+        </div>
+        
+        <v-container class="pa-6">
+          <v-row>
+            <v-col cols="12" md="4" v-for="(category, index) in skills" :key="index">
+              <div class="skill-category mb-6">
+                <h3 class="text-h6 font-weight-bold mb-3">{{ category.name }}</h3>
+                
+                <div v-for="(skill, i) in category.items" :key="i" class="skill-item mb-3">
+                  <div class="d-flex justify-space-between mb-1">
+                    <span class="text-subtitle-2">{{ skill.name }}</span>
+                    <span class="text-caption">{{ skill.level }}%</span>
+                  </div>
+                  <v-progress-linear
+                    :model-value="skill.level"
+                    height="6"
+                    rounded
+                    :color="category.color"
+                  ></v-progress-linear>
+                </div>
               </div>
-              
-              <v-divider class="mb-4"></v-divider>
-              
-              <div class="skills-container pa-2">
-                <div class="mb-5">
-                  <h3 class="text-h6 mb-3">编程语言</h3>
-                  <div class="d-flex flex-wrap">
-                    <v-chip class="ma-1" color="primary" variant="elevated">Python</v-chip>
-                    <v-chip class="ma-1" color="primary" variant="elevated">数据库DML</v-chip>
-                    <v-chip class="ma-1" color="primary" variant="elevated">JavaScript</v-chip>
-                    <v-chip class="ma-1" color="primary" variant="elevated">C/C++</v-chip>
-                    <v-chip class="ma-1" color="primary" variant="elevated">HTML/CSS</v-chip>
-                  </div>
-                </div>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card>
+      
+      <!-- 博客历程卡片 -->
+      <v-card class="about-card mx-auto mb-8" max-width="900" elevation="4">
+        <div class="card-header pa-6">
+          <h2 class="text-h5 font-weight-bold mb-2">
+            <v-icon color="primary" class="mr-2">mdi-book-open-page-variant</v-icon>
+            博客历程
+          </h2>
+        </div>
+        
+        <div class="pa-6">
+          <v-timeline density="comfortable" align="start">
+            <v-timeline-item
+              v-for="(event, i) in timeline"
+              :key="i"
+              :dot-color="event.color"
+              :icon="event.icon"
+              size="small"
+            >
+              <template v-slot:opposite>
+                <div class="text-caption">{{ event.date }}</div>
+              </template>
+              <v-card class="timeline-card" variant="outlined">
+                <v-card-title class="text-subtitle-1 font-weight-bold">
+                  {{ event.title }}
+                </v-card-title>
+                <v-card-text>
+                  {{ event.description }}
+                </v-card-text>
+              </v-card>
+            </v-timeline-item>
+          </v-timeline>
+        </div>
+      </v-card>
+      
+      <!-- 联系卡片 -->
+      <v-card class="about-card mx-auto" max-width="900" elevation="4">
+        <div class="card-header pa-6">
+          <h2 class="text-h5 font-weight-bold mb-2">
+            <v-icon color="primary" class="mr-2">mdi-message-text</v-icon>
+            如何找到我
+          </h2>
+          <p class="text-subtitle-1 text-medium-emphasis">有任何问题或想法，欢迎联系我</p>
+        </div>
+        
+        <v-container class="pa-6">
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-form>
+                <v-text-field
+                  label="您的姓名"
+                  variant="outlined"
+                  prepend-inner-icon="mdi-account"
+                  class="mb-4"
+                ></v-text-field>
                 
-                <div class="mb-5">
-                  <h3 class="text-h6 mb-3">前端技术</h3>
-                  <div class="d-flex flex-wrap">
-                    <v-chip class="ma-1" color="secondary" variant="elevated">Vue.js</v-chip>
-                    <v-chip class="ma-1" color="secondary" variant="elevated">Vuetify</v-chip>
-                    <v-chip class="ma-1" color="secondary" variant="elevated">Element-Plus</v-chip>
-                  </div>
-                </div>
+                <v-text-field
+                  label="您的邮箱"
+                  variant="outlined"
+                  prepend-inner-icon="mdi-email"
+                  class="mb-4"
+                ></v-text-field>
                 
-                <div class="mb-5">
-                  <h3 class="text-h6 mb-3">后端技术</h3>
-                  <div class="d-flex flex-wrap">
-                    <v-chip class="ma-1" color="info" variant="elevated">FastAPI</v-chip>
-                    <v-chip class="ma-1" color="info" variant="elevated">Node.js</v-chip>
-                    <v-chip class="ma-1" color="info" variant="elevated">Flask</v-chip>
-                  </div>
-                </div>
+                <v-textarea
+                  label="您的留言"
+                  variant="outlined"
+                  prepend-inner-icon="mdi-comment-text"
+                  rows="5"
+                  class="mb-4"
+                ></v-textarea>
                 
+                <v-btn
+                  color="primary"
+                  size="large"
+                  prepend-icon="mdi-send"
+                  block
+                  elevation="2"
+                >
+                  发送留言
+                </v-btn>
+              </v-form>
+            </v-col>
+            
+            <v-col cols="12" md="6" class="contact-info">
+              <div class="d-flex align-center mb-6">
+                <v-icon size="32" color="primary" class="mr-4">mdi-map-marker</v-icon>
                 <div>
-                  <h3 class="text-h6 mb-3">数据库与工具</h3>
-                  <div class="d-flex flex-wrap">
-                    <v-chip class="ma-1" color="success" variant="elevated">MySQL</v-chip>
-                    <v-chip class="ma-1" color="success" variant="elevated">Redis</v-chip>
-                    <v-chip class="ma-1" color="success" variant="elevated">Git</v-chip>
-                    <v-chip class="ma-1" color="success" variant="elevated">Docker</v-chip>
-                  </div>
+                  <h3 class="text-subtitle-1 font-weight-bold">地址</h3>
+                  <p class="text-body-2">天津市武清区</p>
                 </div>
               </div>
-            </v-card-item>
-          </v-card>
-        </v-col>
-      </v-row>
+              
+              <div class="d-flex align-center mb-6">
+                <v-icon size="32" color="primary" class="mr-4">mdi-email</v-icon>
+                <div>
+                  <h3 class="text-subtitle-1 font-weight-bold">邮箱</h3>
+                  <p class="text-body-2">noahall127@outlook.com.com</p>
+                </div>
+              </div>
+              
+              <div class="d-flex align-center mb-6">
+                <v-icon size="32" color="primary" class="mr-4">mdi-web</v-icon>
+                <div>
+                  <h3 class="text-subtitle-1 font-weight-bold">网站</h3>
+                  <p class="text-body-2">www.noahblog.com</p>
+                </div>
+              </div>
+              
+              <v-card class="mt-4" variant="outlined">
+                <v-card-text class="text-center py-4">
+                  <p class="text-h6 font-weight-bold mb-2">关注我的博客</p>
+                  <p class="text-body-2">及时获取最新文章和动态</p>
+                  <v-btn color="primary" variant="tonal" class="mt-2" prepend-icon="mdi-rss">
+                    订阅 RSS
+                  </v-btn>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card>
     </v-container>
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue';
+
+// 技能数据
+const skills = ref([
+  {
+    name: '前端开发',
+    color: 'primary',
+    items: [
+      { name: 'Vue.js', level: 80 },
+      { name: 'JavaScript', level: 70 },
+      { name: 'HTML/CSS', level: 55 },
+      { name: 'React', level: 20 }
+    ]
+  },
+  {
+    name: '后端开发',
+    color: 'secondary',
+    items: [
+      { name: 'Python', level: 82 },
+      { name: 'Node.js', level: 50 },
+      { name: 'MySQL', level: 60 },
+      { name: 'Fastapi', level: 80 }
+    ]
+  },
+  {
+    name: '其他技能',
+    color: 'info',
+    items: [
+      { name: 'Git', level: 85 },
+      { name: 'Docker', level: 70 },
+      { name: 'Linux', level: 86 },
+      { name: '云服务', level: 65 }
+    ]
+  }
+]);
+
+// 博客历程
+const timeline = ref([
+  {
+    date: '2025.2',
+    title: '项目启动',
+    description: `Noah's blog个人博客项目开始开发。`,
+    color: 'info',
+    icon: 'mdi-code-tags'
+  },
+  {
+    date: '2025.5',
+    title: '博客启航',
+    description: '创建个人博客，记录我的技术探索和创作。',
+    color: 'primary',
+    icon: 'mdi-rocket-launch'
+  },
+  {
+    date: '未来',
+    title: '持续成长',
+    description: '继续学习和探索，分享更多内容，与读者和世界共同成长。',
+    color: 'success',
+    icon: 'mdi-tree'
+  }
+]);
 </script>
 
 <style scoped>
-.about-view {
-  min-height: 100vh;
+.about-page {
+  min-height: calc(100vh - 200px);
+  background: radial-gradient(circle at 30% 30%, rgba(var(--primary-blue), 0.03), transparent 400px),
+              radial-gradient(circle at 70% 70%, rgba(var(--accent-orange), 0.03), transparent 400px);
 }
 
-.hero-banner {
-  background: linear-gradient(
-    var(--gradient-angle),
-    rgba(var(--primary-blue), 0.1),
-    rgba(var(--secondary-purple), 0.05),
-    rgba(var(--accent-orange), 0.08)
-  );
-  padding: 40px 0;
-  text-align: center;
-  position: relative;
+.about-card {
+  backdrop-filter: blur(8px);
+  background: rgba(var(--v-theme-surface), 0.9);
+  border-radius: var(--border-radius);
   overflow: hidden;
+  border: 1px solid rgba(var(--primary-blue), 0.1);
+  transition: all var(--transition-default);
 }
 
-.hero-banner::before {
-  content: '';
-  position: absolute;
-  top: -10%;
-  left: -10%;
-  width: 120%;
-  height: 120%;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(var(--primary-blue), 0.05) 0%, transparent 70%),
-    radial-gradient(circle at 80% 60%, rgba(var(--accent-orange), 0.05) 0%, transparent 70%);
-  z-index: -1;
+.about-card:hover {
+  box-shadow: var(--hover-shadow);
+  transform: translateY(-4px);
 }
 
-.about-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-bottom: 64px;
+.card-header {
+  background: linear-gradient(var(--gradient-angle), 
+    rgba(var(--primary-blue), 0.05),
+    rgba(var(--secondary-purple), 0.02));
+  border-bottom: 1px solid rgba(var(--primary-blue), 0.07);
+}
+
+.gradient-text {
+  background: var(--neon-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.profile-avatar {
+  border: 4px solid rgba(var(--primary-blue), 0.2);
+  box-shadow: 0 8px 30px rgba(var(--primary-blue), 0.15);
+  transition: all var(--transition-default);
+}
+
+.profile-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 36px rgba(var(--primary-blue), 0.25);
 }
 
 .social-links .v-btn {
@@ -168,42 +323,55 @@
 }
 
 .social-links .v-btn:hover {
-  transform: translateY(-3px);
-  color: rgb(var(--primary-blue));
-}
-
-.hobby-item {
-  padding: 16px;
-  border-radius: var(--border-radius);
-  transition: all var(--transition-default);
-  background: rgba(var(--v-theme-surface), 0.6);
-  height: 100%;
-}
-
-.hobby-item:hover {
   transform: translateY(-5px);
-  background: linear-gradient(
-    var(--gradient-angle),
-    rgba(var(--v-theme-surface), 0.8),
-    rgba(var(--primary-blue), 0.05)
-  );
-  box-shadow: var(--card-shadow);
 }
 
-/* 响应式调整 */
-@media (max-width: 960px) {
-  .about-content p {
-    font-size: 1rem !important;
+.bio-section {
+  border-left: 3px solid rgba(var(--primary-blue), 0.1);
+  padding-left: 20px;
+}
+
+.skill-item {
+  transition: all var(--transition-default);
+}
+
+.skill-item:hover {
+  transform: translateX(5px);
+}
+
+.timeline-card {
+  transition: all var(--transition-default);
+}
+
+.timeline-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--primary-blue), 0.15);
+}
+
+.contact-info {
+  position: relative;
+}
+
+@media (min-width: 960px) {
+  .contact-info::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10%;
+    height: 80%;
+    width: 1px;
+    background: linear-gradient(to bottom,
+      transparent,
+      rgba(var(--primary-blue), 0.2),
+      transparent
+    );
   }
 }
 
-@media (max-width: 600px) {
-  .hero-banner {
-    padding: 32px 0;
-  }
-  
-  .hobby-item {
-    margin-bottom: 16px;
+@media (max-width: 599px) {
+  .profile-avatar {
+    width: 140px;
+    height: 140px;
   }
 }
 </style>

@@ -151,7 +151,6 @@ import { getArticle } from '../api'
 const fetchArticle = async () => {
   loading.value = true
   try {
-    console.log('获取文章ID:', route.params.id)
     const data = await getArticle(route.params.id)
     for (const key in data) {
       console.log(`- ${key}: ${typeof data[key]}`, 
@@ -211,88 +210,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.article-view {
-  min-height: 100vh;
-}
-
-.article-content {
-  font-size: 1.1rem;
-  line-height: 1.8;
-}
-
-/* Markdown 内容样式 */
-.markdown-body {
-  color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  word-wrap: break-word;
-  padding: 16px 0;
-}
-
-.markdown-body h1,
-.markdown-body h2,
-.markdown-body h3,
-.markdown-body h4,
-.markdown-body h5,
-.markdown-body h6 {
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.markdown-body h1 { font-size: 2em; border-bottom: 1px solid var(--border-color, #eaecef); padding-bottom: 0.3em; }
-.markdown-body h2 { font-size: 1.5em; border-bottom: 1px solid var(--border-color, #eaecef); padding-bottom: 0.3em; }
-.markdown-body h3 { font-size: 1.25em; }
-.markdown-body h4 { font-size: 1em; }
-.markdown-body h5 { font-size: 0.875em; }
-.markdown-body h6 { font-size: 0.85em; color: var(--text-secondary); }
-
-.markdown-body p {
-  margin-bottom: 1.2em;
-}
-
-.markdown-body a {
-  color: var(--primary);
-  text-decoration: none;
-}
-
-.markdown-body a:hover {
-  text-decoration: underline;
-}
-
-.markdown-body img {
-  max-width: 100%;
-  border-radius: 4px;
-  margin: 1em 0;
-}
-
-.markdown-body pre {
-  background-color: var(--surface);
-  padding: 1em;
-  border-radius: 4px;
-  overflow-x: auto;
-  margin: 1em 0;
-}
-
-.markdown-body code {
-  background-color: rgba(var(--primary-blue), 0.1);
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
-  font-family: 'Fira Code', monospace;
-  font-size: 0.9em;
-}
-
-.markdown-body pre code {
-  background-color: transparent;
-  padding: 0;
-}
-
-.markdown-body blockquote {
-  border-left: 4px solid var(--primary);
-  padding-left: 1em;
-  margin-left: 0;
-  color: var(--text-secondary);
-}
+/* 所有样式已移至 src/assets/styles/views/article.css */
 </style>
