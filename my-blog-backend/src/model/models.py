@@ -53,7 +53,7 @@ class Tag(Base):
     __tablename__ = 'tags'
     
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String(50), nullable=False)
     
     articles = relationship('Article', secondary='article_tags', back_populates='tags_relationship')
 
