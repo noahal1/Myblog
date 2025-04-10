@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Noah's Blog
 
 一个现代化的个人博客系统，前端使用Vue 3和Vuetify 3构建，后端使用FastAPI和SQLAlchemy。
@@ -43,3 +42,7 @@ npm run dev
 source blogenv/bin/activate
 //使用npm启动uvicorn
 npm start
+
+#后端Docker部署
+docker build -t blog-backend .
+docker run -p 8000:8000 blog-backend

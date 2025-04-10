@@ -53,7 +53,7 @@
               autocomplete="username"
               @focus="errorMessage = ''"
               class="input-field"
-            />
+            ></v-text-field>
           </v-col>
 
           <v-col cols="12">
@@ -70,7 +70,7 @@
               autocomplete="current-password"
               @focus="errorMessage = ''"
               class="input-field"
-            />
+            ></v-text-field>
           </v-col>
           
           <!-- 仅在注册模式显示邮箱字段 -->
@@ -159,7 +159,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import LogoIcon from './icons/LogoIcon.vue'
@@ -167,11 +167,6 @@ import apiClient from '../api'
 
 const router = useRouter()
 const userStore = useUserStore()
-
-// 添加调试代码
-console.log('userStore:', userStore)
-console.log('userStore.login:', userStore.login)
-console.log('typeof userStore.login:', typeof userStore.login)
 
 // 表单状态
 const form = ref({
@@ -203,7 +198,6 @@ const rules = {
 const switchMode = () => {
   isLogin.value = !isLogin.value
   errorMessage.value = ''
-  // 不重置表单数据，保留用户已输入的内容
 }
 
 // 处理表单提交
@@ -214,31 +208,17 @@ const handleSubmit = async () => {
   try {
     if (isLogin.value) {
       // 登录逻辑
-      const loginData = {
+      const response = await apiClient.post('/api/login', {
         username: form.value.username,
         password: form.value.password
-      };
-      
-      console.log('发送登录请求:', loginData);
-      
-      // 使用更简单的方式发送请求
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
       });
       
-      console.log('收到响应状态:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('登录失败:', errorData);
-        throw new Error(errorData.detail || '登录失败');
+      if (!response.data) {
+        console.error('登录失败:', response);
+        throw new Error(response.data?.detail || '登录失败');
       }
       
-      const data = await response.json();
+      const { data } = response;
       console.log('登录成功:', data);
       
       if (data && data.access_token) {
@@ -284,180 +264,5 @@ const formTitle = computed(() => isLogin.value ? '登录' : '注册')
 </script>
 
 <style scoped>
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(80vh - 160px);
-  padding: 32px 16px;
-  background: radial-gradient(circle at 30% 30%, rgba(var(--primary-blue), 0.03), transparent 400px),
-              radial-gradient(circle at 70% 70%, rgba(var(--accent-orange), 0.03), transparent 400px);
-}
-
-.login-card {
-  overflow: hidden;
-  border-radius: var(--border-radius, 16px);
-  background: rgba(var(--v-theme-surface), 0.9);
-  backdrop-filter: blur(12px);
-  box-shadow: var(--card-shadow);
-  border: 1px solid rgba(var(--primary-blue), 0.1);
-  transition: all var(--transition-default);
-  max-width: 95%;
-}
-
-.login-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(var(--primary-blue), 0.15);
-}
-
-.card-header {
-  background: linear-gradient(var(--gradient-angle, 135deg), 
-    rgba(var(--primary-blue), 0.05),
-    rgba(var(--secondary-purple, 156, 39, 176), 0.02));
-  padding: 2.5rem 1.5rem 1rem;
-  text-align: center;
-  border-bottom: 1px solid rgba(var(--primary-blue), 0.07);
-}
-
-.gradient-title {
-  background: var(--neon-gradient, linear-gradient(90deg, #3f51b5, #9c27b0));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.login-form {
-  padding-top: 1.3rem;
-}
-
-.input-field :deep(.v-field) {
-  border-radius: 8px;
-  transition: all var(--transition-default);
-}
-
-.input-field:hover :deep(.v-field) {
-  border-color: rgba(var(--primary-blue), 0.5);
-}
-
-.submit-btn {
-  margin-top: 0rem;
-  border-radius: 8px;
-  text-transform: none;
-  letter-spacing: 0.5px;
-  transition: all var(--transition-default);
-  position: relative;
-  overflow: hidden;
-}
-
-.submit-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: all 0.5s;
-}
-
-.submit-btn:hover::before {
-  left: 100%;
-}
-
-.switch-mode {
-  background: rgba(var(--primary-blue), 0.03);
-}
-
-.switch-link {
-  color: rgb(var(--primary-blue));
-  font-weight: 500;
-  cursor: pointer;
-  position: relative;
-  transition: all var(--transition-default);
-}
-
-.switch-link::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    rgba(var(--primary-blue), 0.7),
-    rgba(var(--accent-orange), 0.7)
-  );
-  transition: width var(--transition-default);
-}
-
-.switch-link:hover {
-  color: rgb(var(--accent-orange));
-}
-
-.switch-link:hover::after {
-  width: 100%;
-}
-
-.divider-container {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  margin: 0.5rem 0;
-}
-
-.divider-text {
-  padding: 0 16px;
-  color: rgba(var(--v-theme-on-surface), 0.5);
-  font-size: 0.875rem;
-}
-
-.divider-container .v-divider {
-  flex-grow: 1;
-  opacity: 0.3;
-}
-
-.social-buttons .v-btn {
-  transition: all var(--transition-default);
-}
-
-.social-buttons .v-btn:hover {
-  transform: translateY(-3px);
-}
-
-/* 动画 */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.login-card {
-  animation: fadeInUp 0.5s ease forwards;
-}
-
-/* 响应式调整 */
-@media (max-width: 600px) {
-  .login-container {
-    padding: 16px;
-  }
-  
-  .card-header {
-    padding: 1.5rem 1rem 0.75rem;
-  }
-  
-  .login-card {
-    margin-top: 0;
-  }
-}
+/* 所有样式已移至 src/assets/styles/components/login.css */
 </style>
