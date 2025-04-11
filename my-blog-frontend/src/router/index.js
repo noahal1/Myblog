@@ -31,11 +31,6 @@ const routes = [
     name: 'create-article',
     component: () => import('../views/CreateArticle.vue'),
     meta: { requiresAuth: true }
-  },
-  {
-    path: '/categories/:category',
-    name: 'category',
-    component: () => import('../views/CategoryView.vue')
   }
 ]
 

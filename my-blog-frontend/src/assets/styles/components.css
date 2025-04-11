@@ -102,18 +102,8 @@
   border-bottom: 1px solid transparent;
 }
 
-.nav-bar.transparent {
-  background: linear-gradient(
-    var(--gradient-angle),
-    rgba(var(--primary-blue), 0.1),
-    rgba(var(--secondary-purple), 0.06),
-    rgba(var(--accent-orange), 0.02)
-  );
-  backdrop-filter: blur(5px);
-}
-
 .nav-bar.scrolled {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(20px) saturate(200%);
   border-bottom: 1px solid rgba(var(--primary-blue), 0.1);

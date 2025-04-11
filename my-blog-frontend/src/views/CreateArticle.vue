@@ -53,7 +53,7 @@
             closable-chips
             class="mb-6"
             item-title="name"
-            item-value="id"
+            item-value="name"
             prepend-inner-icon="mdi-tag-multiple"
             placeholder="选择相关标签，可多选"
           ></v-autocomplete>
@@ -112,12 +112,11 @@ const fetchTags = async () => {
     availableTags.value = response.data
   } catch (error) {
     console.error('获取标签失败:', error)
-    // 如果API不存在，提供一些示例标签
     availableTags.value = [
       { id: 1, name: '前端开发' },
       { id: 2, name: '后端技术' },
-      { id: 3, name: '设计' },
-      { id: 4, name: 'DevOps' },
+      { id: 3, name: '随笔' },
+      { id: 4, name: '诗歌' },
       { id: 5, name: '人工智能' }
     ]
   }
@@ -128,10 +127,8 @@ const submitArticle = async () => {
   loading.value = true
   try {
     const response = await apiClient.post('/api/articles', article.value)
-    console.log('文章创建成功:', response.data)
     router.push(`/article/${response.data.id}`)
   } catch (error) {
-    console.error('创建文章失败:', error)
     alert('创建文章失败，请稍后重试')
   } finally {
     loading.value = false

@@ -103,8 +103,7 @@ def get_db():
         yield db
     finally:
         db.close()
-
-# API路由
+# 用户Api
 @app.post('/api/register', response_model=dict)
 async def register(user: UserCreate, db: Session = Depends(get_db)):
     # 检查用户名是否已存在
@@ -182,6 +181,21 @@ async def get_articles(skip: int = 0, limit: int = 10, db: Session = Depends(get
     response.headers["X-Total-Pages"] = str(math.ceil(total_count / limit))
     return response
 
+#标签api
+@app.get('/api/tags', response_model=list[str])
+async def get_tags(Tag_id:int, db: Session = Depends(get_db)):
+    tag = db.query(models.Tag).all()
+    if tag is None:
+        raise HTTPException(status_code=404, detail="标签不存在")
+    db.commit()
+    tag_names = [tag.name for tag in tag] if tag else []
+
+    tag_data = {
+        'id': tag.id,
+        'name': tag_names,
+    }
+    return tag_data
+    
 @app.get('/api/articles/{article_id}', response_model=ArticleResponse)
 async def get_article(article_id: int, db: Session = Depends(get_db)):
     article = db.query(models.Article).options(joinedload(models.Article.tags_relationship)).filter(models.Article.id == article_id).first()
@@ -205,6 +219,7 @@ async def get_article(article_id: int, db: Session = Depends(get_db)):
     }
     return article_data
 
+
 @app.post('/api/articles', response_model=ArticleResponse)
 async def create_article(article: ArticleCreate, db: Session = Depends(get_db)):
     tag_ids = ','.join(str(tag_id) for tag_id in article.tags) 
@@ -219,7 +234,8 @@ async def create_article(article: ArticleCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_article)
     return db_article
-@app.on_event("startup")
+
+@app.lifespan("startup")
 async def startup():
     redis = Redis(host="localhost", port=6379, db=0, decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="myblog-cache:")
