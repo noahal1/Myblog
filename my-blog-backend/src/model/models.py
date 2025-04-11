@@ -56,9 +56,3 @@ class Tag(Base):
     name = Column(String(50), nullable=False)
     
     articles = relationship('Article', secondary='article_tags', back_populates='tags_relationship')
-
-class ArticleTag(Base):
-    __tablename__ = 'article_tags'
-    
-    article_id = Column(Integer, ForeignKey('articles.id'), primary_key=True)
-    tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)

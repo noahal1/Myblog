@@ -10,6 +10,7 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import { useUserStore } from './stores/user'
 
 // 创建 Vuetify 实例
 const vuetify = createVuetify({
@@ -48,10 +49,15 @@ const vuetify = createVuetify({
 
 // 创建 Vue 应用并应用 Vuetify
 const app = createApp(App)
+const pinia = createPinia()
 
 // 使用 Pinia 和 Router
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
 app.use(vuetify) // 注册 Vuetify
+
+// 在应用挂载前初始化用户状态
+const userStore = useUserStore()
+userStore.initUserState()
 
 app.mount('#app')

@@ -56,7 +56,12 @@
             </div>
           </v-btn>
 
-          <v-menu location="bottom end" :close-on-content-click="false" transition="scale-transition">
+          <v-menu
+            location="bottom end"
+            :close-on-content-click="false"
+            transition="scale-transition"
+            class="user-menu"
+          >
             <template #activator="{ props }">
               <v-btn
                 variant="text"
@@ -64,37 +69,69 @@
                 v-bind="props"
                 :ripple="false"
               >
-                <v-avatar size="32" class="mr-2 user-avatar">
-                  <v-icon icon="mdi-account-circle" size="32" />
+                <v-avatar size="32" class="user-avatar">
+                  <template v-if="userStore.avatar">
+                    <v-img :src="userStore.avatar" alt="用户头像" />
+                  </template>
+                  <template v-else>
+                    <v-icon v-if="!userStore.isLogin" icon="mdi-account-circle" size="32" />
+                    <span v-else class="text-h6">{{ userStore.userInitials }}</span>
+                  </template>
                 </v-avatar>
-                <span class="text-capitalize user-name" v-if="!isSmallScreen">{{ userStore.username || '游客' }}</span>
+                <span class="text-capitalize user-name" v-if="!isSmallScreen">
+                  {{ userStore.username || '游客' }}
+                </span>
                 <v-icon icon="mdi-chevron-down" size="small" class="ml-1" v-if="!isSmallScreen"/>
               </v-btn>
             </template>
             
-            <v-card class="menu-card" elevation="4">
-              <v-list density="compact">
+            <v-card class="menu-card" elevation="3" rounded="lg">
+              <v-list class="user-menu-list">
                 <v-list-item
                   v-if="!userStore.isLogin"
                   to="/login"
                   prepend-icon="mdi-login"
                   title="登录注册"
                   class="menu-item"
+                  rounded="lg"
                 />
-                <v-list-item
-                  v-else
-                  @click="handleLogout"
-                  prepend-icon="mdi-logout"
-                  title="退出登录"
-                  class="menu-item"
-                />
-                <v-list-item
-                  v-if="userStore.isLogin"
-                  to="/create-article"
-                  prepend-icon="mdi-pencil"
-                  title="创建文章"
-                  class="menu-item"
-                />
+                <template v-else>
+                  <v-list-item class="user-info-item pa-3" rounded="lg">
+                    <template v-slot:prepend>
+                      <v-avatar size="40" class="mr-3">
+                        <template v-if="userStore.avatar">
+                          <v-img :src="userStore.avatar" alt="用户头像" />
+                        </template>
+                        <template v-else>
+                          <span class="text-h6">{{ userStore.userInitials }}</span>
+                        </template>
+                      </v-avatar>
+                    </template>
+                    <v-list-item-title class="font-weight-medium">
+                      {{ userStore.username }}
+                    </v-list-item-title>
+                    <v-list-item-subtitle class="text-caption">
+                      已登录
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                  
+                  <v-divider class="my-2"></v-divider>
+                  
+                  <v-list-item
+                    to="/create-article"
+                    prepend-icon="mdi-pencil"
+                    title="创建文章"
+                    class="menu-item"
+                    rounded="lg"
+                  />
+                  <v-list-item
+                    @click="handleLogout"
+                    prepend-icon="mdi-logout"
+                    title="退出登录"
+                    class="menu-item"
+                    rounded="lg"
+                  />
+                </template>
               </v-list>
             </v-card>
           </v-menu>
@@ -208,21 +245,26 @@ const logoColor = computed(() => {
 const isScrolled = ref(false)
 const isHidden = ref(false)
 const lastScrollTop = ref(0)
-const scrollThreshold = 50
-const hideThreshold = 150
+const scrollThreshold = 10
+const hideThreshold = 100
 
 const handleScroll = () => {
   const currentScrollTop = window.scrollY
+  const scrollDelta = currentScrollTop - lastScrollTop.value
   
   isScrolled.value = currentScrollTop > scrollThreshold
   
-  if (currentScrollTop > lastScrollTop.value && currentScrollTop > hideThreshold) {
-    isHidden.value = true
-  } else {
-    isHidden.value = false
+  if (scrollDelta > 0 && currentScrollTop > hideThreshold) {
+    if (!isHidden.value) {
+      isHidden.value = true
+    }
+  } else if (scrollDelta < 0) {
+    if (isHidden.value) {
+      isHidden.value = false
+    }
   }
   
-  lastScrollTop.value = currentScrollTop
+  lastScrollTop.value = currentScrollTop <= 0 ? 0 : currentScrollTop
 }
 
 const throttle = (fn, delay) => {
@@ -235,7 +277,7 @@ const throttle = (fn, delay) => {
   }
 }
 
-const throttledScroll = throttle(handleScroll, 30)
+const throttledScroll = throttle(handleScroll, 16)
 
 watch(() => route.path, () => {
   mobileMenuOpen.value = false
@@ -252,10 +294,33 @@ onMounted(() => {
     } else {
       theme.global.name.value = 'system'
     }
+    
+    // 每次组件挂载时检查用户状态
+    checkUserAuth()
   } catch (e) {
     console.error('设置初始主题时出错:', e)
   }
 })
+
+// 检查用户认证状态
+const checkUserAuth = async () => {
+  if (userStore.isLogin && userStore.token) {
+    try {
+      // 验证token有效性
+      const isValid = await userStore.verifyToken()
+      
+      if (!isValid) {
+        console.log('Token无效，正在登出...')
+        userStore.logout()
+      } else {
+        console.log('用户已登录:', userStore.username)
+      }
+    } catch (error) {
+      console.error('验证用户token时出错:', error)
+      userStore.logout() // 出错时登出用户
+    }
+  }
+}
 
 onUnmounted(() => {
   window.removeEventListener('scroll', throttledScroll)

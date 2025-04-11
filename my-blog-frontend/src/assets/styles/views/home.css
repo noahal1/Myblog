@@ -1,4 +1,8 @@
 /* 首页样式 */
+.home-view {
+  position: relative;
+}
+
 .tagline-text {
   font-weight: 500;
   letter-spacing: 1px;
@@ -18,10 +22,12 @@
     rgba(var(--secondary-purple), 0.06),
     rgba(var(--accent-orange), 0.02)
   );
-  padding: 32px 0;
+  padding: 90px 0 32px; /* 增加顶部内边距，为导航栏留出空间 */
   text-align: center;
   position: relative;
   overflow: hidden;
+  margin-top: -56px; /* 负边距使banner向上移动至导航栏下方 */
+  z-index: 0; /* 修改为0而不是-1，避免完全隐藏 */
 }
 
 .hero-banner::before {
@@ -38,8 +44,11 @@
   font-size: 3rem;
   font-weight: 800;
   line-height: 1.2;
+  margin-top: 25px; /* 添加顶部边距，确保内容不被导航栏遮挡 */
   margin-bottom: 16px;
   font-family: var(--font-heading);
+  position: relative; /* 确保文字在前景 */
+  z-index: 1; /* 确保文字显示在渐变背景上方 */
 }
 
 .hero-subtitle {
@@ -48,6 +57,8 @@
   max-width: 600px;
   margin: 0 auto;
   transition: color var(--transition-slow-text), opacity var(--transition-slow-text);
+  position: relative; /* 确保文字在前景 */
+  z-index: 1; /* 确保文字显示在渐变背景上方 */
 }
 
 .search-input {
@@ -55,6 +66,8 @@
   margin: 0 auto;
   border-radius: 28px;
   transition: all var(--transition-default);
+  position: relative; /* 确保搜索框在前景 */
+  z-index: 1; /* 确保搜索框显示在渐变背景上方 */
 }
 
 .search-input:focus-within {
