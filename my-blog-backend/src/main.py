@@ -182,19 +182,12 @@ async def get_articles(skip: int = 0, limit: int = 10, db: Session = Depends(get
     return response
 
 #标签api
-@app.get('/api/tags', response_model=list[str])
-async def get_tags(Tag_id:int, db: Session = Depends(get_db)):
-    tag = db.query(models.Tag).all()
-    if tag is None:
-        raise HTTPException(status_code=404, detail="标签不存在")
-    db.commit()
-    tag_names = [tag.name for tag in tag] if tag else []
-
-    tag_data = {
-        'id': tag.id,
-        'name': tag_names,
-    }
-    return tag_data
+@app.get('/api/tags', response_model=list[dict])
+async def get_tags(db: Session = Depends(get_db)):
+    tags = db.query(models.Tag).all()
+    if not tags:
+        return []
+    return [{"id": tag.id, "name": tag.name} for tag in tags]
     
 @app.get('/api/articles/{article_id}', response_model=ArticleResponse)
 async def get_article(article_id: int, db: Session = Depends(get_db)):
