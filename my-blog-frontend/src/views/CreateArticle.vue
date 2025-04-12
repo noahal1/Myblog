@@ -46,14 +46,16 @@
           <v-autocomplete
             v-model="article.tags"
             :items="availableTags"
+            item-title="name"
+            item-value="id"
             label="文章标签"
             variant="outlined"
             chips
             multiple
             closable-chips
             class="mb-6"
-            item-title="name"
-            item-value="name"
+            :loading="loading"
+            :error-messages="error"
             prepend-inner-icon="mdi-tag-multiple"
             placeholder="选择相关标签，可多选"
           ></v-autocomplete>
@@ -95,6 +97,7 @@ import apiClient from '../api'
 const router = useRouter()
 const loading = ref(false)
 const isFormValid = ref(false)
+const error = ref(null)
 
 const article = ref({
   title: '',
@@ -107,10 +110,16 @@ const availableTags = ref([])
 
 // 获取标签列表
 const fetchTags = async () => {
+  loading.value = true
+  error.value = null
   try {
     const response = await apiClient.get('/api/tags')
-    availableTags.value = response.data
+    if (!response.ok) {
+      throw new Error('获取标签失败')
+    }
+    availableTags.value = await response.json()
   } catch (error) {
+    error.value = error.message
     console.error('获取标签失败:', error)
     availableTags.value = [
       { id: 1, name: '前端开发' },
@@ -119,6 +128,8 @@ const fetchTags = async () => {
       { id: 4, name: '诗歌' },
       { id: 5, name: '人工智能' }
     ]
+  } finally {
+    loading.value = false
   }
 }
 
@@ -129,7 +140,8 @@ const submitArticle = async () => {
     const response = await apiClient.post('/api/articles', article.value)
     router.push(`/article/${response.data.id}`)
   } catch (error) {
-    alert('创建文章失败，请稍后重试')
+    console.error('发布文章失败:', error)
+    // 这里可以添加错误提示
   } finally {
     loading.value = false
   }
