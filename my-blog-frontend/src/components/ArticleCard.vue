@@ -20,7 +20,17 @@
         <span class="text-caption">{{ article.views || 0 }}</span>
         
         <v-icon icon="mdi-comment" size="small" class="ml-3 mr-1" />
-        <span class="text-caption">{{ article.comments || 0 }}</span>
+        <span class="text-caption">{{ article.comments_count || 0 }}</span>
+
+        <v-btn
+          icon="mdi-thumb-up-outline"
+          size="x-small"
+          variant="text"
+          class="ml-2"
+          @click.stop="handleLike"
+          :color="hasLiked ? 'primary' : ''"
+        ></v-btn>
+        <span class="text-caption">{{ article.likes || 0 }}</span>
       </v-card-subtitle>
       
       <!-- 文章摘要 -->
@@ -45,8 +55,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { likeArticle } from '../api'
 
 // 定义props
 const props = defineProps({
@@ -69,6 +80,30 @@ defineEmits(['click']);
 
 // 悬停状态
 const isHovered = ref(false);
+// 点赞状态
+const hasLiked = ref(false);
+
+// 处理点赞
+const handleLike = async (event) => {
+  event.stopPropagation(); // 阻止事件冒泡，避免触发卡片点击
+  
+  if (hasLiked.value) return; // 防止重复点赞
+  
+  try {
+    const response = await likeArticle(props.article.id);
+    if (response.data && response.data.likes) {
+      props.article.likes = response.data.likes;
+      hasLiked.value = true;
+      
+      // 将点赞状态保存到本地存储
+      const likedArticles = JSON.parse(localStorage.getItem('likedArticles') || '{}');
+      likedArticles[props.article.id] = true;
+      localStorage.setItem('likedArticles', JSON.stringify(likedArticles));
+    }
+  } catch (error) {
+    console.error('点赞失败:', error);
+  }
+};
 
 // 使用固定颜色，不依赖主题
 const primaryColor = '#3F51B5';
@@ -100,6 +135,17 @@ const viewArticle = () => {
 
 // 使用计算属性优化频繁计算
 const formattedDate = computed(() => formatDate(props.article.created_at))
+
+// 检查是否已点赞
+const checkIfLiked = () => {
+  const likedArticles = JSON.parse(localStorage.getItem('likedArticles') || '{}');
+  hasLiked.value = !!likedArticles[props.article.id];
+};
+
+// 在组件挂载时检查点赞状态
+onMounted(() => {
+  checkIfLiked();
+});
 </script>
 
 <style scoped>

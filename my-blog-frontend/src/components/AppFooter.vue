@@ -197,7 +197,7 @@
       <template v-slot:actions>
         <v-btn
           variant="text"
-          @click="showSubscribeSuccess = false"
+          @click="_showSubscribeSuccess = false"
         >
           关闭
         </v-btn>
@@ -374,6 +374,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import LogoIcon from './icons/LogoIcon.vue'
+import { safeRef } from '../fix-refs.js'
 
 // 使用固定颜色，不依赖主题
 const logoColor = ref('#3F51B5')
@@ -399,10 +400,21 @@ const categories = [
 // 订阅状态
 const email = ref('')
 const subscribing = ref(false)
-const showSubscribeSuccess = ref(false)
+const _showSubscribeSuccess = ref(false)
+// 创建计算属性用于v-model绑定
+const showSubscribeSuccess = computed({
+  get: () => _showSubscribeSuccess.value,
+  set: (value) => { _showSubscribeSuccess.value = value }
+})
 
 // 联系表单
-const showContactForm = ref(false)
+const _showContactForm = ref(false)
+// 创建计算属性用于v-model绑定
+const showContactForm = computed({
+  get: () => _showContactForm.value,
+  set: (value) => { _showContactForm.value = value }
+})
+
 const contactForm = ref({
   name: '',
   email: '',
@@ -419,7 +431,7 @@ const subscribeNewsletter = async () => {
   // 模拟API请求
   setTimeout(() => {
     subscribing.value = false
-    showSubscribeSuccess.value = true
+    _showSubscribeSuccess.value = true
     email.value = ''
   }, 1500)
 }
@@ -431,7 +443,7 @@ const submitContactForm = async () => {
   // 模拟API请求
   setTimeout(() => {
     sending.value = false
-    showContactForm.value = false
+    _showContactForm.value = false
     
     // 重置表单
     contactForm.value = {

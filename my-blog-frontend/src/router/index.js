@@ -4,6 +4,7 @@ import ArticleView from '@/views/ArticleView.vue'
 import Login from '@/components/Login.vue'
 import About from '@/views/About.vue'
 import CreateArticle from '../views/CreateArticle.vue'
+import KnowledgeBase from '../views/KnowledgeBase.vue'
 
 const routes = [
   {
@@ -31,6 +32,11 @@ const routes = [
     name: 'create-article',
     component: () => import('../views/CreateArticle.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/knowledge',
+    name: 'knowledge',
+    component: () => import('../views/KnowledgeBase.vue')
   }
 ]
 
