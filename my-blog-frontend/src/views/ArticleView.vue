@@ -58,6 +58,38 @@
               <span v-if="article.read_time">· {{ article.read_time }} 分钟阅读</span>
             </div>
           </div>
+          
+          <!-- 文章统计信息 -->
+          <div class="d-flex align-center mb-4">
+            <v-chip
+              class="mr-2"
+              variant="outlined"
+              prepend-icon="mdi-eye-outline"
+              size="small"
+            >
+              {{ article.views || 0 }} 阅读
+            </v-chip>
+            
+            <v-chip
+              class="mr-2"
+              variant="outlined"
+              prepend-icon="mdi-thumb-up-outline"
+              size="small"
+              :color="hasLiked ? 'primary' : ''"
+              @click="handleLike"
+            >
+              {{ article.likes || 0 }} 喜欢
+            </v-chip>
+            
+            <v-chip
+              variant="outlined"
+              prepend-icon="mdi-comment-outline"
+              size="small"
+              @click="scrollToComments"
+            >
+              {{ article.comments_count || 0 }} 评论
+            </v-chip>
+          </div>
         </div>
         
         <v-img
@@ -100,6 +132,14 @@
                 </v-btn>
               </div>
             </div>
+            
+        <!-- 评论区 -->
+        <CommentSection 
+          :article-id="article.id" 
+          :author-id="article.author_id"
+          @comment-added="handleCommentAdded"
+          @comment-deleted="handleCommentDeleted"
+        />
       </template>
       
       <!-- 文章不存在 -->
@@ -124,11 +164,42 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchArticle as fetchMockArticle } from '../utils/mock-api'
 import { renderMarkdown } from '../utils/markdown'  // 导入 markdown 渲染函数
+import CommentSection from '../components/CommentSection.vue'
+import { getArticle, likeArticle } from '../api'
 
 const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
 const article = ref(null)
+const hasLiked = ref(false)
+
+// 处理点赞
+const handleLike = async () => {
+  if (hasLiked.value) return; // 防止重复点赞
+  
+  try {
+    const response = await likeArticle(article.value.id);
+    if (response.data && response.data.likes) {
+      article.value.likes = response.data.likes;
+      hasLiked.value = true;
+      
+      // 将点赞状态保存到本地存储
+      const likedArticles = JSON.parse(localStorage.getItem('likedArticles') || '{}');
+      likedArticles[article.value.id] = true;
+      localStorage.setItem('likedArticles', JSON.stringify(likedArticles));
+    }
+  } catch (error) {
+    console.error('点赞失败:', error);
+  }
+};
+
+// 检查是否已点赞
+const checkIfLiked = () => {
+  if (!article.value) return;
+  
+  const likedArticles = JSON.parse(localStorage.getItem('likedArticles') || '{}');
+  hasLiked.value = !!likedArticles[article.value.id];
+};
 
 // 检测内容是否为 HTML
 function isHTML(str) {
@@ -146,8 +217,6 @@ const formatDate = (dateString) => {
 }
 
 // 获取文章详情
-import { getArticle } from '../api'
-
 const fetchArticle = async () => {
   loading.value = true
   try {
@@ -195,11 +264,33 @@ const fetchArticle = async () => {
     
     // 设置文档标题
     document.title = `${data.title || '无标题'} - 我的博客`
+    
+    // 检查点赞状态
+    checkIfLiked();
   } catch (error) {
     console.error('获取文章失败:', error)
     article.value = null
   } finally {
     loading.value = false
+  }
+}
+
+// 评论相关处理方法
+const handleCommentAdded = () => {
+  // 可以在这里更新文章评论计数或其他相关状态
+  console.log('评论已添加')
+}
+
+const handleCommentDeleted = () => {
+  // 可以在这里更新文章评论计数或其他相关状态
+  console.log('评论已删除')
+}
+
+// 滚动到评论区域
+const scrollToComments = () => {
+  const commentSection = document.querySelector('.comment-section')
+  if (commentSection) {
+    commentSection.scrollIntoView({ behavior: 'smooth' })
   }
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="create-article">
     <v-container class="py-8">
-      <v-card class="create-article-card mx-auto" max-width="900" elevation="4">
+      <v-card class="create-article-card mx-auto" max-width="1000" elevation="4">
         <div class="card-header pa-6">
           <h1 class="text-h4 font-weight-bold gradient-text mb-2">创建新文章</h1>
           <p class="text-subtitle-1 text-medium-emphasis">在这里分享您的想法和知识</p>
@@ -19,17 +19,59 @@
             placeholder="输入一个吸引人的标题"
           ></v-text-field>
           
-          <v-textarea
-            v-model="article.content"
-            label="文章内容"
-            required
-            variant="outlined"
-            rows="15"
-            class="mb-6"
-            :rules="[v => !!v || '内容不能为空']"
-            placeholder="支持Markdown格式编写"
-            prepend-inner-icon="mdi-text-box"
-          ></v-textarea>
+          <!-- 图片上传 -->
+          <div class="mb-6">
+            <label class="text-subtitle-1 mb-2 d-block">文章封面</label>
+            <div class="d-flex align-center cover-upload">
+              <v-img
+                v-if="coverImagePreview"
+                :src="coverImagePreview"
+                height="150"
+                width="280"
+                cover
+                class="rounded me-4"
+              ></v-img>
+              <div v-else class="image-placeholder d-flex justify-center align-center rounded me-4">
+                <v-icon size="40" color="grey-lighten-1">mdi-image</v-icon>
+              </div>
+              
+              <div>
+                <v-file-input
+                  v-model="coverImage"
+                  accept="image/*"
+                  label="选择封面图片"
+                  variant="outlined"
+                  density="compact"
+                  prepend-icon="mdi-camera"
+                  @update:model-value="handleImageUpload"
+                  hide-details
+                ></v-file-input>
+                <p class="text-caption mt-2 text-grey">
+                  建议尺寸: 1200x600，支持 JPG、PNG、WebP 格式
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Markdown 编辑器 -->
+          <div class="mb-6">
+            <label class="text-subtitle-1 mb-2 d-block">文章内容</label>
+            <MdEditor
+              v-model="article.content"
+              :theme="editorTheme"
+              :toolbarsExclude="toolbarsExclude"
+              previewTheme="github"
+              :autoFocus="false"
+              @onChange="checkFormValidity"
+              style="height: 500px"
+              codeTheme="github"
+              :showCodeRowNumber="true"
+              :autoDetectCode="true"
+              :footers="[]"
+              :tabWidth="2"
+              outlined
+            />
+          </div>
           
           <v-textarea
             v-model="article.summary"
@@ -57,8 +99,27 @@
             :loading="loading"
             :error-messages="error"
             prepend-inner-icon="mdi-tag-multiple"
-            placeholder="选择相关标签，可多选"
+            placeholder="选择相关标签"
           ></v-autocomplete>
+          
+          <!-- 分类和高级选项 -->
+          <div class="d-flex flex-wrap gap-4 mb-6">
+            <v-select
+              v-model="article.category"
+              :items="categories"
+              label="文章分类"
+              variant="outlined"
+              class="flex-grow-1"
+              prepend-inner-icon="mdi-folder"
+            ></v-select>
+            
+            <v-checkbox
+              v-model="article.is_published"
+              label="立即发布"
+              class="mt-5"
+              hide-details
+            ></v-checkbox>
+          </div>
           
           <div class="d-flex justify-space-between mt-6">
             <v-btn
@@ -70,18 +131,31 @@
               返回
             </v-btn>
             
-            <v-btn
-              type="submit"
-              color="primary"
-              :loading="loading"
-              :disabled="!isFormValid"
-              size="large"
-              prepend-icon="mdi-send"
-              elevation="2"
-              class="px-6"
-            >
-              发布文章
-            </v-btn>
+            <div>
+              <v-btn
+                variant="outlined"
+                color="secondary"
+                class="me-2"
+                @click="saveAsDraft"
+                :loading="savingDraft"
+                prepend-icon="mdi-content-save"
+              >
+                保存草稿
+              </v-btn>
+              
+              <v-btn
+                type="submit"
+                color="primary"
+                :loading="loading"
+                :disabled="!isFormValid"
+                size="large"
+                prepend-icon="mdi-send"
+                elevation="2"
+                class="px-6"
+              >
+                发布文章
+              </v-btn>
+            </div>
           </div>
         </v-form>
       </v-card>
@@ -90,37 +164,99 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import apiClient from '../api'
+import { getTags, createArticle } from '../api'
+import MdEditor from 'md-editor-v3'
+import { useTheme } from 'vuetify'
+import 'md-editor-v3/lib/style.css'
 
 const router = useRouter()
 const loading = ref(false)
+const savingDraft = ref(false)
 const isFormValid = ref(false)
 const error = ref(null)
+const theme = useTheme()
+
+// 封面图片
+const coverImage = ref(null)
+const coverImagePreview = ref(null)
+const uploadingImage = ref(false)
+
+// 编辑器主题
+const editorTheme = computed(() => {
+  return theme.global.current.value.dark ? 'dark' : 'light'
+})
+
+// 不需要的工具栏按钮
+const toolbarsExclude = ['save']
 
 const article = ref({
   title: '',
   content: '',
   summary: '',
-  tags: []
+  tags: [],
+  category: '',
+  cover_image: '',
+  is_published: true
 })
 
 const availableTags = ref([])
+
+// 文章分类
+const categories = [
+  '前端开发',
+  '后端技术',
+  '人工智能',
+  '数据科学',
+  '产品设计',
+  '职场成长',
+  '读书笔记',
+  '随笔感悟'
+]
+
+// 图片上传处理
+const handleImageUpload = async () => {
+  if (!coverImage.value || coverImage.value.length === 0) {
+    coverImagePreview.value = null
+    article.value.cover_image = ''
+    return
+  }
+  
+  const file = coverImage.value[0]
+  
+  // 创建本地预览
+  coverImagePreview.value = URL.createObjectURL(file)
+  
+  // 这里应该有上传图片到服务器的代码
+  // 模拟上传过程
+  uploadingImage.value = true
+  try {
+    // 模拟API调用
+    // const response = await uploadImage(file)
+    // article.value.cover_image = response.data.url
+    
+    // 临时使用本地URL
+    article.value.cover_image = coverImagePreview.value
+  } catch (error) {
+    console.error('上传图片失败:', error)
+  } finally {
+    uploadingImage.value = false
+  }
+}
 
 // 获取标签列表
 const fetchTags = async () => {
   loading.value = true
   error.value = null
   try {
-    const response = await apiClient.get('/api/tags')
-    if (!response.ok) {
-      throw new Error('获取标签失败')
-    }
-    availableTags.value = await response.json()
-  } catch (error) {
-    error.value = error.message
-    console.error('获取标签失败:', error)
+    const response = await getTags()
+    availableTags.value = response.data
+  } catch (err) {
+    error.value = '获取标签失败'
+    console.error('获取标签失败:', err)
+    // 如果API调用失败，使用默认标签
     availableTags.value = [
       { id: 1, name: '前端开发' },
       { id: 2, name: '后端技术' },
@@ -133,22 +269,85 @@ const fetchTags = async () => {
   }
 }
 
+// 检查表单有效性
+const checkFormValidity = () => {
+  isFormValid.value = !!article.value.title && 
+                      !!article.value.content && 
+                      !!article.value.summary
+}
+
+// 保存为草稿
+const saveAsDraft = async () => {
+  savingDraft.value = true
+  try {
+    // 设置为草稿状态
+    const draftData = { ...article.value, is_published: false }
+    const response = await createArticle(draftData)
+    
+    // 显示成功消息
+    alert('草稿保存成功!')
+    
+    // 可选：跳转到草稿管理页面
+    // router.push('/drafts')
+  } catch (err) {
+    console.error('保存草稿失败:', err)
+    error.value = '保存草稿失败，请重试'
+  } finally {
+    savingDraft.value = false
+  }
+}
+
 // 提交文章
 const submitArticle = async () => {
+  if (!isFormValid.value) {
+    error.value = '请填写所有必填字段'
+    return
+  }
+  
   loading.value = true
   try {
-    const response = await apiClient.post('/api/articles', article.value)
+    // 确保发布状态为true
+    article.value.is_published = true
+    
+    const response = await createArticle(article.value)
     router.push(`/article/${response.data.id}`)
-  } catch (error) {
-    console.error('发布文章失败:', error)
-    // 这里可以添加错误提示
+  } catch (err) {
+    console.error('发布文章失败:', err)
+    error.value = '发布文章失败，请重试'
   } finally {
     loading.value = false
   }
 }
 
+// 监听内容变化以验证表单
+watch([() => article.value.title, () => article.value.content, () => article.value.summary], 
+  () => checkFormValidity())
+
 onMounted(() => {
   fetchTags()
+  checkFormValidity()
+  
+  // 从本地存储恢复草稿
+  const savedDraft = localStorage.getItem('article_draft')
+  if (savedDraft) {
+    try {
+      const draftData = JSON.parse(savedDraft)
+      article.value = { ...article.value, ...draftData }
+      
+      if (draftData.cover_image) {
+        coverImagePreview.value = draftData.cover_image
+      }
+    } catch (e) {
+      console.error('恢复草稿失败:', e)
+    }
+  }
+  
+  // 定期自动保存草稿
+  setInterval(() => {
+    if (article.value.title || article.value.content) {
+      localStorage.setItem('article_draft', JSON.stringify(article.value))
+    }
+  }, 30000) // 每30秒保存一次
 })
 </script>
 
@@ -185,5 +384,32 @@ onMounted(() => {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.image-placeholder {
+  height: 150px;
+  width: 280px;
+  background-color: rgba(var(--v-theme-surface), 0.8);
+  border: 2px dashed rgba(var(--primary-blue), 0.2);
+}
+
+.cover-upload {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .cover-upload > div {
+    margin-top: 16px;
+    width: 100%;
+  }
+}
+
+:deep(.md-editor) {
+  border-radius: 8px !important;
+  border-color: rgba(var(--primary-blue), 0.2) !important;
+}
+
+:deep(.md-editor-dark) {
+  --md-border-color: rgba(255, 255, 255, 0.2) !important;
 }
 </style> 

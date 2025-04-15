@@ -9,7 +9,7 @@
         'transparent': !isScrolled
       }"
       :elevation="isScrolled ? 2 : 0"
-      :height="navbarHeight"
+      :height="navbarHeightValue"
     >
       <div class="nav-container d-flex align-center">
         <router-link to="/" class="logo-wrapper text-decoration-none d-flex align-center">
@@ -182,6 +182,7 @@ const display = useDisplay()
 const theme = useTheme()
 const route = useRoute()
 const navbarHeight = ref(56)
+const navbarHeightValue = computed(() => navbarHeight.value)
 const mobileMenuOpen = ref(false)
 
 const isMobile = computed(() => display.mdAndDown.value)
@@ -189,6 +190,7 @@ const isSmallScreen = computed(() => display.smAndDown.value)
 
 const navItems = [
   { to: '/', icon: 'mdi-home', label: '首页' },
+  { to: '/knowledge', icon: 'mdi-bookshelf', label: '知识库' },
   { to: '/about', icon: 'mdi-information', label: '关于' }
 ]
 
