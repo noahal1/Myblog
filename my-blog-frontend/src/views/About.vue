@@ -519,123 +519,153 @@ const initScrollAnimations = () => {
     return;
   }
 
-  // 确保DOM已完全渲染 - 使用try-catch包裹整个函数
-  try {
-    // 技能条动画 - 直接使用Vuetify的API
-    const skillBars = document.querySelectorAll('.v-progress-linear');
-    if (skillBars && skillBars.length > 0) {
-      console.log('找到技能条元素:', skillBars.length);
-      
-      // 首先将所有进度条设置为0
-      skillBars.forEach((bar) => {
-        if (!bar || !document.body.contains(bar)) return;
+  // 延迟执行，确保DOM已完全加载
+  setTimeout(() => {
+    // 使用try-catch包裹整个函数
+    try {
+      // 技能条动画 - 使用原生DOM操作
+      const skillBars = document.querySelectorAll('.v-progress-linear');
+      if (skillBars && skillBars.length > 0) {
+        console.log('找到技能条元素:', skillBars.length);
         
-        // 找到关联的进度值并保存为data属性
-        const valueElem = bar.closest('.skill-item');
-        if (valueElem) {
-          const counterElem = valueElem.querySelector('.counter');
-          if (counterElem) {
-            const target = counterElem.getAttribute('data-target');
-            if (target) {
-              // 保存目标值
-              bar.setAttribute('data-target-value', target);
-              
-              // 重置进度条
-              // 使用Vuetify的API (通过aria属性找到内部的进度条元素)
-              const innerBar = bar.querySelector('.v-progress-linear__determinate');
-              if (innerBar) {
-                innerBar.style.width = '0%';
-                innerBar.style.transform = 'none';
-              }
-            }
-          }
-        }
-      });
-      
-      // 然后创建滚动触发器来动画每个进度条
-      skillBars.forEach((bar) => {
-        if (!bar || !document.body.contains(bar)) return;
-        
-        try {
-          const targetValue = bar.getAttribute('data-target-value') || "0";
-          const numValue = parseInt(targetValue) || 0;
+        // 首先将所有进度条设置为0
+        skillBars.forEach((bar) => {
+          if (!bar || !document.body.contains(bar)) return;
           
-          // 使用ScrollTrigger触发动画
-          ScrollTrigger.create({
-            trigger: bar,
-            start: 'top 90%',
-            onEnter: () => {
-              // 找到内部的进度条元素
-              const innerBar = bar.querySelector('.v-progress-linear__determinate');
-              if (innerBar) {
-                gsap.to(innerBar, {
-                  width: `${numValue}%`,
-                  duration: 1.5,
-                  ease: 'power2.out'
-                });
-              }
-              
-              // 更新计数器值
-              const skillItem = bar.closest('.skill-item');
-              if (skillItem) {
-                const counter = skillItem.querySelector('.counter');
-                if (counter) {
-                  let count = 0;
-                  const interval = setInterval(() => {
-                    count += 1;
-                    counter.textContent = count;
-                    if (count >= numValue) {
-                      counter.textContent = numValue + '%';
-                      clearInterval(interval);
-                    }
-                  }, 15);
+          try {
+            // 找到关联的进度值
+            const valueElem = bar.closest('.skill-item');
+            if (valueElem) {
+              const counterElem = valueElem.querySelector('.counter');
+              if (counterElem) {
+                const target = counterElem.getAttribute('data-target');
+                if (target) {
+                  // 保存目标值
+                  bar.setAttribute('data-target-value', target);
+                  
+                  // 重置进度条 - 不使用GSAP，直接使用DOM操作
+                  const innerBar = bar.querySelector('.v-progress-linear__determinate');
+                  if (innerBar) {
+                    innerBar.style.width = '0%';
+                    innerBar.style.transform = 'none';
+                  }
                 }
               }
             }
-          });
-        } catch (error) {
-          console.error('初始化技能条动画时出错:', error);
-        }
-      });
-    } else {
-      console.warn('未找到.v-progress-linear元素，跳过技能条动画初始化');
-    }
-    
-    // 时间线动画 - 使用更安全的方式
-    const timelineItems = document.querySelectorAll('.timeline-item');
-    if (timelineItems && timelineItems.length > 0) {
-      timelineItems.forEach((item, index) => {
-        if (!item || !document.body.contains(item)) return; // 确保元素在DOM中
+          } catch (error) {
+            console.error('处理进度条时出错:', error);
+          }
+        });
         
-        try {
-          // 首先设置初始状态
-          item.style.opacity = '0';
-          item.style.transform = `translateX(${index % 2 ? '100px' : '-100px'})`;
-          
-          // 使用简化的ScrollTrigger
-          ScrollTrigger.create({
-            trigger: item,
-            start: 'top 85%',
-            onEnter: () => {
-              gsap.to(item, {
-                x: 0,
-                opacity: 1,
-                duration: 0.8,
-                delay: index * 0.2,
-                ease: 'back.out(1.7)'
-              });
+        // 创建一个安全的观察器
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const bar = entry.target;
+              try {
+                const targetValue = bar.getAttribute('data-target-value') || "0";
+                const numValue = parseInt(targetValue) || 0;
+                
+                // 使用原生动画而不是GSAP
+                const innerBar = bar.querySelector('.v-progress-linear__determinate');
+                if (innerBar) {
+                  let width = 0;
+                  const duration = 1500; // 1.5秒
+                  const interval = 16; // 约60fps
+                  const steps = duration / interval;
+                  const increment = numValue / steps;
+                  
+                  const animation = setInterval(() => {
+                    width += increment;
+                    if (width >= numValue) {
+                      width = numValue;
+                      clearInterval(animation);
+                    }
+                    innerBar.style.width = `${width}%`;
+                  }, interval);
+                }
+                
+                // 更新计数器
+                const skillItem = bar.closest('.skill-item');
+                if (skillItem) {
+                  const counter = skillItem.querySelector('.counter');
+                  if (counter) {
+                    let count = 0;
+                    const interval = setInterval(() => {
+                      count += 1;
+                      if (counter && document.body.contains(counter)) {
+                        counter.textContent = count;
+                        if (count >= numValue) {
+                          counter.textContent = numValue + '%';
+                          clearInterval(interval);
+                        }
+                      } else {
+                        clearInterval(interval);
+                      }
+                    }, 15);
+                  }
+                }
+                
+                // 一旦处理过，就不再观察
+                observer.unobserve(bar);
+              } catch (error) {
+                console.error('处理进度条动画时出错:', error);
+                observer.unobserve(bar);
+              }
             }
           });
-        } catch (error) {
-          console.error('初始化时间线动画时出错:', error);
-        }
-      });
-    } else {
-      console.warn('未找到.timeline-item元素，跳过时间线动画初始化');
+        }, { threshold: 0.1 });
+        
+        // 开始观察所有进度条
+        skillBars.forEach(bar => {
+          if (bar && document.body.contains(bar)) {
+            observer.observe(bar);
+          }
+        });
+      } else {
+        console.warn('未找到.v-progress-linear元素，跳过技能条动画初始化');
+      }
+      
+      // 时间线动画 - 使用IntersectionObserver替代ScrollTrigger
+      const timelineItems = document.querySelectorAll('.timeline-item');
+      if (timelineItems && timelineItems.length > 0) {
+        timelineItems.forEach((item, index) => {
+          if (!item || !document.body.contains(item)) return;
+          
+          try {
+            // 首先设置初始状态
+            item.style.opacity = '0';
+            item.style.transform = `translateX(${index % 2 ? '100px' : '-100px'})`;
+            
+            // 使用IntersectionObserver代替ScrollTrigger
+            const observer = new IntersectionObserver((entries) => {
+              entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                  const item = entry.target;
+                  
+                  // 使用CSS过渡动画替代GSAP
+                  item.style.transition = `transform 0.8s ease ${index * 0.2}s, opacity 0.8s ease ${index * 0.2}s`;
+                  item.style.transform = 'translateX(0)';
+                  item.style.opacity = '1';
+                  
+                  // 一旦处理过，就不再观察
+                  observer.unobserve(item);
+                }
+              });
+            }, { threshold: 0.1 });
+            
+            observer.observe(item);
+          } catch (error) {
+            console.error('初始化时间线动画时出错:', error);
+          }
+        });
+      } else {
+        console.warn('未找到.timeline-item元素，跳过时间线动画初始化');
+      }
+    } catch (e) {
+      console.error('动画初始化全局错误:', e);
     }
-  } catch (e) {
-    console.error('ScrollTrigger全局错误:', e);
-  }
+  }, 500); // 添加延迟确保DOM已完全准备好
 };
 
 // 添加变量保存清理函数
@@ -682,31 +712,63 @@ const initializeEffects = () => {
     aboutPage.style.opacity = '1';
   }
   
-  // 初始化效果，使用setTimeout链避免阻塞主线程
-  setTimeout(() => {
-    try { initAOS(); } catch (e) { console.error('AOS初始化失败:', e); }
-    
-    setTimeout(() => {
-      try { initTiltCards(); } catch (e) { console.error('3D卡片效果初始化失败:', e); }
+  // 使用promise和延迟执行，按顺序初始化各种效果
+  const initSequence = async () => {
+    try {
+      // 第一步：初始化AOS
+      await new Promise(resolve => {
+        setTimeout(() => {
+          try { initAOS(); } catch (e) { console.error('AOS初始化失败:', e); }
+          resolve();
+        }, 300);
+      });
       
-      setTimeout(() => {
-        try { initTypedText(); } catch (e) { console.error('打字机效果初始化失败:', e); }
-        
-        // 收集可能的清理函数
-        const cleanupMouseFollower = initMouseFollower();
-        
+      // 第二步：初始化3D卡片
+      await new Promise(resolve => {
+        setTimeout(() => {
+          try { initTiltCards(); } catch (e) { console.error('3D卡片效果初始化失败:', e); }
+          resolve();
+        }, 300);
+      });
+      
+      // 第三步：初始化打字机效果
+      await new Promise(resolve => {
+        setTimeout(() => {
+          try { initTypedText(); } catch (e) { console.error('打字机效果初始化失败:', e); }
+          resolve();
+        }, 300);
+      });
+      
+      // 第四步：初始化鼠标跟随
+      const cleanupMouseFollower = await new Promise(resolve => {
+        setTimeout(() => {
+          let cleanup = null;
+          try { cleanup = initMouseFollower(); } catch (e) { console.error('鼠标跟随效果初始化失败:', e); }
+          resolve(cleanup);
+        }, 300);
+      });
+      
+      // 第五步：初始化计数器和滚动动画
+      await new Promise(resolve => {
         setTimeout(() => {
           try { initCounters(); } catch (e) { console.error('计数器初始化失败:', e); }
           try { initScrollAnimations(); } catch (e) { console.error('滚动动画初始化失败:', e); }
+          resolve();
         }, 300);
-      }, 300);
-    }, 300);
-  }, 300);
-  
-  // 保存清理函数到组件实例
-  return {
-    cleanupMouseFollower: typeof cleanupMouseFollower === 'function' ? cleanupMouseFollower : null
+      });
+      
+      // 返回清理函数
+      return {
+        cleanupMouseFollower: typeof cleanupMouseFollower === 'function' ? cleanupMouseFollower : null
+      };
+    } catch (error) {
+      console.error('初始化序列错误:', error);
+      return {};
+    }
   };
+  
+  // 执行初始化序列
+  return initSequence();
 };
 </script>
 
