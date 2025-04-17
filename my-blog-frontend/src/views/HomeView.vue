@@ -78,11 +78,18 @@
         
         <!-- 分页控件 -->
         <div v-if="totalPages > 1" class="pagination-wrapper text-center my-8" ref="pagination">
-        <v-pagination
-          v-model="currentPage"
-          :length="totalPages"
-            :total-visible="7"
-          rounded
+          <!-- 添加debug信息 -->
+          <div v-if="process.env.NODE_ENV === 'development'" class="text-caption mb-2">
+            当前页: {{ currentPage }}, 总页数: {{ totalPages }}, 
+            过滤后文章: {{ filteredArticles.length }}, 
+            分页后文章: {{ paginatedArticles.length }}
+          </div>
+          
+          <v-pagination
+            v-model="currentPage"
+            :length="totalPages"
+            :total-visible="5"
+            rounded
             class="my-5 d-inline-flex"
             @update:model-value="handlePageChange"
           ></v-pagination>
@@ -165,33 +172,73 @@ const availableCategories = computed(() => {
 });
 
 // 获取文章列表
-  const fetchArticles = async () => {
-    loading.value = true
-    try {
+const fetchArticles = async () => {
+  loading.value = true
+  try {
+    console.log('开始获取文章数据...')
     const response = await getArticles(1, 100) // 一次获取所有文章，然后在前端进行分页
+    
+    // 检查响应格式
     if (response && response.data) {
-      articles.value = Array.isArray(response.data) ? response.data : []
-      console.log('获取的文章数据:', articles.value)
+      if (Array.isArray(response.data)) {
+        articles.value = response.data
+        console.log('成功获取文章数据:', articles.value.length, '篇文章')
+      } else if (response.data.items && Array.isArray(response.data.items)) {
+        // 处理可能的分页响应格式
+        articles.value = response.data.items
+        console.log('成功获取文章数据(分页格式):', articles.value.length, '篇文章')
+      } else {
+        console.error('API返回的数据格式不是数组:', response.data)
+        articles.value = []
+      }
     } else {
       console.error('API返回的数据格式不正确:', response)
       articles.value = []
     }
+    
+    // 确保文章数组有效
+    if (!Array.isArray(articles.value)) {
+      console.error('处理后的文章数据不是数组，重置为空数组')
+      articles.value = []
+    }
+    
+    // 更新总页数
     updateTotalPages()
-    } catch (error) {
-      console.error('获取文章失败:', error)
-    articles.value = [] // 确保出错时文章列表为空数组而不是undefined
-    } finally {
-      loading.value = false
+  } catch (error) {
+    console.error('获取文章失败:', error)
+    articles.value = [] // 确保出错时文章列表为空数组
+  } finally {
+    loading.value = false
+    
     // 强制当前组件重新渲染
     nextTick(() => {
-      forceRerender()
+      // 检查数据是否正确
+      console.log('数据加载完成，文章总数:', articles.value.length)
+      console.log('过滤后文章数:', filteredArticles.value.length)
+      console.log('当前页文章数:', paginatedArticles.value.length)
+      console.log('总页数:', totalPages.value)
+      
+      // 在数据更新后重新应用动画
+      if (paginatedArticles.value.length > 0) {
+        forceRerender()
+        animateArticles()
+      } else if (filteredArticles.value.length === 0) {
+        animateEmptyState()
+      }
     })
-    }
   }
+}
 
 // 更新总页数
 const updateTotalPages = () => {
-  totalPages.value = Math.ceil(filteredArticles.value.length / itemsPerPage)
+  const filteredCount = filteredArticles.value.length
+  totalPages.value = Math.max(1, Math.ceil(filteredCount / itemsPerPage))
+  console.log('更新总页数:', totalPages.value, '(基于', filteredCount, '篇文章)')
+  
+  // 确保当前页在有效范围内
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = Math.max(1, totalPages.value)
+  }
 }
 
 // 筛选文章
@@ -239,11 +286,21 @@ const paginationInfo = computed(() => {
 
 // 处理页码变化
 const handlePageChange = (page) => {
+  console.log('页码变化:', page)
   currentPage.value = page
+  
   // 滚动到顶部
   window.scrollTo({ top: 0, behavior: 'smooth' })
-  // 重新应用动画
+  
+  // 确保数据更新后重新渲染
   nextTick(() => {
+    console.log('页面更新后的数据:', 
+      '当前页:', currentPage.value, 
+      '每页文章:', paginatedArticles.value.length
+    )
+    
+    // 强制重新渲染并应用动画
+    forceRerender()
     animateArticles()
   })
 }
@@ -339,39 +396,49 @@ const setupParallaxEffects = () => {
 
 // 初始动画 - 使用GSAP
 const animateHero = () => {
-  // 首先确保元素可见（初始不透明度设置为1）
-  gsap.set([gradientText.value, tagline.value, subtitle.value, searchInput.value], { 
-    opacity: 1,
-    y: 0
-  });
-  
-  // 如果元素存在，应用动画效果
+  // 检查元素存在性
   if (!gradientText.value || !tagline.value || !subtitle.value || !searchInput.value) {
     console.warn('部分DOM元素未找到，跳过动画');
-    return;
+    return () => {}; // 返回空清理函数
   }
   
-  // 添加类来激活CSS动画
-  gradientText.value.classList.add('animated');
+  // 首先确保元素可见（初始不透明度设置为1）
+  const elements = [gradientText.value, tagline.value, subtitle.value, searchInput.value].filter(Boolean);
   
-  // 设置基本的视差效果，但不改变不透明度
+  // 安全地设置样式
+  elements.forEach(el => {
+    if (el && document.body.contains(el)) {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    }
+  });
+  
+  // 添加类来激活CSS动画
+  if (gradientText.value && document.body.contains(gradientText.value)) {
+    gradientText.value.classList.add('animated');
+  }
+  
+  // 使用原生JS替代GSAP进行视差效果
   const setupBasicParallax = () => {
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const speed1 = 0.1; // 降低速度
-      const speed2 = 0.05; // 降低速度
-      
-      if (tagline.value) {
-        gsap.set(tagline.value, { y: scrollY * speed1 });
-      }
-      
-      if (gradientText.value) {
-        gsap.set(gradientText.value, { y: scrollY * speed1 * 0.7 });
-      }
-      
-      if (subtitle.value) {
-        gsap.set(subtitle.value, { y: scrollY * speed2 });
-      }
+      requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        const speed1 = 0.1; // 降低速度
+        const speed2 = 0.05; // 降低速度
+        
+        // 安全地设置样式
+        if (tagline.value && document.body.contains(tagline.value)) {
+          tagline.value.style.transform = `translateY(${scrollY * speed1}px)`;
+        }
+        
+        if (gradientText.value && document.body.contains(gradientText.value)) {
+          gradientText.value.style.transform = `translateY(${scrollY * speed1 * 0.7}px)`;
+        }
+        
+        if (subtitle.value && document.body.contains(subtitle.value)) {
+          subtitle.value.style.transform = `translateY(${scrollY * speed2}px)`;
+        }
+      });
     };
     
     // 添加滚动监听器
@@ -393,9 +460,6 @@ const animateArticles = () => {
     return
   }
   
-  // 首先确保文章元素可见，再应用动画
-  gsap.set('.article-item', { opacity: 1, y: 0 })
-  
   // 查找文章元素
   const articles = articleGrid.value.querySelectorAll('.article-item')
   console.log('找到文章DOM元素数量:', articles.length)
@@ -405,78 +469,123 @@ const animateArticles = () => {
     return
   }
   
-  // 应用动画效果
-  gsap.from(articles, {
-    opacity: 0,
-    y: 20,
-    duration: 0.5,
-    stagger: 0.1,
-    ease: 'power2.out',
-    onComplete: () => {
-      // 文章显示完成后，显示分页
-      if (pagination.value) {
-        gsap.to(pagination.value, {
-          opacity: 1,
-          y: 0, 
-          duration: 0.5,
-          ease: 'power2.out'
-        })
-      }
+  // 使用原生JS替代GSAP
+  articles.forEach((article, index) => {
+    // 安全检查
+    if (!article || !document.body.contains(article)) return;
+    
+    // 设置初始样式
+    article.style.opacity = '0';
+    article.style.transform = 'translateY(20px)';
+    
+    // 设置过渡效果
+    article.style.transition = `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`;
+    
+    // 延迟执行以确保过渡生效
+    setTimeout(() => {
+      article.style.opacity = '1';
+      article.style.transform = 'translateY(0)';
+    }, 10);
+  });
+  
+  // 文章显示完成后，显示分页
+  if (pagination.value) {
+    // 安全检查
+    if (document.body.contains(pagination.value)) {
+      // 设置过渡效果
+      pagination.value.style.opacity = '0';
+      pagination.value.style.transform = 'translateY(10px)';
+      pagination.value.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      
+      // 延迟显示分页
+      setTimeout(() => {
+        pagination.value.style.opacity = '1';
+        pagination.value.style.transform = 'translateY(0)';
+      }, articles.length * 100 + 100); // 等待所有文章动画完成
     }
-  })
+  }
 }
 
 // 空状态动画
 const animateEmptyState = () => {
-  if (!emptyState.value) return
+  if (!emptyState.value || !document.body.contains(emptyState.value)) return;
   
-  gsap.from(emptyState.value, {
-    opacity: 0,
-    y: 30,
-    duration: 0.8,
-    ease: 'elastic.out(1, 0.5)'
-  })
+  // 使用原生JS替代GSAP
+  emptyState.value.style.opacity = '0';
+  emptyState.value.style.transform = 'translateY(30px)';
+  emptyState.value.style.transition = 'opacity 0.8s ease, transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1.5)';
+  
+  // 延迟执行以确保过渡生效
+  setTimeout(() => {
+    emptyState.value.style.opacity = '1';
+    emptyState.value.style.transform = 'translateY(0)';
+  }, 10);
 }
 
 // 强制重新渲染组件
 const forceRerender = () => {
   // 确保文章容器可见
-  if (articleGrid.value) {
-    // 先确保文章卡片DOM元素存在并可见
-    gsap.set('.article-item', { opacity: 1, y: 0, clearProps: 'all' })
+  if (!articleGrid.value) {
+    console.error('文章网格容器不存在')
+    return
+  }
+  
+  // 检查文章卡片是否存在
+  const articleItems = articleGrid.value.querySelectorAll('.article-item')
+  console.log('文章卡片元素数量:', articleItems.length, '，数据数量:', paginatedArticles.value.length)
+  
+  // 如果DOM中没有文章卡片但数据中有文章，执行手动渲染
+  if (articleItems.length === 0 && paginatedArticles.value.length > 0) {
+    console.log('执行手动渲染文章卡片...')
     
-    // 检查文章卡片是否存在
-    const articleItems = articleGrid.value.querySelectorAll('.article-item')
-    console.log('文章卡片元素数量:', articleItems.length)
+    // 先移除所有子元素
+    while (articleGrid.value.firstChild) {
+      articleGrid.value.removeChild(articleGrid.value.firstChild)
+    }
     
-    if (articleItems.length === 0 && paginatedArticles.value.length > 0) {
-      // 如果DOM中没有文章卡片但数据中有文章，尝试强制重新渲染
-      console.warn('DOM中未找到文章卡片，尝试强制重新渲染')
-      // 先移除所有子元素
-      while (articleGrid.value.firstChild) {
-        articleGrid.value.removeChild(articleGrid.value.firstChild)
-      }
-      
-      // 手动创建文章卡片元素
-      paginatedArticles.value.forEach((article, index) => {
-        const articleElement = document.createElement('div')
-        articleElement.className = 'article-item mb-4'
-        articleElement.setAttribute('data-index', index)
-        articleElement.innerHTML = `
-          <div class="article-card">
-            <div class="card-content">
-              <div class="title text-primary">${article.title}</div>
-              <div class="preview">${article.summary}</div>
-              <div class="meta">
-                <span>${new Date(article.created_at).toLocaleDateString()}</span>
-                <span>浏览: ${article.views || 0}</span>
-              </div>
+    // 手动创建文章卡片元素
+    paginatedArticles.value.forEach((article, index) => {
+      const articleElement = document.createElement('div')
+      articleElement.className = 'article-item mb-4'
+      articleElement.setAttribute('data-index', index)
+      articleElement.innerHTML = `
+        <div class="article-card">
+          <div class="card-content">
+            <div class="title text-primary">${article.title || '无标题'}</div>
+            <div class="preview">${article.summary || '暂无摘要'}</div>
+            <div class="meta">
+              <span>${article.created_at ? new Date(article.created_at).toLocaleDateString() : '未知日期'}</span>
+              <span>浏览: ${article.views || 0}</span>
             </div>
           </div>
-        `
-        articleElement.addEventListener('click', () => viewArticle(article.id))
-        articleGrid.value.appendChild(articleElement)
-      })
+        </div>
+      `
+      articleElement.addEventListener('click', () => viewArticle(article.id))
+      articleGrid.value.appendChild(articleElement)
+      
+      // 设置初始样式
+      articleElement.style.opacity = '0';
+      articleElement.style.transform = 'translateY(20px)';
+      
+      // 设置过渡效果
+      articleElement.style.transition = `opacity 0.3s ease ${index * 0.1}s, transform 0.3s ease ${index * 0.1}s`;
+      
+      // 延迟执行以确保过渡生效
+      setTimeout(() => {
+        articleElement.style.opacity = '1';
+        articleElement.style.transform = 'translateY(0)';
+      }, 10);
+    })
+    
+    console.log('手动渲染完成，添加了', paginatedArticles.value.length, '个文章卡片')
+    
+    // 如果分页控件存在，确保其可见
+    if (pagination.value && totalPages.value > 1) {
+      // 安全检查
+      if (document.body.contains(pagination.value)) {
+        pagination.value.style.opacity = '1';
+        pagination.value.style.transform = 'translateY(0)';
+      }
     }
   }
 }
@@ -485,26 +594,39 @@ const forceRerender = () => {
 let cleanupFunction = null;
 
 onMounted(() => {
-  // 确保ScrollTrigger已注册
-  gsap.registerPlugin(ScrollTrigger);
-  
   // 立即设置所有关键元素为可见状态
-  document.querySelector('.home-view').style.opacity = '1'
+  const homeView = document.querySelector('.home-view')
+  if (homeView) homeView.style.opacity = '1'
   
   nextTick(() => {
-    // 确保元素在动画之前可见
-    const elements = [gradientText, tagline, subtitle, searchInput];
-    elements.forEach(el => {
-      if (el.value) el.value.style.opacity = '1';
-    });
-    
-    // 设置文章列表容器为可见
-    if (articleGrid.value) {
-      articleGrid.value.style.opacity = '1';
+    try {
+      // 确保元素在动画之前可见
+      const elements = [
+        { ref: gradientText, name: 'gradientText' },
+        { ref: tagline, name: 'tagline' }, 
+        { ref: subtitle, name: 'subtitle' }, 
+        { ref: searchInput, name: 'searchInput' }
+      ];
+      
+      elements.forEach(el => {
+        if (el.ref && el.ref.value) {
+          el.ref.value.style.opacity = '1';
+          console.log(`设置${el.name}元素可见`);
+        } else {
+          console.warn(`${el.name}元素未找到`);
+        }
+      });
+      
+      // 设置文章列表容器为可见
+      if (articleGrid.value) {
+        articleGrid.value.style.opacity = '1';
+      }
+      
+      // 然后应用动画
+      cleanupFunction = animateHero();
+    } catch (error) {
+      console.error('初始化动画时出错:', error);
     }
-    
-    // 然后应用动画
-    cleanupFunction = animateHero();
   });
   
   // 监听滚动事件（用于回到顶部按钮）
