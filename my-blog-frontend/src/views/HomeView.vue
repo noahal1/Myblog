@@ -51,14 +51,17 @@
       <!-- 文章列表 -->
       <div v-else class="articles-container">
         <div class="article-grid" ref="articleGrid">
-          <article-card
-            v-for="(article, index) in paginatedArticles"
-            :key="article.id"
-            :article="article"
-            @click="viewArticle(article.id)"
-            class="mb-4 article-item"
-            :data-index="index"
-          />
+          <template v-if="paginatedArticles.length > 0">
+            <article-card
+              v-for="(article, index) in paginatedArticles"
+              :key="article.id"
+              :article="article"
+              @click="viewArticle(article.id)"
+              class="mb-4 article-item"
+              :data-index="index"
+            />
+          </template>
+          <div v-else class="no-articles-placeholder" style="height: 50px;"></div>
         </div>
         
         <!-- 空状态 -->
@@ -78,11 +81,8 @@
         
         <!-- 分页控件 -->
         <div v-if="totalPages > 1" class="pagination-wrapper text-center my-8" ref="pagination">
-          <!-- 添加debug信息 -->
-          <div v-if="process.env.NODE_ENV === 'development'" class="text-caption mb-2">
+          <div v-if="isDevelopment" class="text-caption mb-2">
             当前页: {{ currentPage }}, 总页数: {{ totalPages }}, 
-            过滤后文章: {{ filteredArticles.length }}, 
-            分页后文章: {{ paginatedArticles.length }}
           </div>
           
           <v-pagination
@@ -150,6 +150,9 @@ const articleGrid = ref(null)
 const pagination = ref(null)
 const emptyState = ref(null)
 
+// 在script部分添加isDevelopment变量
+const isDevelopment = ref(import.meta.env ? import.meta.env.DEV : false);
+
 // 从文章中获取唯一标签来生成分类列表
 const availableCategories = computed(() => {
   const categories = [{ id: 'all', name: '全部' }];
@@ -210,22 +213,39 @@ const fetchArticles = async () => {
   } finally {
     loading.value = false
     
-    // 强制当前组件重新渲染
-    nextTick(() => {
-      // 检查数据是否正确
-      console.log('数据加载完成，文章总数:', articles.value.length)
-      console.log('过滤后文章数:', filteredArticles.value.length)
-      console.log('当前页文章数:', paginatedArticles.value.length)
-      console.log('总页数:', totalPages.value)
-      
-      // 在数据更新后重新应用动画
-      if (paginatedArticles.value.length > 0) {
-        forceRerender()
-        animateArticles()
-      } else if (filteredArticles.value.length === 0) {
-        animateEmptyState()
-      }
-    })
+    // 确保DOM已完全更新后再尝试访问元素
+    setTimeout(() => {
+      nextTick(() => {
+        // 检查数据是否正确
+        console.log('数据加载完成，文章总数:', articles.value.length)
+        console.log('过滤后文章数:', filteredArticles.value.length)
+        console.log('当前页文章数:', paginatedArticles.value.length)
+        console.log('总页数:', totalPages.value)
+        
+        // 确保引用可用
+        ensureDomRefs();
+        
+        if (articleGrid.value) {
+          console.log('找到文章网格容器，长度:', 
+            articleGrid.value.children.length,
+            '，可见性:', 
+            window.getComputedStyle(articleGrid.value).display !== 'none'
+          );
+          forceRerender();
+          animateArticles();
+        } else {
+          console.error('无法找到文章网格容器，尝试最后的修复方法');
+          // 最后的尝试 - 直接在DOM中查找并强制显示
+          const gridElement = document.querySelector('.article-grid');
+          if (gridElement) {
+            articleGrid.value = gridElement;
+            gridElement.style.display = 'grid';
+            forceRerender();
+            animateArticles();
+          }
+        }
+      });
+    }, 300); // 增加延迟以确保DOM更新
   }
 }
 
@@ -455,6 +475,13 @@ const animateHero = () => {
 // 文章项动画
 const animateArticles = () => {
   console.log('开始执行文章动画，文章数量:', paginatedArticles.value.length)
+  
+  // 如果引用不存在，尝试重新获取DOM元素
+  if (!articleGrid.value) {
+    articleGrid.value = document.querySelector('.article-grid')
+    console.log('尝试重新获取articleGrid:', articleGrid.value ? '成功' : '失败')
+  }
+  
   if (!articleGrid.value) {
     console.warn('articleGrid元素不存在，跳过动画')
     return
@@ -524,6 +551,12 @@ const animateEmptyState = () => {
 
 // 强制重新渲染组件
 const forceRerender = () => {
+  // 如果引用不存在，尝试重新获取DOM元素
+  if (!articleGrid.value) {
+    articleGrid.value = document.querySelector('.article-grid')
+    console.log('尝试重新获取articleGrid (forceRerender):', articleGrid.value ? '成功' : '失败')
+  }
+  
   // 确保文章容器可见
   if (!articleGrid.value) {
     console.error('文章网格容器不存在')
@@ -594,11 +627,58 @@ const forceRerender = () => {
 let cleanupFunction = null;
 
 onMounted(() => {
+  // 为了确保DOM引用更稳定，添加备用获取方法
+  const ensureDomRefs = () => {
+    // 重新获取引用
+    if (!heroBanner.value) heroBanner.value = document.querySelector('.hero-banner');
+    if (!tagline.value) tagline.value = document.querySelector('.tagline-prefix');
+    if (!gradientText.value) gradientText.value = document.querySelector('.gradient-text');
+    if (!subtitle.value) subtitle.value = document.querySelector('.hero-subtitle');
+    if (!searchInput.value) searchInput.value = document.querySelector('.search-input');
+    if (!categories.value) categories.value = document.querySelector('.category-tags');
+    if (!articleGrid.value) {
+      const grid = document.querySelector('.article-grid');
+      if (grid) {
+        articleGrid.value = grid;
+        console.log('成功通过DOM查询找到文章网格');
+      } else {
+        console.error('DOM中不存在.article-grid元素');
+      }
+    }
+    if (!pagination.value) pagination.value = document.querySelector('.pagination-wrapper');
+    if (!emptyState.value) emptyState.value = document.querySelector('.empty-state');
+    
+    console.log('DOM引用检查结果:', {
+      heroBanner: !!heroBanner.value,
+      tagline: !!tagline.value,
+      gradientText: !!gradientText.value,
+      subtitle: !!subtitle.value,
+      searchInput: !!searchInput.value,
+      categories: !!categories.value,
+      articleGrid: !!articleGrid.value,
+      pagination: !!pagination.value,
+      emptyState: !!emptyState.value
+    });
+    
+    // 检查文章网格的状态
+    if (articleGrid.value) {
+      console.log('文章网格详情:', {
+        display: window.getComputedStyle(articleGrid.value).display,
+        visibility: window.getComputedStyle(articleGrid.value).visibility,
+        opacity: window.getComputedStyle(articleGrid.value).opacity,
+        childrenCount: articleGrid.value.children.length
+      });
+    }
+  };
+
   // 立即设置所有关键元素为可见状态
   const homeView = document.querySelector('.home-view')
   if (homeView) homeView.style.opacity = '1'
   
+  // 确保DOM引用可用
   nextTick(() => {
+    ensureDomRefs();
+    
     try {
       // 确保元素在动画之前可见
       const elements = [
@@ -627,15 +707,15 @@ onMounted(() => {
     } catch (error) {
       console.error('初始化动画时出错:', error);
     }
+    
+    // 监听滚动事件（用于回到顶部按钮）
+    window.addEventListener('scroll', checkScrollPosition);
+    
+    // 加载文章数据 - 放在最后确保DOM元素已准备好
+    setTimeout(() => {
+      fetchArticles();
+    }, 500);
   });
-  
-  // 监听滚动事件（用于回到顶部按钮）
-  window.addEventListener('scroll', checkScrollPosition);
-  
-  // 加载文章数据 - 放在最后确保DOM元素已准备好
-  setTimeout(() => {
-    fetchArticles();
-  }, 500);
 });
 
 // 组件卸载时清除
