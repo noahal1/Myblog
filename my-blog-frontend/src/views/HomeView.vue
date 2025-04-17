@@ -48,10 +48,11 @@
         class="mx-auto"
       />
       
-      <!-- 文章列表 -->
-      <div v-else class="articles-container">
+      <!-- 文章列表 - 确保网格始终存在 -->
+      <div class="articles-container">
+        <!-- 始终渲染article-grid容器，而不是使用v-else -->
         <div class="article-grid" ref="articleGrid">
-          <template v-if="paginatedArticles.length > 0">
+          <template v-if="!loading && paginatedArticles.length > 0">
             <article-card
               v-for="(article, index) in paginatedArticles"
               :key="article.id"
@@ -61,11 +62,11 @@
               :data-index="index"
             />
           </template>
-          <div v-else class="no-articles-placeholder" style="height: 50px;"></div>
+          <div v-else-if="!loading" class="no-articles-placeholder" style="height: 50px;"></div>
         </div>
         
-        <!-- 空状态 -->
-        <div v-if="filteredArticles.length === 0" class="empty-state text-center py-8" ref="emptyState">
+        <!-- 空状态 - 仅在非加载且无文章时显示 -->
+        <div v-if="!loading && filteredArticles.length === 0" class="empty-state text-center py-8" ref="emptyState">
           <v-icon icon="mdi-text-search" size="64" class="mb-4 empty-icon"></v-icon>
           <h3 class="text-h5">无法找到符合条件的文章</h3>
           <p class="text-body-1">尝试调整搜索条件或查看其他分类</p>
@@ -79,8 +80,8 @@
           </v-btn>
         </div>
         
-        <!-- 分页控件 -->
-        <div v-if="totalPages > 1" class="pagination-wrapper text-center my-8" ref="pagination">
+        <!-- 分页控件 - 仅在非加载且有足够页数时显示 -->
+        <div v-if="!loading && totalPages > 1" class="pagination-wrapper text-center my-8" ref="pagination">
           <div class="text-caption mb-2">
             当前页: {{ currentPage }}, 总页数: {{ totalPages }}
           </div>
@@ -150,6 +151,15 @@ const articleGrid = ref(null)
 const pagination = ref(null)
 const emptyState = ref(null)
 
+// 修复DOM检查错误，创建更安全的元素检查函数
+const isValidElement = (el) => {
+  try {
+    return el && el instanceof Element && document.body.contains(el);
+  } catch (error) {
+    return false;
+  }
+};
+
 // 从文章中获取唯一标签来生成分类列表
 const availableCategories = computed(() => {
   const categories = [{ id: 'all', name: '全部' }];
@@ -175,7 +185,8 @@ const availableCategories = computed(() => {
 const fetchArticles = async () => {
   loading.value = true
   try {
-    const response = await getArticles(1, 100) 
+    console.log('开始获取文章数据...')
+    const response = await getArticles(1, 100) // 一次获取所有文章，然后在前端进行分页
     
     // 检查响应格式
     if (response && response.data) {
@@ -212,36 +223,40 @@ const fetchArticles = async () => {
     // 确保DOM已完全更新后再尝试访问元素
     setTimeout(() => {
       nextTick(() => {
-        // 检查数据是否正确
-        console.log('数据加载完成，文章总数:', articles.value.length)
-        console.log('过滤后文章数:', filteredArticles.value.length)
-        console.log('当前页文章数:', paginatedArticles.value.length)
-        console.log('总页数:', totalPages.value)
-        
-        // 确保引用可用
-        ensureDomRefs();
-        
-        if (articleGrid.value) {
-          console.log('找到文章网格容器，长度:', 
-            articleGrid.value.children.length,
-            '，可见性:', 
-            window.getComputedStyle(articleGrid.value).display !== 'none'
-          );
-          forceRerender();
-          animateArticles();
-        } else {
-          console.error('无法找到文章网格容器，尝试最后的修复方法');
-          // 最后的尝试 - 直接在DOM中查找并强制显示
-          const gridElement = document.querySelector('.article-grid');
-          if (gridElement) {
-            articleGrid.value = gridElement;
-            gridElement.style.display = 'grid';
+        try {
+          // 检查数据是否正确
+          console.log('数据加载完成，文章总数:', articles.value.length)
+          console.log('过滤后文章数:', filteredArticles.value.length)
+          console.log('当前页文章数:', paginatedArticles.value.length)
+          console.log('总页数:', totalPages.value)
+          
+          // 确保引用可用 - 这里是函数移出onMounted后，可以直接调用
+          ensureDomRefs();
+          
+          if (articleGrid.value) {
+            console.log('找到文章网格容器，长度:', 
+              articleGrid.value.children ? articleGrid.value.children.length : 0,
+              '，可见性:', 
+              window.getComputedStyle(articleGrid.value).display !== 'none'
+            );
             forceRerender();
             animateArticles();
+          } else {
+            console.error('无法找到文章网格容器，尝试最后的修复方法');
+            // 最后的尝试
+            const gridElement = document.querySelector('.article-grid');
+            if (gridElement) {
+              articleGrid.value = gridElement;
+              gridElement.style.display = 'grid';
+              forceRerender();
+              animateArticles();
+            }
           }
+        } catch (error) {
+          console.error('处理加载后数据时出错:', error);
         }
       });
-    }, 300); // 增加延迟以确保DOM更新
+    }, 300);
   }
 }
 
@@ -322,7 +337,6 @@ const paginationInfo = computed(() => {
   return { from, to, total }
 })
 
-// 处理页码变化
 const handlePageChange = (page) => {
   console.log('页码变化:', page);
   
@@ -334,10 +348,7 @@ const handlePageChange = (page) => {
   
   currentPage.value = page;
   
-  // 滚动到顶部
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  
-  // 使用延时和双重nextTick确保在生产环境中也能正确更新
   setTimeout(() => {
     nextTick(() => {
       nextTick(() => {
@@ -404,7 +415,6 @@ watch([searchQuery, selectedCategory], () => {
 
 // 设置视差效果
 const setupParallaxEffects = () => {
-  // 清除之前可能存在的ScrollTrigger实例
   ScrollTrigger.getAll().forEach(st => st.kill());
   
   // 使用window滚动监听器
@@ -425,7 +435,6 @@ const setupParallaxEffects = () => {
     }
     
     if (subtitle.value) {
-      // 保持副标题可见但有轻微移动
       const opacity = Math.max(0.7, 1 - (scrollY * 0.001));
       gsap.set(subtitle.value, { 
         y: scrollY * speed2,
@@ -445,61 +454,90 @@ const setupParallaxEffects = () => {
 
 // 初始动画 - 使用GSAP
 const animateHero = () => {
-  // 检查元素存在性
-  if (!gradientText.value || !tagline.value || !subtitle.value || !searchInput.value) {
-    console.warn('部分DOM元素未找到，跳过动画');
-    return () => {}; // 返回空清理函数
-  }
-  
-  // 首先确保元素可见（初始不透明度设置为1）
-  const elements = [gradientText.value, tagline.value, subtitle.value, searchInput.value].filter(Boolean);
-  
-  // 安全地设置样式
-  elements.forEach(el => {
-    if (el && document.body.contains(el)) {
-      el.style.opacity = '1';
-      el.style.transform = 'translateY(0)';
+  try {
+    // 更安全的元素检查
+    const safeGradientText = gradientText.value && isValidElement(gradientText.value) ? gradientText.value : null;
+    const safeTagline = tagline.value && isValidElement(tagline.value) ? tagline.value : null;
+    const safeSubtitle = subtitle.value && isValidElement(subtitle.value) ? subtitle.value : null;
+    const safeSearchInput = searchInput.value && isValidElement(searchInput.value) ? searchInput.value : null;
+    
+    // 提前检查是否有足够元素可用
+    const hasEnoughElements = safeGradientText || safeTagline || safeSubtitle;
+    if (!hasEnoughElements) {
+      console.warn('关键DOM元素不足，跳过动画');
+      return () => {}; // 返回空清理函数
     }
-  });
-  
-  // 添加类来激活CSS动画
-  if (gradientText.value && document.body.contains(gradientText.value)) {
-    gradientText.value.classList.add('animated');
+    
+    // 构建有效元素列表
+    const elements = [];
+    if (safeGradientText) elements.push({ el: safeGradientText, name: 'gradientText' });
+    if (safeTagline) elements.push({ el: safeTagline, name: 'tagline' });
+    if (safeSubtitle) elements.push({ el: safeSubtitle, name: 'subtitle' });
+    if (safeSearchInput) elements.push({ el: safeSearchInput, name: 'searchInput' });
+    
+    // 安全地设置样式
+    elements.forEach(item => {
+      try {
+        if (item.el) {
+          item.el.style.opacity = '1';
+          item.el.style.transform = 'translateY(0)';
+          console.log(`成功设置${item.name}样式`);
+        }
+      } catch (error) {
+        console.error(`设置${item.name}样式时出错:`, error);
+      }
+    });
+    
+    // 添加类来激活CSS动画
+    try {
+      if (safeGradientText) {
+        safeGradientText.classList.add('animated');
+      }
+    } catch (error) {
+      console.error('添加动画类时出错:', error);
+    }
+    
+    // 使用原生JS替代GSAP进行视差效果
+    const setupBasicParallax = () => {
+      const handleScroll = () => {
+        requestAnimationFrame(() => {
+          try {
+            const scrollY = window.scrollY;
+            const speed1 = 0.1; // 降低速度
+            const speed2 = 0.05; // 降低速度
+            
+            // 安全地设置样式，使用先前验证过的元素
+            elements.forEach(item => {
+              try {
+                if (item.el && isValidElement(item.el)) {
+                  const speedFactor = item.name === 'gradientText' ? speed1 * 0.7 : 
+                                    item.name === 'tagline' ? speed1 : speed2;
+                  item.el.style.transform = `translateY(${scrollY * speedFactor}px)`;
+                }
+              } catch (error) {
+                // 忽略滚动处理错误
+              }
+            });
+          } catch (error) {
+            // 忽略滚动处理错误
+          }
+        });
+      };
+      
+      // 添加滚动监听器
+      window.addEventListener('scroll', handleScroll);
+      
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+      };
+    };
+    
+    return setupBasicParallax();
+  } catch (error) {
+    console.error('animateHero函数执行错误:', error);
+    return () => {}; // 出错时返回空清理函数
   }
-  
-  // 使用原生JS替代GSAP进行视差效果
-  const setupBasicParallax = () => {
-    const handleScroll = () => {
-      requestAnimationFrame(() => {
-        const scrollY = window.scrollY;
-        const speed1 = 0.1; // 降低速度
-        const speed2 = 0.05; // 降低速度
-        
-        // 安全地设置样式
-        if (tagline.value && document.body.contains(tagline.value)) {
-          tagline.value.style.transform = `translateY(${scrollY * speed1}px)`;
-        }
-        
-        if (gradientText.value && document.body.contains(gradientText.value)) {
-          gradientText.value.style.transform = `translateY(${scrollY * speed1 * 0.7}px)`;
-        }
-        
-        if (subtitle.value && document.body.contains(subtitle.value)) {
-          subtitle.value.style.transform = `translateY(${scrollY * speed2}px)`;
-        }
-      });
-    };
-    
-    // 添加滚动监听器
-    window.addEventListener('scroll', handleScroll);
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  };
-  
-  return setupBasicParallax();
-}
+};
 
 // 文章项动画
 const animateArticles = () => {
@@ -566,12 +604,10 @@ const animateArticles = () => {
 const animateEmptyState = () => {
   if (!emptyState.value || !document.body.contains(emptyState.value)) return;
   
-  // 使用原生JS替代GSAP
   emptyState.value.style.opacity = '0';
   emptyState.value.style.transform = 'translateY(30px)';
   emptyState.value.style.transition = 'opacity 0.8s ease, transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1.5)';
-  
-  // 延迟执行以确保过渡生效
+
   setTimeout(() => {
     emptyState.value.style.opacity = '1';
     emptyState.value.style.transform = 'translateY(0)';
@@ -652,98 +688,127 @@ const forceRerender = () => {
   }
 }
 
+// 添加缺失的ensureDomRefs函数定义
+// 改进ensureDomRefs函数，使用更稳定的DOM查询
+const ensureDomRefs = () => {
+  try {
+    // 为了更稳定访问，使用延迟函数创建一次性定时器
+    setTimeout(() => {
+      try {
+        // 等待DOM稳定后再查询
+        const heroContainer = document.querySelector('.home-view');
+        if (!heroContainer) {
+          console.warn('找不到主容器.home-view');
+          return;
+        }
+        
+        // 主要容器都找到了，再查找内部元素
+        if (!heroBanner.value) heroBanner.value = heroContainer.querySelector('.hero-banner');
+        if (!tagline.value) tagline.value = heroContainer.querySelector('.tagline-prefix');
+        if (!gradientText.value) gradientText.value = heroContainer.querySelector('.gradient-text');
+        if (!subtitle.value) subtitle.value = heroContainer.querySelector('.hero-subtitle');
+        if (!searchInput.value) searchInput.value = heroContainer.querySelector('.search-input');
+        if (!categories.value) categories.value = heroContainer.querySelector('.category-tags');
+        
+        // 文章网格相关元素
+        const articlesContainer = heroContainer.querySelector('.articles-container');
+        if (articlesContainer) {
+          if (!articleGrid.value) {
+            articleGrid.value = articlesContainer.querySelector('.article-grid');
+            if (articleGrid.value) {
+              console.log('成功通过DOM查询找到文章网格');
+              // 确保网格容器可见
+              articleGrid.value.style.opacity = '1';
+              articleGrid.value.style.display = 'grid';
+            } else {
+              console.error('DOM中不存在.article-grid元素，尝试创建');
+              // 尝试创建缺失元素
+              const newGrid = document.createElement('div');
+              newGrid.className = 'article-grid';
+              articlesContainer.insertBefore(newGrid, articlesContainer.firstChild);
+              articleGrid.value = newGrid;
+              console.log('已创建文章网格容器');
+            }
+          }
+          
+          if (!pagination.value) pagination.value = articlesContainer.querySelector('.pagination-wrapper');
+          if (!emptyState.value) emptyState.value = articlesContainer.querySelector('.empty-state');
+        } else {
+          console.error('无法找到.articles-container容器');
+        }
+        
+        // 记录结果
+        console.log('DOM引用检查结果:', {
+          heroBanner: !!heroBanner.value,
+          tagline: !!tagline.value,
+          gradientText: !!gradientText.value,
+          subtitle: !!subtitle.value,
+          searchInput: !!searchInput.value,
+          categories: !!categories.value,
+          articleGrid: !!articleGrid.value,
+          pagination: !!pagination.value,
+          emptyState: !!emptyState.value
+        });
+        
+        // 检查文章网格的状态
+        if (articleGrid.value && isValidElement(articleGrid.value)) {
+          const style = window.getComputedStyle(articleGrid.value);
+          console.log('文章网格详情:', {
+            display: style.display,
+            visibility: style.visibility,
+            opacity: style.opacity,
+            childrenCount: articleGrid.value.children.length
+          });
+        }
+      } catch (error) {
+        console.error('DOM引用检查失败(内部错误):', error);
+      }
+    }, 100);
+  } catch (error) {
+    console.error('DOM引用检查失败(外部错误):', error);
+  }
+};
+
 // 存储清理函数
 let cleanupFunction = null;
 
 onMounted(() => {
-  // 为了确保DOM引用更稳定，添加备用获取方法
-  const ensureDomRefs = () => {
-    // 重新获取引用
-    if (!heroBanner.value) heroBanner.value = document.querySelector('.hero-banner');
-    if (!tagline.value) tagline.value = document.querySelector('.tagline-prefix');
-    if (!gradientText.value) gradientText.value = document.querySelector('.gradient-text');
-    if (!subtitle.value) subtitle.value = document.querySelector('.hero-subtitle');
-    if (!searchInput.value) searchInput.value = document.querySelector('.search-input');
-    if (!categories.value) categories.value = document.querySelector('.category-tags');
-    if (!articleGrid.value) {
-      const grid = document.querySelector('.article-grid');
-      if (grid) {
-        articleGrid.value = grid;
-        console.log('成功通过DOM查询找到文章网格');
-      } else {
-        console.error('DOM中不存在.article-grid元素');
-      }
-    }
-    if (!pagination.value) pagination.value = document.querySelector('.pagination-wrapper');
-    if (!emptyState.value) emptyState.value = document.querySelector('.empty-state');
-    
-    console.log('DOM引用检查结果:', {
-      heroBanner: !!heroBanner.value,
-      tagline: !!tagline.value,
-      gradientText: !!gradientText.value,
-      subtitle: !!subtitle.value,
-      searchInput: !!searchInput.value,
-      categories: !!categories.value,
-      articleGrid: !!articleGrid.value,
-      pagination: !!pagination.value,
-      emptyState: !!emptyState.value
-    });
-    
-    // 检查文章网格的状态
-    if (articleGrid.value) {
-      console.log('文章网格详情:', {
-        display: window.getComputedStyle(articleGrid.value).display,
-        visibility: window.getComputedStyle(articleGrid.value).visibility,
-        opacity: window.getComputedStyle(articleGrid.value).opacity,
-        childrenCount: articleGrid.value.children.length
-      });
-    }
-  };
-
-  // 立即设置所有关键元素为可见状态
-  const homeView = document.querySelector('.home-view')
-  if (homeView) homeView.style.opacity = '1'
+  // 立即设置主容器可见
+  document.documentElement.style.opacity = '1';
+  const homeView = document.querySelector('.home-view');
+  if (homeView) {
+    homeView.style.opacity = '1';
+    homeView.style.visibility = 'visible';
+  }
   
   // 确保DOM引用可用
   nextTick(() => {
-    ensureDomRefs();
-    
     try {
-      // 确保元素在动画之前可见
-      const elements = [
-        { ref: gradientText, name: 'gradientText' },
-        { ref: tagline, name: 'tagline' }, 
-        { ref: subtitle, name: 'subtitle' }, 
-        { ref: searchInput, name: 'searchInput' }
-      ];
-      
-      elements.forEach(el => {
-        if (el.ref && el.ref.value) {
-          el.ref.value.style.opacity = '1';
-          console.log(`设置${el.name}元素可见`);
-        } else {
-          console.warn(`${el.name}元素未找到`);
-        }
-      });
-      
-      // 设置文章列表容器为可见
-      if (articleGrid.value) {
-        articleGrid.value.style.opacity = '1';
-      }
-      
-      // 然后应用动画
-      cleanupFunction = animateHero();
+      // 延迟执行DOM引用检查，确保组件已经完全渲染
+      setTimeout(() => {
+        ensureDomRefs();
+        
+        // 在DOM更新后尝试应用动画
+        nextTick(() => {
+          try {
+            // 然后应用动画
+            cleanupFunction = animateHero();
+          } catch (error) {
+            console.error('初始化动画时出错:', error);
+          }
+          
+          // 监听滚动事件（用于回到顶部按钮）
+          window.addEventListener('scroll', checkScrollPosition);
+          
+          // 加载文章数据 - 放在最后确保DOM元素已准备好
+          fetchArticles();
+        });
+      }, 200);
     } catch (error) {
-      console.error('初始化动画时出错:', error);
+      console.error('组件挂载时出错:', error);
+      // 即使出错也尝试加载文章
+      setTimeout(fetchArticles, 500);
     }
-    
-    // 监听滚动事件（用于回到顶部按钮）
-    window.addEventListener('scroll', checkScrollPosition);
-    
-    // 加载文章数据 - 放在最后确保DOM元素已准备好
-    setTimeout(() => {
-      fetchArticles();
-    }, 500);
   });
 });
 
