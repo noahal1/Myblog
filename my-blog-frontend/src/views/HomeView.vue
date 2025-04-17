@@ -81,8 +81,8 @@
         
         <!-- 分页控件 -->
         <div v-if="totalPages > 1" class="pagination-wrapper text-center my-8" ref="pagination">
-          <div v-if="isDevelopment" class="text-caption mb-2">
-            当前页: {{ currentPage }}, 总页数: {{ totalPages }}, 
+          <div class="text-caption mb-2">
+            当前页: {{ currentPage }}, 总页数: {{ totalPages }}
           </div>
           
           <v-pagination
@@ -150,9 +150,6 @@ const articleGrid = ref(null)
 const pagination = ref(null)
 const emptyState = ref(null)
 
-// 在script部分添加isDevelopment变量
-const isDevelopment = ref(import.meta.env ? import.meta.env.DEV : false);
-
 // 从文章中获取唯一标签来生成分类列表
 const availableCategories = computed(() => {
   const categories = [{ id: 'all', name: '全部' }];
@@ -178,8 +175,7 @@ const availableCategories = computed(() => {
 const fetchArticles = async () => {
   loading.value = true
   try {
-    console.log('开始获取文章数据...')
-    const response = await getArticles(1, 100) // 一次获取所有文章，然后在前端进行分页
+    const response = await getArticles(1, 100) 
     
     // 检查响应格式
     if (response && response.data) {
@@ -251,15 +247,24 @@ const fetchArticles = async () => {
 
 // 更新总页数
 const updateTotalPages = () => {
-  const filteredCount = filteredArticles.value.length
-  totalPages.value = Math.max(1, Math.ceil(filteredCount / itemsPerPage))
-  console.log('更新总页数:', totalPages.value, '(基于', filteredCount, '篇文章)')
+  // 确保filteredArticles是有效的
+  if (!filteredArticles.value || !Array.isArray(filteredArticles.value)) {
+    totalPages.value = 1;
+    return;
+  }
+  
+  const filteredCount = filteredArticles.value.length;
+  const calculatedPages = Math.max(1, Math.ceil(filteredCount / itemsPerPage));
+  
+  console.log(`更新总页数: ${calculatedPages} (基于 ${filteredCount} 篇文章, 每页 ${itemsPerPage} 篇)`);
+  totalPages.value = calculatedPages;
   
   // 确保当前页在有效范围内
   if (currentPage.value > totalPages.value) {
-    currentPage.value = Math.max(1, totalPages.value)
+    currentPage.value = Math.max(1, totalPages.value);
+    console.log(`当前页超出范围，重置为: ${currentPage.value}`);
   }
-}
+};
 
 // 筛选文章
 const filteredArticles = computed(() => {
@@ -290,9 +295,22 @@ const filteredArticles = computed(() => {
 
 // 分页后的文章
 const paginatedArticles = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredArticles.value.slice(start, end)
+  // 确保当前页码有效
+  if (currentPage.value < 1 || isNaN(currentPage.value)) {
+    currentPage.value = 1;
+  }
+  
+  // 确保总页数有效
+  if (totalPages.value < 1) {
+    updateTotalPages();
+  }
+  
+  // 计算起始和结束索引
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  
+  // 确保返回有效的数组切片
+  return filteredArticles.value.slice(start, Math.min(end, filteredArticles.value.length));
 })
 
 // 分页信息
@@ -306,24 +324,35 @@ const paginationInfo = computed(() => {
 
 // 处理页码变化
 const handlePageChange = (page) => {
-  console.log('页码变化:', page)
-  currentPage.value = page
+  console.log('页码变化:', page);
+  
+  // 验证页码有效性
+  if (page < 1 || page > totalPages.value || isNaN(page)) {
+    console.error(`无效的页码: ${page}，范围应为 1-${totalPages.value}`);
+    page = Math.max(1, Math.min(page, totalPages.value));
+  }
+  
+  currentPage.value = page;
   
   // 滚动到顶部
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   
-  // 确保数据更新后重新渲染
-  nextTick(() => {
-    console.log('页面更新后的数据:', 
-      '当前页:', currentPage.value, 
-      '每页文章:', paginatedArticles.value.length
-    )
-    
-    // 强制重新渲染并应用动画
-    forceRerender()
-    animateArticles()
-  })
-}
+  // 使用延时和双重nextTick确保在生产环境中也能正确更新
+  setTimeout(() => {
+    nextTick(() => {
+      nextTick(() => {
+        console.log('页面更新后的数据:', 
+          '当前页:', currentPage.value, 
+          '每页文章:', paginatedArticles.value.length
+        );
+        
+        ensureDomRefs();
+        forceRerender();
+        animateArticles();
+      });
+    });
+  }, 50);
+};
 
 // 搜索文章
 const searchArticles = () => {
