@@ -521,34 +521,76 @@ const initScrollAnimations = () => {
 
   // 确保DOM已完全渲染 - 使用try-catch包裹整个函数
   try {
-    // 技能条动画
-    const skillBars = document.querySelectorAll('.skill-progress');
+    // 技能条动画 - 直接使用Vuetify的API
+    const skillBars = document.querySelectorAll('.v-progress-linear');
     if (skillBars && skillBars.length > 0) {
+      console.log('找到技能条元素:', skillBars.length);
+      
+      // 首先将所有进度条设置为0
       skillBars.forEach((bar) => {
-        if (!bar || !document.body.contains(bar)) return; // 确保元素在DOM中
+        if (!bar || !document.body.contains(bar)) return;
+        
+        // 找到关联的进度值并保存为data属性
+        const valueElem = bar.closest('.skill-item');
+        if (valueElem) {
+          const counterElem = valueElem.querySelector('.counter');
+          if (counterElem) {
+            const target = counterElem.getAttribute('data-target');
+            if (target) {
+              // 保存目标值
+              bar.setAttribute('data-target-value', target);
+              
+              // 重置进度条
+              // 使用Vuetify的API (通过aria属性找到内部的进度条元素)
+              const innerBar = bar.querySelector('.v-progress-linear__determinate');
+              if (innerBar) {
+                innerBar.style.width = '0%';
+                innerBar.style.transform = 'none';
+              }
+            }
+          }
+        }
+      });
+      
+      // 然后创建滚动触发器来动画每个进度条
+      skillBars.forEach((bar) => {
+        if (!bar || !document.body.contains(bar)) return;
         
         try {
-          const value = bar.getAttribute('model-value') || 
-                      bar.getAttribute(':model-value') || 
-                      bar.getAttribute('value') || 
-                      "0";
+          const targetValue = bar.getAttribute('data-target-value') || "0";
+          const numValue = parseInt(targetValue) || 0;
           
-          // 确保值是有效的
-          const numValue = parseInt(value) || 0;
-          
-          // 使用更直接的方式设置宽度，避免复杂的动画
-          bar.style.width = '0%';
-          
-          // 简化ScrollTrigger配置
+          // 使用ScrollTrigger触发动画
           ScrollTrigger.create({
             trigger: bar,
             start: 'top 90%',
             onEnter: () => {
-              gsap.to(bar, {
-                width: `${numValue}%`,
-                duration: 1.5,
-                ease: 'power2.out'
-              });
+              // 找到内部的进度条元素
+              const innerBar = bar.querySelector('.v-progress-linear__determinate');
+              if (innerBar) {
+                gsap.to(innerBar, {
+                  width: `${numValue}%`,
+                  duration: 1.5,
+                  ease: 'power2.out'
+                });
+              }
+              
+              // 更新计数器值
+              const skillItem = bar.closest('.skill-item');
+              if (skillItem) {
+                const counter = skillItem.querySelector('.counter');
+                if (counter) {
+                  let count = 0;
+                  const interval = setInterval(() => {
+                    count += 1;
+                    counter.textContent = count;
+                    if (count >= numValue) {
+                      counter.textContent = numValue + '%';
+                      clearInterval(interval);
+                    }
+                  }, 15);
+                }
+              }
             }
           });
         } catch (error) {
@@ -556,7 +598,7 @@ const initScrollAnimations = () => {
         }
       });
     } else {
-      console.warn('未找到.skill-progress元素，跳过技能条动画初始化');
+      console.warn('未找到.v-progress-linear元素，跳过技能条动画初始化');
     }
     
     // 时间线动画 - 使用更安全的方式
