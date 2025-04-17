@@ -10,7 +10,7 @@
           </div>
           
           <p class="footer-description">
-            抒情与逻辑之间的自留地，记录技术、思考与生活的点滴。
+            抒情与逻辑之间的自留地，记录技术与思考。
           </p>
           
           <div class="social-links mt-4">
@@ -115,10 +115,8 @@
           </v-form>
         </v-col>
       </v-row>
-      
       <!-- 版权与备案 -->
       <v-divider class="my-4"></v-divider>
-      
       <div class="footer-bottom d-flex flex-wrap justify-space-between align-center">
         <div class="copyright">
           &copy; {{ new Date().getFullYear() }} Noah's Blog. All rights reserved.
@@ -129,7 +127,7 @@
             href="https://beian.miit.gov.cn/" 
             target="_blank"
             class="beian-link"
-          >浙ICP备XXXXXXXX号</a>
+          >津ICP备XXXX号</a>
         </div>
       </div>
     </v-container>

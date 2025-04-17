@@ -152,7 +152,7 @@ onMounted(() => {
 .article-card {
   border-radius: var(--border-radius);
   overflow: hidden;
-  transition: all var(--transition-slow);
+  transition: all var(--transition-slow), transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   background: linear-gradient(
     var(--gradient-angle),
     rgba(var(--v-theme-surface), 0.85),
@@ -166,6 +166,7 @@ onMounted(() => {
   cursor: pointer;
   border: 1px solid rgba(var(--primary-blue), 0.08);
   position: relative;
+  will-change: transform, box-shadow;
 }
 
 .article-card:hover {
