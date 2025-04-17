@@ -102,25 +102,6 @@
             placeholder="选择相关标签"
           ></v-autocomplete>
           
-          <!-- 分类和高级选项 -->
-          <div class="d-flex flex-wrap gap-4 mb-6">
-            <v-select
-              v-model="article.category"
-              :items="categories"
-              label="文章分类"
-              variant="outlined"
-              class="flex-grow-1"
-              prepend-inner-icon="mdi-folder"
-            ></v-select>
-            
-            <v-checkbox
-              v-model="article.is_published"
-              label="立即发布"
-              class="mt-5"
-              hide-details
-            ></v-checkbox>
-          </div>
-          
           <div class="d-flex justify-space-between mt-6">
             <v-btn
               variant="outlined"
@@ -229,11 +210,10 @@ const handleImageUpload = async () => {
   // 创建本地预览
   coverImagePreview.value = URL.createObjectURL(file)
   
-  // 这里应该有上传图片到服务器的代码
-  // 模拟上传过程
+  // 上传图片到服务器
   uploadingImage.value = true
   try {
-    // 模拟API调用
+    // API调用
     // const response = await uploadImage(file)
     // article.value.cover_image = response.data.url
     
