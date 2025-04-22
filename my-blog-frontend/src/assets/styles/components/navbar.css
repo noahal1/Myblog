@@ -276,7 +276,7 @@
   right: 0;
   width: 320px; /* 更宽的侧边栏 */
   height: 100%;
-  background: var(--background);
+  background: var(--surface);
   box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
@@ -286,6 +286,11 @@
   overflow-y: auto;
   border-radius: 24px 0 0 24px; /* MD3圆角设计 */
   padding-top: 80px; /* 给状态栏和导航栏留出空间 */
+}
+
+.v-theme--dark .mobile-menu-container {
+  background: rgba(0, 0, 0, 0.15);
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.3);
 }
 
 .mobile-menu.open .mobile-menu-container {
@@ -322,9 +327,18 @@
   border-radius: 16px; /* 圆角菜单项 */
 }
 
+.v-theme--dark .mobile-nav-link {
+  color: rgba(255, 255, 255, 0.87);
+}
+
 .mobile-nav-link:hover,
 .mobile-nav-link:active {
   background: rgba(var(--primary-blue), 0.08);
+}
+
+.v-theme--dark .mobile-nav-link:hover,
+.v-theme--dark .mobile-nav-link:active {
+  background: rgba(var(--primary-blue), 0.15);
 }
 
 /* 用户菜单样式 - MD3设计规范 */
