@@ -21,8 +21,8 @@
 }
 
 .v-theme--dark .nav-bar.transparent .v-app-bar.v-toolbar {
-  background: rgba(18, 18, 18, 0.8) !important; /* 暗色模式统一背景色 */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0) !important; /* 暗色模式统一背景色 */
+  border-bottom: 0px solid rgba(0, 0, 0, 0);
 }
 
 .nav-bar.scrolled .v-app-bar.v-toolbar {
@@ -74,8 +74,6 @@
 
 .v-theme--dark .nav-bar.transparent {
   background: rgba(18, 18, 18, 0.8); /* 与appbar背景色保持一致 */
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .v-theme--dark .nav-bar.transparent .nav-link {
