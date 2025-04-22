@@ -130,7 +130,6 @@ import ArticleCard from '../components/ArticleCard.vue';
 import TreeBackground from '../components/TreeBackground.vue';
 import { getArticles } from '../api';
 
-// 导入样式
 import '@/assets/styles/views/home.css';
 
 // 基本状态

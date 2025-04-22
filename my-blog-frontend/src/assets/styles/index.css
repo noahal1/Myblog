@@ -1,24 +1,15 @@
-/* 主样式文件 - 集中导入所有CSS */
-
-/* 基础样式 */
 @import './variables.css';
 @import './components.css';
 @import './animations.css';
 @import './text.css';
 
-/* 组件样式 */
+
 @import './components/navbar.css';
 @import './components/login.css';
-/* 其他组件样式文件导入... */
-
-/* 页面视图样式 */
 @import './views/home.css';
 @import './views/article.css';
-/* 其他页面样式文件导入... */
 
-/* 全局样式定义可以放在这里 */
 :root {
-  /* 全局变量定义 */
 }
 
 body {

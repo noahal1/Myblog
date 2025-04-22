@@ -58,6 +58,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { likeArticle } from '../api'
+import '@/assets/styles/views/home.css'
 
 // 定义props
 const props = defineProps({
@@ -149,77 +150,50 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.article-card {
-  border-radius: 8px;
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  will-change: transform, box-shadow; /* 性能优化 */
-  transform: translateZ(0); /* 硬件加速 */
-  contain: content; /* 内容包含优化 */
-}
-
-.article-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
 .card-content {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  contain: content; /* 内容包含优化 */
+  padding: 1rem;
 }
 
+/* 标题样式 */
 .title {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 0.75rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  transition: color 0.2s ease;
 }
 
-.preview {
-  font-size: 0.95rem;
-  color: #666;
-  margin-bottom: 1rem;
-  line-height: 1.5;
-  contain: content; /* 内容包含优化 */
-}
-
+/* 元信息样式 */
 .meta {
-  font-size: 0.85rem;
-  color: #999;
   display: flex;
   align-items: center;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.85rem;
 }
 
-.actions {
-  margin-top: auto;
+/* 摘要样式 */
+.preview {
+  font-size: 0.95rem;
+  color: rgba(0, 0, 0, 0.7);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* 深色模式适配 */
-:deep(.v-theme--dark) .article-card {
-  background: #212121;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+/* 深色模式样式 - 增加选择器优先级 */
+:deep(.v-theme--dark) .v-card .title {
+  color: rgba(255, 255, 255, 0.9);
 }
 
-:deep(.v-theme--dark) .article-card:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+:deep(.v-theme--dark) .v-card .meta {
+  color: rgba(255, 255, 255, 0.6);
 }
 
-/* 响应式调整 */
-@media (max-width: 600px) {
-  .title {
-    font-size: 1.1rem;
-  }
-  
-  .preview {
-    font-size: 0.85rem;
-  }
+:deep(.v-theme--dark) .v-card .preview {
+  color: rgba(255, 255, 255, 0.7);
 }
 </style>

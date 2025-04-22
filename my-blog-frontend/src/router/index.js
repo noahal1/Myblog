@@ -10,12 +10,12 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: () => import('../views/HomeView.vue')
+    component: HomeView
   },
   {
     path: '/article/:id',
     name: 'article',
-    component: () => import('../views/ArticleView.vue')
+    component: ArticleView
   },
   {
     path: '/login',
@@ -30,13 +30,13 @@ const routes = [
   {
     path: '/create-article',
     name: 'create-article',
-    component: () => import('../views/CreateArticle.vue'),
+    component: CreateArticle,
     meta: { requiresAuth: true }
   },
   {
     path: '/knowledge',
     name: 'knowledge',
-    component: () => import('../views/KnowledgeBase.vue')
+    component: KnowledgeBase
   }
 ]
 

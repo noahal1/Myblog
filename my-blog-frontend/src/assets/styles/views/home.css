@@ -19,17 +19,18 @@
   transition: color 2.0s ease;
 }
 
+/* Hero Banner样式 */
 .hero-banner {
   background: radial-gradient(circle at 30% 30%, rgba(var(--primary-blue), 0.05), transparent 400px),
               radial-gradient(circle at 70% 70%, rgba(var(--accent-orange), 0.05), transparent 400px);
   padding: 140px 0 40px;
   text-align: center;
   position: relative;
-  overflow: hidden; /* 确保内容不溢出 */
+  overflow: hidden; 
   will-change: transform;
   background-position: 50% 0%;
-  margin-top: -56px; /* 向上延伸覆盖状态栏和导航栏高度 */
-  height: 400px; /* 固定高度以适应树状背景 */
+  margin-top: -56px; 
+  height: 400px; 
 }
 
 /* 调整hero内容区域的z-index，确保内容正确显示 */
@@ -64,20 +65,14 @@
   color: transparent;
   display: inline-block;
   animation: gradient-shift 15s ease infinite;
-  will-change: background-position; /* 性能优化 */
+  will-change: background-position; 
 }
 
 /* 渐变背景动画 */
 @keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .hero-subtitle {
@@ -91,7 +86,7 @@
   cursor: pointer;
   position: relative;
   z-index: 2;
-  transform: translateZ(0); /* 硬件加速 */
+  transform: translateZ(0);
   backface-visibility: hidden;
 }
 
@@ -149,40 +144,61 @@
   transition: all 0.3s ease;
 }
 
-.article-card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  height: 100%;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+.home-view .v-card.article-card {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  height: 100% !important;
+  cursor: pointer !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
   will-change: transform; /* 性能优化 */
 }
 
-.article-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+.home-view .v-card.article-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.v-theme--dark .v-card.article-card {
+  background: rgba(33, 33, 33, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.08) !important;
+}
+
+.v-theme--dark .v-card.article-card .v-card-text {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.v-theme--dark .v-card.article-card .v-card-title {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.v-theme--dark .v-card.article-card .v-card-subtitle {
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
 .card-content {
   padding: 1.5rem;
 }
 
-.title {
+/* 标题样式 - 仅应用于非组件的默认样式 */
+.home-view .title:not(.v-card-title) {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
 }
 
-.preview {
+/* 摘要样式 - 仅应用于非组件的默认样式 */
+.home-view .preview:not(.v-card-text) {
   font-size: 0.95rem;
   color: #666;
   margin-bottom: 1rem;
   line-height: 1.5;
 }
 
-.meta {
+/* 元信息样式 - 仅应用于非组件的默认样式 */
+.home-view .meta:not(.v-card-subtitle) {
   font-size: 0.85rem;
   color: #999;
   display: flex;
@@ -195,7 +211,7 @@
   transform: translateY(20px);
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
-  animation: fadeIn 0.5s forwards 0.2s; /* 性能优化 */
+  animation: fadeIn 0.5s forwards 0.2s;
 }
 
 @keyframes fadeIn {
@@ -252,10 +268,6 @@
     font-size: 2.3rem !important;
   }
   
-  .hero .tagline-prefix {
-    font-size: 1.5rem;
-  }
-  
   .back-to-top {
     bottom: 30px !important;
     right: 20px !important;
@@ -263,11 +275,6 @@
   
   .back-to-top i {
     font-size: 1.2rem;
-  }
-  
-  .pagination-wrapper {
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
   }
 }
 
@@ -341,12 +348,7 @@
   }
 }
 
-/* 支持深色模式增强 */
-.v-theme--dark .article-card {
-  background: rgba(var(--surface, 33, 33, 33), 0.8);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
+/* 深色模式调整 */
 .v-theme--dark .back-to-top {
   background-color: rgba(var(--surface, 33, 33, 33), 0.8) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
