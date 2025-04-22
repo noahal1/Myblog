@@ -9,13 +9,18 @@
     "preview": "vite preview",
     "serve": "vue-cli-service serve",
     "lint": "vue-cli-service lint",
-    "test": "vue-cli-service test:unit"
+    "test": "vue-cli-service test:unit",
+    "analyze": "vite build --mode analyze",
+    "build:prod": "vite build --mode production",
+    "format": "prettier --write 'src/**/*.{js,vue,css,scss}'"
   },
   "dependencies": {
     "@kangc/v-md-editor": "^2.2.4",
     "@mdi/font": "^7.4.47",
     "@mdi/js": "^7.4.47",
     "@vueup/vue-quill": "^1.2.0",
+    "@vueuse/core": "^13.1.0",
+    "aos": "^2.3.4",
     "axios": "^1.8.4",
     "dompurify": "^3.2.5",
     "gsap": "^3.12.2",
@@ -27,20 +32,25 @@
     "md-editor-v3": "^2.11.0",
     "pinia": "^3.0.1",
     "prismjs": "^1.30.0",
+    "typed.js": "^2.0.16",
+    "vanilla-tilt": "^1.8.1",
     "vue": "^3.2.0",
     "vue-router": "^4.5.0",
     "vue3-emoji-picker": "^1.1.8",
-    "vuetify": "^3.7.19",
-    "aos": "^2.3.4",
-    "typed.js": "^2.0.16",
-    "vanilla-tilt": "^1.8.1"
+    "vuetify": "^3.7.19"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "prettier": "^3.2.5",
+    "rollup-plugin-visualizer": "^5.14.0",
+    "sass": "^1.86.3",
+    "terser": "^5.29.2",
+    "unocss": "^0.58.6",
     "unplugin-auto-import": "^19.1.1",
     "unplugin-vue-components": "^28.4.1",
     "vite": "^6.2.0",
     "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-imagemin": "^0.6.1",
     "vite-plugin-pwa": "^0.21.2"
   }
 }

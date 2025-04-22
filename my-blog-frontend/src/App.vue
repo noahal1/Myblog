@@ -97,6 +97,17 @@ body, .v-application {
 .v-application {
   transition: background-color 0.3s ease-out !important;
 }
+
+/* 确保主内容区域不添加额外底部空间 */
+:deep(.v-main) {
+  --v-layout-bottom: 0px !important;
+  padding-bottom: 0 !important;
+}
+
+:deep(.v-footer) {
+  margin-top: 0 !important; 
+}
+
 .v-theme--dark .hero-subtitle,
 .v-theme--dark .tagline-prefix {
   transition-duration: 0.3s !important;
@@ -107,7 +118,7 @@ body, .v-application {
 </style>
 
 <script setup>
-import { ref, provide, onMounted, watch } from 'vue'
+import { ref, provide, onMounted, watch, nextTick } from 'vue'
 import NavBar from './components/NavBar.vue'
 import AppFooter from './components/AppFooter.vue'
 import { useTheme } from 'vuetify'

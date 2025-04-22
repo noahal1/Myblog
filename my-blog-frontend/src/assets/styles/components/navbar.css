@@ -4,22 +4,25 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10;
-  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); /* MD3标准过渡曲线 */
-  border-bottom: 1px solid transparent;
+  z-index: 100; 
+  transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1); 
+  border-bottom: 0.5px solid transparent;
   transform-origin: top;
   will-change: transform, opacity;
 }
 
-/* 覆盖Vuetify默认背景色 */
 .v-app-bar.v-toolbar {
-  background-color: transparent !important; /* 使用!important确保覆盖 */
+  background-color: transparent !important;
 }
 
-/* 针对不同状态设置背景色 */
 .nav-bar.transparent .v-app-bar.v-toolbar {
-  background: transparent !important;
-  backdrop-filter: blur(5px);
+  background: rgba(255, 255, 255, 0.9) !important; 
+  border-bottom: 1px solid rgba(var(--primary-blue), 0.1);
+}
+
+.v-theme--dark .nav-bar.transparent .v-app-bar.v-toolbar {
+  background: rgba(18, 18, 18, 0.8) !important; /* 暗色模式统一背景色 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .nav-bar.scrolled .v-app-bar.v-toolbar {
@@ -40,14 +43,14 @@
 }
 
 .nav-bar.transparent {
-  background: transparent;
-  backdrop-filter: blur(5px);
+  background: rgba(255, 255, 255, 0.9); /* 与appbar背景色保持一致 */
+
 }
 
 .nav-bar.transparent .nav-link {
   color: rgba(var(--text-primary), 1);
   font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: none; 
 }
 
 .nav-bar.scrolled {
@@ -70,7 +73,9 @@
 }
 
 .v-theme--dark .nav-bar.transparent {
-  background: transparent;
+  background: rgba(18, 18, 18, 0.8); /* 与appbar背景色保持一致 */
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .v-theme--dark .nav-bar.transparent .nav-link {

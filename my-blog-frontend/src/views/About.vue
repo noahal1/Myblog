@@ -8,7 +8,7 @@
     </div>
     
     <!-- 鼠标跟随效果 -->
-    <div class="cursor-follower" ref="follower"></div>
+    <div class="follower" ref="follower"></div>
     <div class="parallax-container" ref="parallaxContainer">
       <v-container class="py-8">
         <v-card class="about-card mx-auto mb-8 tilt-card" max-width="900" elevation="4" ref="profileCard">
@@ -34,7 +34,7 @@
               <p class="text-body-1 text-medium-emphasis mb-4 fade-in-text" data-aos="fade-up" data-aos-delay="200">全栈开发者 & 技术爱好者</p>
               
               <div class="social-links d-flex justify-center" data-aos="fade-up" data-aos-delay="300">
-                <v-btn icon variant="text" color="primary" class="mx-1 floating-icon">
+                <v-btn icon variant="text" color="primary" class="mx-1 floating-icon"href="https://github.com/noahal1">
                   <v-icon>mdi-github</v-icon>
                 </v-btn>
                 <v-btn icon variant="text" color="info" class="mx-1 floating-icon">
@@ -344,9 +344,6 @@ const initTiltCards = () => {
 
 // 专门为打字机效果创建一个初始化函数，确保正确位置
 const initTypedText = () => {
-  console.log('初始化打字机效果');
-  
-  // 确保元素存在且已经渲染在DOM中
   if (!typingName.value || !document.body.contains(typingName.value)) {
     console.warn('打字机容器元素不存在或未渲染');
     
@@ -376,11 +373,9 @@ const createTypedInstance = () => {
   
   // 确保DOM元素存在
   if (!typingName.value || !document.body.contains(typingName.value)) {
-    console.error('无法创建打字机实例：元素不存在');
     return;
   }
   
-  // 调整打字机文本的样式 - 使用cssText可能导致错误，改用单独设置
   try {
     typingName.value.style.position = 'relative';
     typingName.value.style.display = 'inline-block';
@@ -468,7 +463,6 @@ const initCounters = () => {
   nextTick(() => {
     const counters = document.querySelectorAll('.counter');
     if (!counters || counters.length === 0) {
-      console.warn('未找到.counter元素，跳过计数器动画初始化');
       return;
     }
     
@@ -672,20 +666,17 @@ const initScrollAnimations = () => {
 let cleanupFunctions = null;
 
 onMounted(() => {
-  // 直接设置页面可见，避免动画阻塞
   const aboutPage = document.querySelector('.about-page');
   if (aboutPage) {
     aboutPage.style.opacity = '1';
   }
 
-  // 等待一段时间后初始化效果，避免在DOM未完全准备好时执行
   setTimeout(() => {
     cleanupFunctions = initializeEffects();
   }, 1000);
 });
 
 onUnmounted(() => {
-  // 执行所有清理函数
   if (cleanupFunctions) {
     Object.values(cleanupFunctions).forEach(fn => {
       if (typeof fn === 'function') {
@@ -693,8 +684,7 @@ onUnmounted(() => {
       }
     });
   }
-  
-  // 其他清理
+
   try { AOS.refresh(); } catch (e) { console.error('AOS清理错误:', e); }
 });
 
@@ -702,36 +692,30 @@ onUnmounted(() => {
 const initializeEffects = () => {
   // 确保文档已完全加载
   if (!document.body) {
-    console.error('文档body不存在');
     return;
   }
   
-  // 确保页面可见
   const aboutPage = document.querySelector('.about-page');
   if (aboutPage) {
     aboutPage.style.opacity = '1';
   }
-  
-  // 使用promise和延迟执行，按顺序初始化各种效果
+ 
   const initSequence = async () => {
     try {
-      // 第一步：初始化AOS
       await new Promise(resolve => {
         setTimeout(() => {
           try { initAOS(); } catch (e) { console.error('AOS初始化失败:', e); }
           resolve();
         }, 300);
       });
-      
-      // 第二步：初始化3D卡片
+
       await new Promise(resolve => {
         setTimeout(() => {
           try { initTiltCards(); } catch (e) { console.error('3D卡片效果初始化失败:', e); }
           resolve();
         }, 300);
       });
-      
-      // 第三步：初始化打字机效果
+
       await new Promise(resolve => {
         setTimeout(() => {
           try { initTypedText(); } catch (e) { console.error('打字机效果初始化失败:', e); }
@@ -739,7 +723,6 @@ const initializeEffects = () => {
         }, 300);
       });
       
-      // 第四步：初始化鼠标跟随
       const cleanupMouseFollower = await new Promise(resolve => {
         setTimeout(() => {
           let cleanup = null;
@@ -748,7 +731,6 @@ const initializeEffects = () => {
         }, 300);
       });
       
-      // 第五步：初始化计数器和滚动动画
       await new Promise(resolve => {
         setTimeout(() => {
           try { initCounters(); } catch (e) { console.error('计数器初始化失败:', e); }
@@ -833,7 +815,6 @@ const initializeEffects = () => {
   background-color: transparent !important;
 }
 
-/* 在页面内容上方添加一个半透明覆盖层，增强背景效果可见性 */
 .about-page::before {
   content: '';
   position: fixed;
@@ -847,8 +828,7 @@ const initializeEffects = () => {
   z-index: -1;
 }
 
-/* 鼠标跟随效果 */
-.cursor-follower {
+.follower {
   position: fixed;
   width: 30px;
   height: 30px;
@@ -861,7 +841,7 @@ const initializeEffects = () => {
   transition: transform 0.1s ease;
 }
 
-/* 平行视差容器 */
+
 .parallax-container {
   perspective: 1000px;
   transform-style: preserve-3d;
@@ -985,11 +965,10 @@ const initializeEffects = () => {
   }
 }
 
-/* 打字机容器和文本样式 */
 .typing-container {
   position: relative;
   margin: 10px auto 15px;
-  min-height: 30px;
+  min-height: 20px;
   text-align: center;
 }
 
@@ -1042,7 +1021,7 @@ const initializeEffects = () => {
   }
 }
 
-/* 技能条动画 */
+
 .skill-item {
   transition: all var(--transition-default);
 }
@@ -1065,7 +1044,7 @@ const initializeEffects = () => {
   width: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
   transform: translateX(-100%);
-  animation: shine 2s infinite;
+  animation: shine 3s infinite;
 }
 
 @keyframes shine {
@@ -1076,13 +1055,13 @@ const initializeEffects = () => {
 
 /* 3D卡片效果 */
 .floating-card {
-  transition: all 0.3s ease;
-  transform: translateZ(20px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 2s ease;
+  transform: translateZ(10px);
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
 }
 
 .floating-card:hover {
-  transform: translateY(-10px) translateZ(30px);
+  transform: translateY(-10px) translateZ(10px);
   box-shadow: 0 15px 40px rgba(var(--primary-blue), 0.2);
 }
 
@@ -1116,7 +1095,7 @@ const initializeEffects = () => {
 
 /* 脉冲图标 */
 .pulse-icon {
-  animation: pulse 2s infinite;
+  animation: pulse 1s infinite;
 }
 
 @keyframes pulse {
@@ -1133,7 +1112,7 @@ const initializeEffects = () => {
 
 /* 旋转图标 */
 .rotating-icon {
-  animation: rotate 6s linear infinite;
+  animation: rotate 3s infinite;
 }
 
 @keyframes rotate {
@@ -1147,7 +1126,7 @@ const initializeEffects = () => {
 
 /* 弹跳图标 */
 .bounce-icon {
-  animation: bounce 2s ease infinite;
+  animation: bounce 1s infinite;
 }
 
 @keyframes bounce {
@@ -1164,7 +1143,7 @@ const initializeEffects = () => {
 
 /* 摇摆图标 */
 .swing-icon {
-  animation: swing 2s infinite;
+  animation: swing 1s infinite;
 }
 
 @keyframes swing {
@@ -1261,8 +1240,7 @@ const initializeEffects = () => {
     opacity: 0.2;
   }
   
-  .cursor-follower {
-    /* 在移动端隐藏鼠标跟随效果 */
+  .follower {
     display: none;
   }
   

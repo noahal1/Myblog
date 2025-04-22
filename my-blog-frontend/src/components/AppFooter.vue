@@ -1,5 +1,5 @@
 <template>
-  <v-footer app class="footer-container" style="position: relative;">
+  <v-footer app class="footer-container" style="position: relative; margin-top: 0; padding-top: 0;">
     <v-container>
       <v-row>
         <!-- Logo & 简介 -->
@@ -20,7 +20,7 @@
                   v-bind="props"
                   variant="text"
                   icon="mdi-github"
-                  href="https://github.com/yourusername"
+                  href="https://github.com/noahal1"
                   target="_blank"
                   class="social-btn"
                 ></v-btn>
@@ -208,7 +208,8 @@
 .footer-container {
   background: var(--header-gradient);
   border-top: var(--border-subtle);
-  padding: 48px 0 24px;
+  padding: 24px 0 24px;
+  margin-top: 0 !important;
   color: rgba(var(--text-primary), 0.9);
   width: 100%;
   height: auto;
