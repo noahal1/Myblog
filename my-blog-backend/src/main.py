@@ -81,6 +81,7 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    userId: int
 
 class TagCreate(BaseModel):
     name: str
@@ -161,13 +162,15 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
 @app.post('/api/login', response_model=Token)
 async def login(credentials: UserLogin, db: Session = Depends(get_db)):
     # 查找用户
-    user = db.query(models.User).filter(models.User.username == credentials.username).first()
+    user = db.query(models.User.id, models.User.hashed_password).filter(
+            models.User.username == credentials.username
+        ).first()
     if not user or not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="用户名或密码错误")
-    
+    user_id = user[0]
     # 创建访问令牌 - 修复函数名错误
-    access_token = create_access_token({"sub": user.username})
-    return {"access_token": access_token, "token_type": "bearer"}
+    access_token = create_access_token({"sub": credentials.username})
+    return {"access_token": access_token, "token_type": "bearer", "userId": user_id}
 
 @app.get('/api/health')
 async def health_check():
