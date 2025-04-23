@@ -69,6 +69,11 @@ export const likeArticle = async (articleId) => {
   return apiClient.post(`/api/articles/${articleId}/like`);
 };
 
+// 点赞评论
+export const likeComment = async (commentId) => {
+  return apiClient.post(`/api/comments/${commentId}/like`);
+};
+
 // 添加请求和响应拦截器
 apiClient.interceptors.request.use(
   config => {

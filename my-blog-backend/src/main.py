@@ -450,3 +450,19 @@ async def like_article(article_id: int, db: Session = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# 添加评论点赞API端点
+@app.post('/api/comments/{comment_id}/like')
+async def like_comment(comment_id: int, db: Session = Depends(get_db)):
+    """点赞评论"""
+    comment = db.query(models.Comment).filter(models.Comment.id == comment_id).first()
+    if not comment:
+        raise HTTPException(status_code=404, detail="评论不存在")
+    
+    # 增加点赞数
+    if comment.likes is None:
+        comment.likes = 0
+    comment.likes += 1
+    
+    db.commit()
+    return {"likes": comment.likes}

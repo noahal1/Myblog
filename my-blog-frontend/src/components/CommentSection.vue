@@ -184,7 +184,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { getComments, createComment, deleteComment } from '../api'
+import { getComments, createComment, deleteComment, likeComment as likeCommentApi } from '../api'
 import DOMPurify from 'dompurify'
 import { useUserStore } from '../stores/user'
 import { safeRef } from '../fix-refs.js'
@@ -252,10 +252,14 @@ const fetchComments = async () => {
   loading.value = true
   try {
     const response = await getComments(props.articleId, 1, commentsPerPage)
+    
+    // 获取本地存储的点赞状态
+    const likedComments = JSON.parse(localStorage.getItem('likedComments') || '{}');
+    
     // 处理评论数据，添加额外属性
     comments.value = response.data.map(comment => ({
       ...comment,
-      userLiked: false, // 用户是否点赞
+      userLiked: !!likedComments[comment.id], // 检查用户是否已点赞
       is_author: comment.user_id === props.authorId // 是否是作者的评论
     }))
     // 模拟一下，假设有更多评论
@@ -275,10 +279,14 @@ const loadMoreComments = async () => {
   try {
     currentPage.value++
     const response = await getComments(props.articleId, currentPage.value, commentsPerPage)
+    
+    // 获取本地存储的点赞状态
+    const likedComments = JSON.parse(localStorage.getItem('likedComments') || '{}');
+    
     // 处理评论数据，添加额外属性
     const newComments = response.data.map(comment => ({
       ...comment,
-      userLiked: false,
+      userLiked: !!likedComments[comment.id], // 检查用户是否已点赞
       is_author: comment.user_id === props.authorId
     }))
     comments.value = [...comments.value, ...newComments]
@@ -310,11 +318,9 @@ const submitComment = async () => {
     newComment.value = ''
     _replyingTo.value = null
     
-    // 通知父组件
     emit('comment-added')
   } catch (error) {
     console.error('提交评论失败:', error)
-    // 在此添加错误提示
   } finally {
     submitting.value = false
   }
@@ -330,28 +336,36 @@ const deleteCommentItem = async (commentId) => {
     comments.value = comments.value.filter(c => c.id !== commentId)
     totalComments.value--
     
-    // 通知父组件
     emit('comment-deleted')
   } catch (error) {
     console.error('删除评论失败:', error)
-    // 在此添加错误提示
   }
 }
 
 // 喜欢评论
-const likeComment = (comment) => {
-  // 切换喜欢状态
-  if (comment.userLiked) {
-    comment.likes = Math.max(0, (comment.likes || 0) - 1)
-    comment.userLiked = false
-  } else {
-    comment.likes = (comment.likes || 0) + 1
-    comment.userLiked = true
+const likeComment = async (comment) => {
+  try {
+    // 防止重复点赞
+    if (comment.userLiked) return;
+    
+    // 调用API
+    const response = await likeCommentApi(comment.id);
+    
+    // 更新UI
+    if (response && response.data) {
+      comment.likes = response.data.likes;
+      comment.userLiked = true;
+      
+      // 保存点赞状态到本地存储
+      const likedComments = JSON.parse(localStorage.getItem('likedComments') || '{}');
+      likedComments[comment.id] = true;
+      localStorage.setItem('likedComments', JSON.stringify(likedComments));
+    }
+  } catch (error) {
+    console.error('点赞评论失败:', error);
   }
-  // 实际应调用API更新
 }
 
-// 回复评论
 const replyToComment = (comment) => {
   _replyingTo.value = comment
   newComment.value = ''
@@ -364,7 +378,6 @@ const cancelReply = () => {
   _replyingTo.value = null
 }
 
-// 渲染评论内容，支持@用户和简单格式化
 const renderCommentContent = (content) => {
   if (!content) return ''
   
