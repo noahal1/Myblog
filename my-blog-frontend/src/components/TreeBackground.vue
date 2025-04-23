@@ -90,7 +90,7 @@ onMounted(async () => {
   }
 
   let lastTime = performance.now()
-  const interval = 1000 / 40 // 50fps
+  const interval = 1000 / 60 // 60fps
 
   let controls: ReturnType<typeof useRafFn>
 
@@ -107,9 +107,7 @@ onMounted(async () => {
       stopped.value = true
     }
 
-    // Execute all the steps from the previous frame
     prevSteps.forEach((i) => {
-      // 50% chance to keep the step for the next frame, to create a more organic look
       if (random() < 0.5)
         steps.push(i)
       else
@@ -119,9 +117,6 @@ onMounted(async () => {
 
   controls = useRafFn(frame, { immediate: false })
 
-  /**
-   * 0.2 - 0.8
-   */
   const randomMiddle = () => random() * 0.6 + 0.2
 
   start.value = () => {

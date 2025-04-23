@@ -15,7 +15,7 @@ export const useUserStore = defineStore('user', {
   getters: {
     isAuthenticated: (state) => !!state.token && state.isLogin,
     userInitials: (state) => {
-      if (!state.username) return '游'
+      if (!state.username) return '游客'
       return state.username.substring(0, 1).toUpperCase()
     }
   },
@@ -25,11 +25,10 @@ export const useUserStore = defineStore('user', {
       this.username = userData.username
       this.token = userData.token
       this.isLogin = true
-      this.userId = userData.userId || null
+      this.userId = userData.userId
       this.avatar = userData.avatar || ''
       this.lastLoginTime = new Date().toISOString()
       
-      // 保存到本地存储，以便页面刷新后保持登录状态
       this.saveToLocalStorage()
     },
     

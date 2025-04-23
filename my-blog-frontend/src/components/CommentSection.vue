@@ -186,6 +186,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { getComments, createComment, deleteComment } from '../api'
 import DOMPurify from 'dompurify'
+import { useUserStore } from '../stores/user'
 import { safeRef } from '../fix-refs.js'
 
 const props = defineProps({
@@ -257,8 +258,6 @@ const fetchComments = async () => {
       userLiked: false, // 用户是否点赞
       is_author: comment.user_id === props.authorId // 是否是作者的评论
     }))
-    
-    // 通常，总评论数会在响应头中返回
     // 模拟一下，假设有更多评论
     totalComments.value = response.data.length + 5
   } catch (error) {
@@ -297,8 +296,7 @@ const submitComment = async () => {
   
   submitting.value = true
   try {
-    // 假设当前用户ID为1，实际应从登录状态获取
-    const userId = localStorage.getItem('userId') || 1
+    const userId = useUserStore().userId
     
     // 创建评论
     const replyToId = _replyingTo.value ? _replyingTo.value.id : undefined

@@ -210,7 +210,7 @@ const handleSubmit = async () => {
       // 登录逻辑
       const response = await apiClient.post('/api/login', {
         username: form.value.username,
-        password: form.value.password
+        password: form.value.password,
       });
       
       if (!response.data) {
@@ -226,12 +226,14 @@ const handleSubmit = async () => {
         localStorage.setItem('user', JSON.stringify({
           username: form.value.username,
           token: data.access_token,
+          userId: data.userId,
           isLogin: true
         }));
         
         // 更新状态
         userStore.username = form.value.username;
         userStore.token = data.access_token;
+        userStore.userId = data.userId;
         userStore.isLogin = true;
         
         // 导航到首页
