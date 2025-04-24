@@ -222,19 +222,24 @@ const handleSubmit = async () => {
       console.log('登录成功:', data);
       
       if (data && data.access_token) {
-        // 保存用户信息
-        localStorage.setItem('user', JSON.stringify({
+        // 创建用户对象
+        const userData = {
           username: form.value.username,
           token: data.access_token,
           userId: data.userId,
-          isLogin: true
-        }));
+          isLogin: true,
+          lastLoginTime: new Date().toISOString()
+        };
         
-        // 更新状态
-        userStore.username = form.value.username;
-        userStore.token = data.access_token;
-        userStore.userId = data.userId;
-        userStore.isLogin = true;
+        // 保存用户信息到localStorage
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        // 使用userStore登录方法更新状态
+        userStore.login({
+          username: form.value.username,
+          token: data.access_token,
+          userId: data.userId
+        });
         
         // 导航到首页
         router.replace('/');
@@ -255,7 +260,7 @@ const handleSubmit = async () => {
     }
   } catch (error) {
     console.error('操作失败:', error);
-    errorMessage.value = error.message || '操作失败';
+    errorMessage.value = error.response?.data?.detail || error.message || '操作失败';
   } finally {
     loading.value = false;
   }

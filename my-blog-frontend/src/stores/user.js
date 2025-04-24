@@ -51,7 +51,6 @@ export const useUserStore = defineStore('user', {
       this.avatar = ''
       this.lastLoginTime = null
       
-      // 清除本地存储
       localStorage.removeItem('user')
     },
     

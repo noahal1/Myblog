@@ -77,10 +77,17 @@ export const likeComment = async (commentId) => {
 // 添加请求和响应拦截器
 apiClient.interceptors.request.use(
   config => {
-    // 从localStorage获取token
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    // 获取用户信息对象，与Login.vue组件中存储方式匹配
+    const userInfo = localStorage.getItem('user')
+    if (userInfo) {
+      try {
+        const user = JSON.parse(userInfo)
+        if (user && user.token) {
+          config.headers.Authorization = `Bearer ${user.token}`
+        }
+      } catch (e) {
+        console.error('解析用户信息失败:', e)
+      }
     }
     return config
   },
@@ -93,8 +100,12 @@ apiClient.interceptors.response.use(
   error => {
     // 处理401错误（未授权）
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
+      // 清除user对象而不是token
+      localStorage.removeItem('user')
+      // 如果不在登录页就跳转
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }

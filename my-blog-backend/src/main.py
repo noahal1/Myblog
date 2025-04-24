@@ -3,18 +3,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker, Session, joinedload
 from passlib.context import CryptContext
-from jose import JWTError, jwt
-from datetime import datetime, timedelta
+from datetime import datetime
 from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
-from .model import models
+from src.model import models
 import json
 import math
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
 from redis import Redis
+from src.utils import log, api_log
+from src.utils.auth import get_current_user_id, create_access_token
+from fastapi import status
 
 load_dotenv(dotenv_path='./.env')
 
@@ -37,12 +39,15 @@ DATABASE_URL = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD'
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 认证配置
-SECRET_KEY = os.getenv('SECRET_KEY')
-ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 10080  # 7天
-
+# 密码哈希工具
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+
+# 认证工具函数
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
 
 # 创建数据库表
 models.Base.metadata.create_all(bind=engine)
@@ -113,19 +118,6 @@ class CommentResponse(BaseModel):
     class Config:
         orm_mode = True
 
-# 认证工具函数
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
-def create_access_token(data: dict):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
 # 依赖项
 def get_db():
     db = SessionLocal()
@@ -157,20 +149,35 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    # 记录注册日志
+    log.info(f"用户 {db_user} 在 {datetime.now()} 注册成功")
     return {"message": "用户创建成功"}
 
+# 用户登录api
 @app.post('/api/login', response_model=Token)
 async def login(credentials: UserLogin, db: Session = Depends(get_db)):
+    """用户登录获取JWT令牌"""
     # 查找用户
-    user = db.query(models.User.id, models.User.hashed_password).filter(
-            models.User.username == credentials.username
-        ).first()
+    user = db.query(models.User).filter(models.User.username == credentials.username).first()
+    
+    # 验证密码
     if not user or not verify_password(credentials.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="用户名或密码错误")
-    user_id = user[0]
-    # 创建访问令牌 - 修复函数名错误
-    access_token = create_access_token({"sub": credentials.username})
-    return {"access_token": access_token, "token_type": "bearer", "userId": user_id}
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="用户名或密码错误"
+        )
+    
+    # 创建访问令牌，将user_id作为sub字段存储
+    access_token = create_access_token({"sub": str(user.id)})
+    
+    # 记录登录日志
+    log.info(f"用户ID：{user.id} 在 {datetime.now()} 登录成功")
+
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "userId": user.id
+    }
 
 @app.get('/api/health')
 async def health_check():
@@ -235,6 +242,7 @@ async def create_tag(tag: TagCreate, db: Session = Depends(get_db)):
     db.add(new_tag)
     db.commit()
     db.refresh(new_tag)
+
     return new_tag
     
 @app.get('/api/articles/{article_id}', response_model=ArticleResponse)
@@ -262,22 +270,30 @@ async def get_article(article_id: int, db: Session = Depends(get_db)):
 
 
 @app.post('/api/articles', response_model=ArticleResponse)
-async def create_article(article: ArticleCreate, db: Session = Depends(get_db)):
+async def create_article(
+    article: ArticleCreate, 
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)  # 使用依赖项获取当前用户ID
+):
+    """创建新文章"""
+    # 记录API访问日志
+    api_log.info(f"用户 {current_user_id} 正在创建文章: {article.title}")
+    
     # 首先获取标签信息
     tag_objects = []
     tag_names = []
-    
+
     if article.tags:
         # 获取所有标签
         tag_objects = db.query(models.Tag).filter(models.Tag.id.in_(article.tags)).all()
         tag_names = [tag.name for tag in tag_objects]
-    
-    # 创建新文章
+
+    # 创建新文章，使用当前登录用户的ID
     db_article = models.Article(
         title=article.title,
         content=article.content,
         summary=article.summary,
-        author_id=1,  # 这里应该从JWT令牌中获取用户ID
+        author_id=current_user_id,  # 使用从JWT获取的用户ID
         tags=",".join(tag_names) if tag_names else None  # 使用逗号分隔的标签名
     )
 
@@ -287,13 +303,15 @@ async def create_article(article: ArticleCreate, db: Session = Depends(get_db)):
     if tag_objects:
         # 建立标签关联
         db_article.tags_relationship = tag_objects
-    
     db.commit()
     db.refresh(db_article)
     
     # 转换标签为字符串列表
     tag_names = [tag.name for tag in db_article.tags_relationship] if db_article.tags_relationship else []
     
+    # 创建文章日志记录
+    log.info(f"用户id: {current_user_id} 在 {datetime.now()} 创建了文章 {db_article.title}")
+
     return {
         'id': db_article.id,
         'title': db_article.title,
@@ -352,7 +370,11 @@ async def get_comments(article_id: int, skip: int = 0, limit: int = 50, db: Sess
     return comments_data
 
 @app.post('/api/comments', response_model=CommentResponse)
-async def create_comment(comment: CommentCreate, db: Session = Depends(get_db)):
+async def create_comment(
+    comment: CommentCreate, 
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
     """创建评论"""
     # 检查文章是否存在
     article = db.query(models.Article).filter(models.Article.id == comment.article_id).first()
@@ -369,7 +391,7 @@ async def create_comment(comment: CommentCreate, db: Session = Depends(get_db)):
     db_comment = models.Comment(
         content=comment.content,
         article_id=comment.article_id,
-        user_id=comment.user_id,  # 如果不提供user_id，则为匿名评论
+        user_id=current_user_id,  # 使用从JWT获取的用户ID
         reply_to_id=comment.reply_to_id
     )
     
@@ -403,6 +425,9 @@ async def create_comment(comment: CommentCreate, db: Session = Depends(get_db)):
                 "content": parent_comment.content
             }
     
+    # 记录评论日志
+    log.info(f"用户 {current_user_id} 在文章 {article.id} 添加了评论")
+    
     return {
         'id': db_comment.id,
         'content': db_comment.content,
@@ -416,11 +441,19 @@ async def create_comment(comment: CommentCreate, db: Session = Depends(get_db)):
     }
 
 @app.delete('/api/comments/{comment_id}')
-async def delete_comment(comment_id: int, db: Session = Depends(get_db)):
+async def delete_comment(
+    comment_id: int, 
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
     """删除评论"""
     comment = db.query(models.Comment).filter(models.Comment.id == comment_id).first()
     if not comment:
         raise HTTPException(status_code=404, detail="评论不存在")
+    
+    # 检查用户是否有权限删除此评论
+    if comment.user_id != current_user_id:
+        raise HTTPException(status_code=403, detail="无权删除此评论")
     
     # 更新文章评论计数
     article = db.query(models.Article).filter(models.Article.id == comment.article_id).first()
@@ -429,10 +462,18 @@ async def delete_comment(comment_id: int, db: Session = Depends(get_db)):
     
     db.delete(comment)
     db.commit()
+    
+    # 记录删除日志
+    api_log.info(f"用户 {current_user_id} 删除了评论 {comment_id}")
+    
     return {"message": "评论已删除"}
 
 @app.post('/api/articles/{article_id}/like')
-async def like_article(article_id: int, db: Session = Depends(get_db)):
+async def like_article(
+    article_id: int, 
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
     """点赞文章"""
     article = db.query(models.Article).filter(models.Article.id == article_id).first()
     if not article:
@@ -444,16 +485,18 @@ async def like_article(article_id: int, db: Session = Depends(get_db)):
     article.likes += 1
     
     db.commit()
+    
+    # 记录点赞日志
+    api_log.info(f"用户 {current_user_id} 点赞了文章 {article_id}")
+    
     return {"likes": article.likes}
 
-# 启动服务器
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
-# 添加评论点赞API端点
 @app.post('/api/comments/{comment_id}/like')
-async def like_comment(comment_id: int, db: Session = Depends(get_db)):
+async def like_comment(
+    comment_id: int, 
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
     """点赞评论"""
     comment = db.query(models.Comment).filter(models.Comment.id == comment_id).first()
     if not comment:
@@ -465,4 +508,13 @@ async def like_comment(comment_id: int, db: Session = Depends(get_db)):
     comment.likes += 1
     
     db.commit()
+    
+    # 记录点赞日志
+    api_log.info(f"用户 {current_user_id} 点赞了评论 {comment_id}")
+    
     return {"likes": comment.likes}
+
+# 启动服务器
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
