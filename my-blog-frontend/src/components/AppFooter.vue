@@ -33,13 +33,13 @@
                 <v-btn 
                   v-bind="props"
                   variant="text"
-                  icon="mdi-twitter"
-                  href="https://twitter.com/yourusername"
+                  icon="mdi-sina-weibo"
+                  href="https://weibo.com/u/3273752025"
                   target="_blank"
                   class="social-btn"
                 ></v-btn>
               </template>
-              <span>Twitter</span>
+              <span>Weibo</span>
             </v-tooltip>
             
             <v-tooltip location="top">
@@ -47,12 +47,12 @@
                 <v-btn 
                   v-bind="props"
                   variant="text"
-                  icon="mdi-email-outline"
-                  @click="showContactForm = true"
+                  icon="mdi-wechat"
+                  @click="openWechatDialog"
                   class="social-btn"
                 ></v-btn>
               </template>
-              <span>联系我</span>
+              <span>微信二维码</span>
             </v-tooltip>
           </div>
         </v-col>
@@ -132,59 +132,25 @@
       </div>
     </v-container>
     
-    <!-- 联系表单对话框 -->
-    <v-dialog v-model="showContactForm" max-width="600px">
-      <v-card class="contact-dialog">
-        <v-card-title class="dialog-title">
-          <span>联系我</span>
-          <v-btn icon @click="showContactForm = false" class="close-btn">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+    <!-- 微信二维码对话框 -->
+    <v-dialog v-model="wechatDialog" max-width="400px">
+      <v-card class="wechat-dialog">
+        <v-card-title class="text-center">
+          <v-icon color="success" class="mr-2">mdi-wechat</v-icon>
+          <v-spacer></v-spacer>
         </v-card-title>
-        
-        <v-card-text>
-          <v-form @submit.prevent="submitContactForm">
-            <v-text-field
-              v-model="contactForm.name"
-              label="您的姓名"
-              variant="outlined"
-              required
-            ></v-text-field>
-            
-            <v-text-field
-              v-model="contactForm.email"
-              label="您的邮箱"
-              variant="outlined"
-              type="email"
-              required
-            ></v-text-field>
-            
-            <v-textarea
-              v-model="contactForm.message"
-              label="您的留言"
-              variant="outlined"
-              rows="4"
-              required
-            ></v-textarea>
-            
-            <div class="d-flex justify-end">
-              <v-btn
-                variant="text"
-                @click="showContactForm = false"
-                class="mr-2"
-              >
-                取消
-              </v-btn>
-              
-              <v-btn
-                type="submit"
-                color="primary"
-                :loading="sending"
-              >
-                发送
-              </v-btn>
-            </div>
-          </v-form>
+        <v-card-text class="text-center">
+          <div class="qrcode-container">
+            <v-img
+              :src="`https://s21.ax1x.com/2025/04/27/pETG8KJ.png`"
+              alt="noahall"
+              class="mx-auto qrcode-image"
+              contain
+              max-height="250"
+            ></v-img>
+          </div>
+          <p class="mt-4 wechat-text">扫描二维码添加我的微信</p>
+          <v-btn icon="mdi-close" variant="text" size="small" @click="wechatDialog = false" class="text-center"></v-btn>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -307,149 +273,164 @@
 
 .social-links {
   display: flex;
-  gap: 8px;
+  align-items: center;
 }
 
 .social-btn {
-  color: rgba(var(--text-secondary), 1);
+  margin-right: 8px;
+  opacity: 0.8;
   transition: all var(--transition-default);
 }
 
 .social-btn:hover {
-  color: rgba(var(--primary-blue), 1);
-  transform: translateY(-2px);
+  opacity: 1;
+  transform: translateY(-3px);
 }
 
-.copyright, .beian {
+.subscribe-input {
+  background: rgba(var(--background), 0.5);
+  border-radius: 4px;
+}
+
+.subscribe-btn {
+  height: 40px;
+  min-width: 80px;
+}
+
+.footer-bottom {
   font-size: 0.85rem;
-  color: rgba(var(--text-tertiary), 1);
+  color: rgba(var(--text-secondary), 0.8);
 }
 
 .beian-link {
-  color: rgba(var(--text-tertiary), 1);
+  color: rgba(var(--text-secondary), 0.8);
   text-decoration: none;
   transition: color var(--transition-default);
 }
 
 .beian-link:hover {
-  color: rgba(var(--primary-blue), 0.8);
+  color: rgba(var(--primary-blue), 1);
 }
 
-.subscribe-input {
-  max-width: 280px;
+/* 微信二维码样式 */
+.wechat-dialog {
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.subscribe-btn {
-  height: 40px;
+.qrcode-container {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.dialog-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.qrcode-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.contact-dialog {
-  background: rgba(var(--v-theme-surface), 0.95);
-  backdrop-filter: blur(15px);
-  border-radius: var(--border-radius-md);
-  border: var(--border-subtle);
+.qrcode-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  padding: 4px;
 }
 
-@media (max-width: 960px) {
-  .footer-section {
-    margin-bottom: 32px;
+.qrcode-avatar {
+  border: 2px solid #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.wechat-text {
+  color: rgba(var(--text-secondary), 1);
+  font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+  .subscribe-btn {
+    height: 40px;
+    min-width: 60px;
+    font-size: 0.85rem;
   }
   
-  .footer-bottom {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+  .footer-section {
+    margin-bottom: 24px;
   }
 }
 </style>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useTheme } from 'vuetify'
 import LogoIcon from './icons/LogoIcon.vue'
-import { safeRef } from '../fix-refs.js'
 
-// 使用固定颜色，不依赖主题
-const logoColor = ref('#3F51B5')
+// 微信二维码相关
+const wechatDialog = ref(false)
+const wechatQRCodeUrl = ref('/images/wechat-qrcode.png')
+const avatarUrl = ref('/images/avatar.jpg')
+
+// 主题相关
+const theme = useTheme()
+const logoColor = computed(() => {
+  return theme.global.current.value.dark ? '#ffffff' : '#3F51B5'
+})
 
 // 快速链接
-const quickLinks = [
+const quickLinks = ref([
   { text: '首页', to: '/' },
   { text: '归档', to: '/archive' },
   { text: '标签', to: '/tags' },
   { text: '关于', to: '/about' },
   { text: '友链', to: '/friends' }
-]
+])
 
 // 分类
-const categories = [
+const categories = ref([
   { id: 'frontend', name: '前端开发' },
   { id: 'backend', name: '后端技术' },
   { id: 'design', name: '设计与UI' },
   { id: 'devops', name: 'DevOps' },
   { id: 'thoughts', name: '随想随笔' }
-]
+])
 
-// 订阅状态
+// 邮箱订阅相关
 const email = ref('')
 const subscribing = ref(false)
 const _showSubscribeSuccess = ref(false)
-// 创建计算属性用于v-model绑定
 const showSubscribeSuccess = computed({
   get: () => _showSubscribeSuccess.value,
-  set: (value) => { _showSubscribeSuccess.value = value }
+  set: (val) => { _showSubscribeSuccess.value = val }
 })
 
-// 联系表单
-const _showContactForm = ref(false)
-// 创建计算属性用于v-model绑定
-const showContactForm = computed({
-  get: () => _showContactForm.value,
-  set: (value) => { _showContactForm.value = value }
-})
+// 打开微信二维码对话框
+function openWechatDialog() {
+  wechatDialog.value = true
+}
 
-const contactForm = ref({
-  name: '',
-  email: '',
-  message: ''
-})
-const sending = ref(false)
-
-// 订阅处理
-const subscribeNewsletter = async () => {
+// 订阅
+async function subscribeNewsletter() {
   if (!email.value) return
   
   subscribing.value = true
   
-  // 模拟API请求
-  setTimeout(() => {
-    subscribing.value = false
-    _showSubscribeSuccess.value = true
-    email.value = ''
-  }, 1500)
-}
-
-// 联系表单提交
-const submitContactForm = async () => {
-  sending.value = true
-  
-  // 模拟API请求
-  setTimeout(() => {
-    sending.value = false
-    _showContactForm.value = false
+  try {
+    // 模拟订阅API请求
+    await new Promise(resolve => setTimeout(resolve, 1000))
     
-    // 重置表单
-    contactForm.value = {
-      name: '',
-      email: '',
-      message: ''
-    }
-  }, 1500)
+    email.value = ''
+    _showSubscribeSuccess.value = true
+  } catch (error) {
+    console.error('订阅失败:', error)
+  } finally {
+    subscribing.value = false
+  }
 }
 </script> 

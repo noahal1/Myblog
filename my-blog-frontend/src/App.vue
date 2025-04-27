@@ -98,10 +98,9 @@ body, .v-application {
   transition: background-color 0.3s ease-out !important;
 }
 
-/* 确保主内容区域不添加额外底部空间 */
-:deep(.v-main) {
-  --v-layout-bottom: 0px !important;
-  padding-bottom: 0 !important;
+.v-main {
+  --v-layout-bottom: 100px !important;
+  padding-bottom: 10px !important;
 }
 
 :deep(.v-footer) {

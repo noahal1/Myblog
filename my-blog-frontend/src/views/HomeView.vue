@@ -579,10 +579,9 @@ const getLatestUpdateDate = () => {
   }
 }
 
-/* 修复主布局问题，彻底减少底部空间 */
 :deep(.v-main) {
   --v-layout-bottom: 0px !important;
-  padding-bottom: 0 !important;
+;
 }
 
 :deep(.v-application__wrap) {
