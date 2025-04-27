@@ -15,7 +15,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
 from redis import Redis
 from src.utils import log, api_log
-from src.utils.auth import get_current_user_id, create_access_token
+from src.utils.auth import get_current_user_id, create_access_token, create_tokens_from_refresh_token, create_refresh_token
 from fastapi import status
 
 load_dotenv(dotenv_path='./.env')
@@ -118,6 +118,10 @@ class CommentResponse(BaseModel):
     class Config:
         orm_mode = True
 
+# 添加刷新令牌请求模型
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
 # 依赖项
 def get_db():
     db = SessionLocal()
@@ -153,6 +157,23 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
     log.info(f"用户 {db_user} 在 {datetime.now()} 注册成功")
     return {"message": "用户创建成功"}
 
+# 刷新令牌API
+@app.post('/api/token/refresh', response_model=Token)
+async def refresh_token(request: RefreshTokenRequest):
+    """使用刷新令牌获取新的访问令牌"""
+    try:
+        # 从刷新令牌创建新的令牌对
+        tokens = create_tokens_from_refresh_token(request.refresh_token)
+        return tokens
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        log.error(f"刷新令牌失败: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="刷新令牌过程中发生错误",
+        )
+
 # 用户登录api
 @app.post('/api/login', response_model=Token)
 async def login(credentials: UserLogin, db: Session = Depends(get_db)):
@@ -168,14 +189,19 @@ async def login(credentials: UserLogin, db: Session = Depends(get_db)):
         )
     
     # 创建访问令牌，将user_id作为sub字段存储
-    access_token = create_access_token({"sub": str(user.id)})
+    access_token, expires_at = create_access_token({"sub": str(user.id)})
+    
+    # 创建刷新令牌
+    refresh_token = create_refresh_token({"sub": str(user.id)})
     
     # 记录登录日志
     log.info(f"用户ID：{user.id} 在 {datetime.now()} 登录成功")
 
     return {
         "access_token": access_token, 
+        "refresh_token": refresh_token,
         "token_type": "bearer",
+        "expires_at": expires_at,
         "userId": user.id
     }
 

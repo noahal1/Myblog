@@ -13,6 +13,7 @@ from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from dotenv import load_dotenv
+from pydantic import BaseModel
 
 from .logger import log
 
@@ -20,22 +21,27 @@ from .logger import log
 load_dotenv()
 
 # JWT配置
-SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-if not SECRET_KEY:
-    log.warning("未设置JWT_SECRET_KEY环境变量，使用默认密钥")
-    SECRET_KEY = "noahblog_jwt_secret_key_2023"  # 默认密钥，生产环境应使用环境变量
-
-# 添加调试日志
-log.info(f"JWT配置: SECRET_KEY长度={len(SECRET_KEY) if SECRET_KEY else 0}, ALGORITHM={ALGORITHM}")
-
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24小时
+SECRET_KEY = os.getenv("JWT_SECRET", "your_secret_key_change_this_in_production")
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 默认24小时
+REFRESH_TOKEN_EXPIRE_DAYS = 30  # 刷新令牌有效期30天
 
 # OAuth2密码流认证
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
 
+# Token响应模型
+class Token(BaseModel):
+    access_token: str
+    refresh_token: Optional[str] = None
+    token_type: str
+    expires_at: int  # UNIX时间戳，表示过期时间
 
-def create_access_token(data: Dict, expires_delta: Optional[timedelta] = None) -> str:
+# Token数据模型
+class TokenData(BaseModel):
+    user_id: Optional[str] = None
+    exp: Optional[datetime] = None
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """创建JWT访问令牌
     
     Args:
@@ -46,44 +52,91 @@ def create_access_token(data: Dict, expires_delta: Optional[timedelta] = None) -
         str: 生成的JWT令牌
     """
     to_encode = data.copy()
-    
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt, int(expire.timestamp())
+
+def create_refresh_token(data: dict):
+    """创建刷新令牌
     
-    # 生成JWT
+    Args:
+        data: 要编码到令牌的数据
+        
+    Returns:
+        str: 生成的刷新令牌
+    """
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode.update({"exp": expire, "refresh": True})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+def create_tokens_from_refresh_token(refresh_token: str):
+    """从刷新令牌创建新的访问令牌
+    
+    Args:
+        refresh_token: 刷新令牌
+        
+    Returns:
+        dict: 新的访问令牌和刷新令牌
+    """
+    try:
+        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        is_refresh = payload.get("refresh", False)
+        
+        if not user_id or not is_refresh:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="无效的刷新令牌",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+            
+        # 创建新的访问令牌
+        access_token, expires_at = create_access_token({"sub": user_id})
+        
+        # 创建新的刷新令牌
+        new_refresh_token = create_refresh_token({"sub": user_id})
+        
+        return {
+            "access_token": access_token,
+            "refresh_token": new_refresh_token,
+            "token_type": "bearer",
+            "expires_at": expires_at
+        }
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="无效的刷新令牌",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-def decode_token(token: str) -> Dict:
-    """解码JWT令牌
+def verify_token(token: str):
+    """验证令牌并提取用户ID
     
     Args:
         token: JWT令牌
         
     Returns:
-        Dict: 解码后的令牌数据
-        
-    Raises:
-        HTTPException: 令牌无效或过期
+        TokenData: 令牌数据
     """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="无法验证凭证",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
-    except JWTError as e:
-        log.error(f"JWT解码错误: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="无效的认证凭据",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+        token_data = TokenData(user_id=user_id, exp=datetime.fromtimestamp(payload.get("exp")))
+        return token_data
+    except JWTError:
+        raise credentials_exception
 
-
-def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
+async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
     """从JWT令牌中获取当前用户ID
     Args:
         token: JWT令牌
@@ -92,9 +145,9 @@ def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
     Raises:
         HTTPException: 令牌无效或用户ID不存在
     """
-    payload = decode_token(token)
+    token_data = verify_token(token)
     
-    user_id = payload.get("sub")
+    user_id = token_data.user_id
     if not user_id:
         log.error("JWT中未包含用户ID")
         raise HTTPException(
@@ -112,4 +165,16 @@ def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="用户认证信息无效",
             headers={"WWW-Authenticate": "Bearer"},
-        ) 
+        )
+
+# 检查令牌是否接近过期
+def is_token_about_to_expire(token: str, threshold_minutes: int = 30):
+    """检查令牌是否接近过期（默认阈值为30分钟）"""
+    try:
+        token_data = verify_token(token)
+        if token_data.exp:
+            time_remaining = token_data.exp - datetime.utcnow()
+            return time_remaining < timedelta(minutes=threshold_minutes)
+        return False
+    except:
+        return True  # 如果验证失败，视为需要刷新 
