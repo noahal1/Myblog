@@ -19,7 +19,6 @@ mkdir -p logs
 BACKEND_LOG="logs/backend-$ENV.log"
 FRONTEND_LOG="logs/frontend-$ENV.log"
 
-# 停止可能正在运行的进程
 stop_services() {
     echo "停止可能运行中的服务..."
     # 使用 lsof 查找占用 8000 端口的后端服务进程
@@ -61,6 +60,7 @@ start_backend() {
         # 生产环境
         uvicorn src.main:app --port 8000 > "../$BACKEND_LOG" 2>&1 &
     else
+        source source dev/bin/activate
         # 测试环境
         uvicorn src.main:app --reload --port 8000 > "../$BACKEND_LOG" 2>&1 &
     fi
