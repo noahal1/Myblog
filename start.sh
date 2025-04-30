@@ -60,7 +60,7 @@ start_backend() {
         # 生产环境
         uvicorn src.main:app --port 8000 > "../$BACKEND_LOG" 2>&1 &
     else
-        source source dev/bin/activate
+        source dev/bin/activate
         # 测试环境
         uvicorn src.main:app --reload --port 8000 > "../$BACKEND_LOG" 2>&1 &
     fi
