@@ -185,17 +185,6 @@ const article = ref({
 
 const availableTags = ref([])
 
-// 文章分类
-const categories = [
-  '前端开发',
-  '后端技术',
-  '人工智能',
-  '数据科学',
-  '产品设计',
-  '职场成长',
-  '读书笔记',
-  '随笔感悟'
-]
 
 // 图片上传处理
 const handleImageUpload = async () => {
