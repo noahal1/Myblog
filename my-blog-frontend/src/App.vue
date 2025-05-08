@@ -6,6 +6,8 @@ export default {
   },
   methods: {
     initialize() {
+      // 初始化应用状态
+      console.log('App 组件已加载');
     }
   }
 }
@@ -118,12 +120,16 @@ body, .v-application {
 
 <script setup>
 import { ref, provide, onMounted, watch, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import NavBar from './components/NavBar.vue'
 import AppFooter from './components/AppFooter.vue'
 import { useTheme } from 'vuetify'
+import { useUserStore } from './stores/user'
 
 const theme = useTheme()
 const currentTheme = ref('light')
+const router = useRouter()
+const userStore = useUserStore()
 
 // 提供主题给子组件
 provide('theme', currentTheme)
@@ -136,8 +142,9 @@ const toggleTheme = () => {
   })
 }
 
-// 初始化主题
-onMounted(() => {
+// 初始化应用
+onMounted(async () => {
+  // 初始化主题
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme) {
     currentTheme.value = savedTheme
@@ -147,5 +154,22 @@ onMounted(() => {
     currentTheme.value = 'dark'
     theme.global.name.value = 'dark'
   }
+  
+  // 初始化用户状态
+  try {
+    await userStore.initUserState()
+    console.log('用户状态初始化完成', userStore.isLogin ? '已登录' : '未登录')
+  } catch (error) {
+    console.error('初始化用户状态失败', error)
+  }
 })
+
+// 监听路由变化，处理特殊路由规则
+watch(() => router.currentRoute.value, async (route) => {
+  // 如果进入需要登录的页面但未登录，则重定向到登录页
+  if (route.meta.requiresAuth && !userStore.isAuthenticated) {
+    console.log('需要登录访问的页面，重定向到登录')
+    router.push('/login')
+  }
+}, { immediate: true })
 </script>

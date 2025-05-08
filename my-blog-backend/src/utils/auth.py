@@ -4,16 +4,15 @@
 """
 JWT认证工具模块
 """
-
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
+from sqlalchemy.orm import Session
+from dotenv import load_dotenv
+from pydantic import BaseModel
 import os
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Union
-
-from jose import JWTError, jwt
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from dotenv import load_dotenv
-from pydantic import BaseModel
 
 from .logger import log
 
@@ -27,7 +26,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "
 REFRESH_TOKEN_EXPIRE_DAYS = 30  # 刷新令牌有效期30天
 
 # OAuth2密码流认证
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token", auto_error=False)
 
 # Token响应模型
 class Token(BaseModel):
@@ -145,25 +144,47 @@ async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
     Raises:
         HTTPException: 令牌无效或用户ID不存在
     """
-    token_data = verify_token(token)
+    if not token:
+        log.error("未提供JWT令牌")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="未提供认证信息",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     
-    user_id = token_data.user_id
-    if not user_id:
-        log.error("JWT中未包含用户ID")
+    try:
+        token_data = verify_token(token)
+        
+        user_id = token_data.user_id
+        if not user_id:
+            log.error("JWT中未包含用户ID")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="用户认证信息无效",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # 确保user_id是整数
+        return int(user_id)
+    except JWTError as e:
+        log.error(f"JWT解析错误: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="无效的认证令牌",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except (ValueError, TypeError) as e:
+        log.error(f"用户ID格式错误: {user_id}, 错误: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="用户认证信息无效",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    try:
-        # 确保user_id是整数
-        return int(user_id)
-    except (ValueError, TypeError):
-        log.error(f"用户ID格式错误: {user_id}")
+    except Exception as e:
+        log.error(f"验证令牌时发生未知错误: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="用户认证信息无效",
+            detail="认证过程中发生错误",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -178,3 +199,31 @@ def is_token_about_to_expire(token: str, threshold_minutes: int = 30):
         return False
     except:
         return True  # 如果验证失败，视为需要刷新 
+
+async def get_current_user_id_optional(token: str = Depends(oauth2_scheme)) -> Optional[int]:
+    """从JWT令牌中获取当前用户ID，如果令牌无效则返回None
+    
+    Args:
+        token: JWT令牌
+    
+    Returns:
+        Optional[int]: 用户ID，如果令牌无效则为None
+    """
+    if not token:
+        return None
+        
+    try:
+        token_data = verify_token(token)
+        user_id = token_data.user_id
+        if not user_id:
+            return None
+        
+        # 确保user_id是整数
+        return int(user_id)
+    except JWTError as e:
+        log.warning(f"JWT解析错误: {str(e)}")
+        return None
+    except Exception as e:
+        log.warning(f"获取用户ID时发生错误: {str(e)}")
+        # 如果验证失败，返回None
+        return None 

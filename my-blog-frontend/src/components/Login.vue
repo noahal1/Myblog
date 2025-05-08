@@ -226,6 +226,8 @@ const handleSubmit = async () => {
         const userData = {
           username: form.value.username,
           token: data.access_token,
+          refreshToken: data.refresh_token,
+          expiresAt: data.expires_at,
           userId: data.userId,
           isLogin: true,
           lastLoginTime: new Date().toISOString()
@@ -238,6 +240,8 @@ const handleSubmit = async () => {
         userStore.login({
           username: form.value.username,
           token: data.access_token,
+          refreshToken: data.refresh_token,
+          expiresAt: data.expires_at,
           userId: data.userId
         });
         

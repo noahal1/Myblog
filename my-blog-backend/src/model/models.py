@@ -1,9 +1,8 @@
-from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime, ForeignKey, Table
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime, ForeignKey, Table, Float
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime
 
-Base = declarative_base()
+from .database import Base
 
 class User(Base):
     __tablename__ = 'users'
@@ -41,16 +40,18 @@ class Comment(Base):
     __tablename__ = 'comments'
     
     id = Column(Integer, primary_key=True, index=True)
-    content = Column(Text)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    article_id = Column(Integer, ForeignKey('articles.id'))
+    content = Column(Text, nullable=False)
+    article_id = Column(Integer, ForeignKey("articles.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     likes = Column(Integer, default=0)
-    reply_to_id = Column(Integer, ForeignKey('comments.id'), nullable=True)
+    reply_to_id = Column(Integer, ForeignKey("comments.id"), nullable=True)
+    ip_address = Column(String(45), nullable=True)  # IPv6地址最长45个字符
+    location = Column(String(50), nullable=True)  # 地理位置信息
     
-    user = relationship("User", back_populates="comments")
     article = relationship("Article", back_populates="comments")
-    replies = relationship("Comment", backref=backref("parent", remote_side=[id]))
+    user = relationship("User", back_populates="comments")
+    parent = relationship("Comment", remote_side=[id], backref="replies")
 
 class Tag(Base):
     __tablename__ = 'tags'
@@ -67,3 +68,21 @@ article_tags = Table(
     Column('article_id', Integer, ForeignKey('articles.id'), primary_key=True),
     Column('tag_id', Integer, ForeignKey('tags.id'), primary_key=True)
 )
+
+# 添加访问记录模型
+class VisitorLog(Base):
+    __tablename__ = 'visitor_logs'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    ip_address = Column(String(50), index=True)
+    user_agent = Column(String(255))
+    path = Column(String(255))
+    method = Column(String(10))
+    status_code = Column(Integer)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    request_time = Column(DateTime, default=datetime.utcnow)
+    process_time = Column(Float)
+    referer = Column(String(255), nullable=True)
+    
+    # 与用户表的关联关系
+    user = relationship("User", backref="access_logs")

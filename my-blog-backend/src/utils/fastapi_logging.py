@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""
-在FastAPI应用中集成日志系统
-"""
-
 import time
 import uuid
 from typing import Callable
 
 from fastapi import FastAPI, Request, Response
-from fastapi.middleware.base import BaseHTTPMiddleware
-
+from starlette.middleware.base import BaseHTTPMiddleware
+from sqlalchemy.orm import Session
+from src.model.models import VisitorLog
+from src.utils.auth import get_current_user_id
 from .logger import log_manager, log, api_log
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
     """FastAPI日志中间件，记录请求和响应信息"""
+    
+    def __init__(self, app, db_session_maker=None):
+        super().__init__(app)
+        self.db_session_maker = db_session_maker
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """处理请求和响应"""
@@ -24,12 +23,10 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         request_id = str(uuid.uuid4())
         
         # 获取认证信息和用户ID
-        user_id = "anonymous"
-        authorization = request.headers.get("Authorization", "")
-        if authorization and authorization.startswith("Bearer "):
-            # 从认证令牌提取用户信息 - 这里是简化示例
-            # 实际实现会从JWT令牌中解析用户ID
-            user_id = "authenticated_user"  
+        try:
+            user_id = await get_current_user_id(request)
+        except:
+            user_id = None
         
         # 初始化请求日志上下文
         log_manager.init_request_logger(request_id, user_id)
@@ -38,16 +35,29 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         # 获取API日志器
         api_logger = log_manager.get_api_logger()
         
+        # 获取客户端真实IP地址
+        client_ip = request.client.host if request.client else None
+        forwarded_for = request.headers.get("X-Forwarded-For")
+        if forwarded_for:
+            # 如果存在X-Forwarded-For头，使用第一个IP地址
+            client_ip = forwarded_for.split(",")[0].strip()
+        
+        # 获取请求相关信息
+        user_agent = request.headers.get("User-Agent", "Unknown")
+        path = request.url.path
+        method = request.method
+        referer = request.headers.get("Referer")
+        
         # 记录请求开始信息
         start_time = time.time()
         api_logger.info(
-            f"{request.method} {request.url.path} - 开始处理",
+            f"{method} {path} - 开始处理 - IP: {client_ip}",
             extra={
-                "method": request.method,
-                "path": request.url.path,
+                "method": method,
+                "path": path,
                 "query_params": str(request.query_params),
-                "client_host": request.client.host if request.client else None,
-                "user_agent": request.headers.get("User-Agent", "Unknown")
+                "client_host": client_ip,
+                "user_agent": user_agent
             }
         )
         
@@ -60,7 +70,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             
             # 记录响应信息
             api_logger.info(
-                f"{request.method} {request.url.path} - 状态码: {response.status_code}, 耗时: {process_time:.3f}秒",
+                f"{method} {path} - 状态码: {response.status_code}, 耗时: {process_time:.3f}秒",
                 extra={
                     "status_code": response.status_code,
                     "process_time": process_time
@@ -70,21 +80,43 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # 添加请求ID到响应头
             response.headers["X-Request-ID"] = request_id
             
+            # 如果提供了数据库会话，保存访问记录
+            if self.db_session_maker:
+                try:
+                    db = self.db_session_maker()
+                    visitor_log = VisitorLog(
+                        ip_address=client_ip,
+                        user_agent=user_agent,
+                        path=path,
+                        method=method,
+                        status_code=response.status_code,
+                        user_id=user_id if isinstance(user_id, int) else None,
+                        process_time=process_time,
+                        referer=referer
+                    )
+                    db.add(visitor_log)
+                    db.commit()
+                except Exception as e:
+                    log.error(f"保存访问记录失败: {str(e)}")
+                    db.rollback()
+                finally:
+                    db.close()
+            
             return response
             
         except Exception as exc:
             # 记录异常信息
             process_time = time.time() - start_time
             request_logger.exception(
-                f"{request.method} {request.url.path} - 处理异常: {str(exc)}, 耗时: {process_time:.3f}秒"
+                f"{method} {path} - 处理异常: {str(exc)}, 耗时: {process_time:.3f}秒"
             )
             raise  # 继续传播异常
             
 
-def setup_logging_middleware(app: FastAPI, admin_api_url: str = None, api_key: str = None):
+def setup_logging_middleware(app: FastAPI, db_session_maker=None, admin_api_url: str = None, api_key: str = None):
     """设置FastAPI应用的日志中间件"""
     # 添加日志中间件
-    app.add_middleware(LoggingMiddleware)
+    app.add_middleware(LoggingMiddleware, db_session_maker=db_session_maker)
     
     # 如果提供了后台API，添加后台日志接收器
     if admin_api_url and api_key:
@@ -99,24 +131,3 @@ def setup_logging_middleware(app: FastAPI, admin_api_url: str = None, api_key: s
     log.info("FastAPI应用启动，日志系统初始化完成")
     
     return app
-
-
-# 示例：如何在FastAPI应用中使用
-def get_application() -> FastAPI:
-    """创建并配置FastAPI应用"""
-    app = FastAPI(title="MyBlog API", version="1.0.0")
-    
-    # 添加日志配置
-    setup_logging_middleware(
-        app, 
-        admin_api_url="http://admin.example.com/api/logs",
-        api_key="your_secret_api_key"
-    )
-    
-    # 其他应用配置...
-    
-    return app
-
-
-# 如果需要直接在main.py中使用
-app = get_application() 

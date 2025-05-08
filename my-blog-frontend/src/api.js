@@ -37,25 +37,28 @@ async function refreshToken() {
   }
 
   try {
+    console.log('开始刷新Token...');
     const response = await axios.post(`${API_BASE_URL}/api/token/refresh`, {
       refresh_token: userInfo.refreshToken
     });
     
     // 更新存储的Token
-    const { access_token, refresh_token, expires_at } = response.data;
+    const { access_token, refresh_token, expires_at, userId } = response.data;
     const updatedUserInfo = {
       ...userInfo,
       token: access_token,
       refreshToken: refresh_token,
-      expiresAt: expires_at
+      expiresAt: expires_at,
+      userId: userId || userInfo.userId,
+      isLogin: true
     };
     localStorage.setItem('user', JSON.stringify(updatedUserInfo));
     
+    console.log('Token刷新成功');
     return access_token;
   } catch (error) {
-    // 刷新Token失败, 清除用户信息
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+    console.error('刷新Token失败:', error.response?.data || error.message);
+    // 不直接清除用户信息和重定向，让调用者决定如何处理
     return null;
   }
 }
@@ -133,16 +136,15 @@ export const getComments = async (articleId, page = 1, limit = 50) => {
 };
 
 // 创建评论
-export const createComment = async (content, articleId, userId = null, replyToId = null) => {
+export const createComment = async (content, articleId, replyToId = null) => {
   try {
     return await apiClient.post('/api/comments', {
       content,
       article_id: articleId,
-      user_id: userId,
-      reply_to_id: replyToId ? parseInt(replyToId) : undefined
+      reply_to_id: replyToId ? parseInt(replyToId) : null
     });
   } catch (error) {
-    return handleApiError(error, () => createComment(content, articleId, userId, replyToId));
+    return handleApiError(error, () => createComment(content, articleId, replyToId));
   }
 };
 
@@ -235,40 +237,57 @@ const handleApiError = (error, retryCallback) => {
   
   // 如果是401错误但不是刷新令牌请求本身
   if (error.response?.status === 401 && !error.config.url.includes('/api/token/refresh')) {
-    if (!isRefreshing) {
-      isRefreshing = true;
-      
-      refreshToken().then(newToken => {
-        isRefreshing = false;
-        if (newToken) {
-          onTokenRefreshed(newToken);
-        }
-      }).catch(() => {
-        isRefreshing = false;
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-      });
-    }
+    console.log('遇到401错误，尝试刷新token...');
     
-    // 创建一个新的Promise，等待令牌刷新
+    // 创建一个新的Promise来处理刷新token和重试
     if (retryCallback) {
-      return new Promise((resolve) => {
-        addRefreshSubscriber(newToken => {
-          // 替换原始请求的Authorization头
-          error.config.headers.Authorization = `Bearer ${newToken}`;
-          // 使用新令牌重试原始请求
-          resolve(axios(error.config));
-        });
+      return new Promise((resolve, reject) => {
+        // 如果当前没有其他请求正在刷新token，则开始刷新
+        if (!isRefreshing) {
+          isRefreshing = true;
+          
+          refreshToken()
+            .then(newToken => {
+              isRefreshing = false;
+              if (newToken) {
+                console.log('使用新token重试请求');
+                // 如果刷新成功，通知所有等待的请求
+                onTokenRefreshed(newToken);
+                
+                // 替换当前请求的token并重试
+                error.config.headers.Authorization = `Bearer ${newToken}`;
+                resolve(axios(error.config));
+              } else {
+                // 如果刷新失败，拒绝所有等待的请求
+                reject(error);
+              }
+            })
+            .catch(refreshError => {
+              isRefreshing = false;
+              console.error('刷新token失败:', refreshError);
+              reject(error);
+            });
+        } else {
+          // 如果已经有请求在刷新token，将当前请求加入队列
+          addRefreshSubscriber(newToken => {
+            console.log('使用刷新的token重试队列中的请求');
+            error.config.headers.Authorization = `Bearer ${newToken}`;
+            resolve(axios(error.config));
+          });
+        }
       });
     }
   }
   
-  // 处理401错误（未授权）
+  // 处理401错误，如果是登录页面或没有token，直接抛出错误
   if (error.response?.status === 401) {
-    localStorage.removeItem('user');
-    if (window.location.pathname !== '/login') {
-      window.location.href = '/login';
+    // 只有当用户已登录时才清理状态
+    const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
+    if (userInfo.token) {
+      console.warn('身份验证失败，请重新登录');
     }
+    
+    throw error;
   }
   
   // 将所有其他错误正常抛出
@@ -278,27 +297,44 @@ const handleApiError = (error, retryCallback) => {
 // 添加请求拦截器
 apiClient.interceptors.request.use(
   async config => {
-    // 检查是否需要刷新令牌
-    if (isTokenExpired() && !config.url.includes('/api/token/refresh') && !isRefreshing) {
-      isRefreshing = true;
-      const newToken = await refreshToken();
-      isRefreshing = false;
-      
-      if (newToken) {
-        config.headers.Authorization = `Bearer ${newToken}`;
-      }
-    } else {
-      // 获取用户信息对象
-      const userInfo = localStorage.getItem('user');
-      if (userInfo) {
-        try {
-          const user = JSON.parse(userInfo);
-          if (user && user.token) {
-            config.headers.Authorization = `Bearer ${user.token}`;
+    // 获取用户信息对象
+    const userInfo = localStorage.getItem('user');
+    if (userInfo) {
+      try {
+        const user = JSON.parse(userInfo);
+        
+        // 如果有token，直接使用它
+        if (user && user.token) {
+          config.headers.Authorization = `Bearer ${user.token}`;
+          
+          // 检查token是否即将过期
+          if (user.expiresAt) {
+            const expiryTime = new Date(user.expiresAt * 1000); // 转换为毫秒
+            const now = new Date();
+            const thresholdMs = 5 * 60 * 1000; // 5分钟
+            
+            // 如果token即将过期且有刷新token，尝试刷新，但不阻塞请求
+            if (now > (expiryTime - thresholdMs) && user.refreshToken && !isRefreshing && !config.url.includes('/api/token/refresh')) {
+              // 设置标志，避免多次刷新
+              isRefreshing = true;
+              
+              // 异步刷新token，不阻塞当前请求
+              refreshToken().then(newToken => {
+                isRefreshing = false;
+                if (newToken) {
+                  onTokenRefreshed(newToken);
+                }
+              }).catch(error => {
+                isRefreshing = false;
+                console.error('刷新令牌失败:', error);
+                // 不阻塞当前请求，让后端判断token有效性
+              });
+            }
           }
-        } catch (e) {
-          console.error('解析用户信息失败:', e);
         }
+      } catch (e) {
+        console.error('解析用户信息失败:', e);
+        // 出错时不添加令牌
       }
     }
     return config;
