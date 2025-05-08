@@ -27,6 +27,7 @@ class LogManager:
         # 请求相关的上下文日志
         self.request_id = None
         self.user_id = None
+        self.ip_address = None
     
     def _init_loggers(self):
         """初始化所有日志记录器"""
@@ -69,7 +70,7 @@ class LogManager:
             retention="30 days",
             compression="zip",
             level="INFO",
-            format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {extra[request_id]} | {extra[user_id]} | {message}",
+            format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | 请求ID:{extra[request_id]} | 用户:{extra[user_id]} | IP:{extra[ip_address]} | {message}",
             filter=lambda record: record["extra"].get("api_log") is True,
             encoding="utf-8"
         )
@@ -126,8 +127,11 @@ class LogManager:
             module_name: 模块名称
             level: 日志级别
         """
+        from datetime import datetime
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        
         logger.add(
-            os.path.join(self.log_path, f"{module_name}_{time:YYYY-MM-DD}.log"),
+            os.path.join(self.log_path, f"{module_name}_{current_date}.log"),
             rotation="00:00",
             retention="30 days",
             compression="zip",
@@ -137,23 +141,38 @@ class LogManager:
             encoding="utf-8"
         )
     
-    def init_request_logger(self, request_id: str, user_id: Optional[str] = None):
+    def init_request_logger(self, request_id: str, user_id: Optional[str] = None, ip_address: Optional[str] = None):
         """初始化请求上下文日志器
         
         Args:
             request_id: 请求ID
             user_id: 用户ID
+            ip_address: IP地址
         """
         self.request_id = request_id
         self.user_id = user_id or "anonymous"
+        self.ip_address = ip_address or "unknown"
     
     def get_logger(self):
         """获取常规日志记录器"""
-        return logger.bind(request_id=self.request_id, user_id=self.user_id)
+        return logger.bind(request_id=self.request_id, user_id=self.user_id, ip_address=self.ip_address)
     
     def get_api_logger(self):
         """获取API日志记录器"""
-        return logger.bind(api_log=True, request_id=self.request_id, user_id=self.user_id)
+        return logger.bind(api_log=True, request_id=self.request_id, user_id=self.user_id, ip_address=self.ip_address)
+    
+    def format_exception(self, exc: Exception) -> str:
+        """格式化异常信息
+        
+        Args:
+            exc: 异常对象
+            
+        Returns:
+            str: 格式化后的异常信息
+        """
+        import traceback
+        tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
+        return "".join(tb)
 
 
 # 创建全局实例

@@ -5,6 +5,13 @@
     <!-- 评论表单 -->
     <v-card class="mb-6 comment-form" elevation="1" variant="outlined">
       <v-card-text>
+        <div v-if="!isLoggedIn" class="mb-4 pa-3 bg-grey-lighten-4 rounded-lg text-center">
+          <p class="mb-2">请先登录后才能发表评论</p>
+          <v-btn color="primary" to="/login" prepend-icon="mdi-login">
+            登录
+          </v-btn>
+        </div>
+
         <div v-if="replyingTo" class="reply-info mb-2 px-2 py-1 rounded grey lighten-4">
           <div class="d-flex align-center">
             <span class="text-caption">回复 <strong>{{ replyingTo.username }}</strong>: {{ replyingTo.content.substring(0, 50) }}{{ replyingTo.content.length > 50 ? '...' : '' }}</span>
@@ -24,6 +31,7 @@
           variant="outlined"
           rows="3"
           counter="1000"
+          :disabled="!isLoggedIn"
           :rules="[v => !!v || '请输入评论内容']"
           placeholder="写下你的想法..."
           hide-details
@@ -37,6 +45,7 @@
                 variant="text"
                 icon="mdi-emoticon-outline"
                 v-bind="props"
+                :disabled="!isLoggedIn"
               ></v-btn>
             </template>
             <v-card>
@@ -58,7 +67,7 @@
           <v-btn
             color="primary"
             :loading="submitting"
-            :disabled="!newComment.trim()"
+            :disabled="!isLoggedIn || !newComment.trim()"
             @click="submitComment"
             prepend-icon="mdi-send"
           >
@@ -106,6 +115,19 @@
               color="info"
               label
             >作者</v-chip>
+            
+            <!-- 显示评论者位置信息 -->
+            <v-chip
+              v-if="comment.location"
+              class="ml-2"
+              size="x-small"
+              color="success"
+              variant="outlined"
+              label
+            >
+              <v-icon start size="x-small">mdi-map-marker</v-icon>
+              {{ comment.location }}
+            </v-chip>
             
             <v-spacer></v-spacer>
             
@@ -218,6 +240,9 @@ const replyingTo = computed(() => _replyingTo.value)
 // 表情符号
 const commonEmojis = ['😊', '👍', '🎉', '❤️', '😂', '🙌', '🤔', '👏', '🔥', '✨', '😍', '🙏']
 
+const userStore = useUserStore()
+const isLoggedIn = computed(() => userStore.isAuthenticated)
+
 // 插入表情符号
 const insertEmoji = (emoji) => {
   newComment.value += emoji
@@ -260,7 +285,8 @@ const fetchComments = async () => {
     comments.value = response.data.map(comment => ({
       ...comment,
       userLiked: !!likedComments[comment.id], // 检查用户是否已点赞
-      is_author: comment.user_id === props.authorId // 是否是作者的评论
+      is_author: comment.user_id === props.authorId, // 是否是作者的评论
+      location: comment.location || "未知地区" // 确保位置信息存在
     }))
     // 模拟一下，假设有更多评论
     totalComments.value = response.data.length + 5
@@ -287,7 +313,8 @@ const loadMoreComments = async () => {
     const newComments = response.data.map(comment => ({
       ...comment,
       userLiked: !!likedComments[comment.id], // 检查用户是否已点赞
-      is_author: comment.user_id === props.authorId
+      is_author: comment.user_id === props.authorId,
+      location: comment.location || "未知地区" // 确保位置信息存在
     }))
     comments.value = [...comments.value, ...newComments]
   } catch (error) {
@@ -304,15 +331,33 @@ const submitComment = async () => {
   
   submitting.value = true
   try {
-    const userId = useUserStore().userId
+    const userStore = useUserStore()
+    
+    // 检查用户是否登录
+    if (!userStore.isAuthenticated) {
+      alert('请先登录再发表评论')
+      submitting.value = false
+      return
+    }
     
     // 创建评论
-    const replyToId = _replyingTo.value ? _replyingTo.value.id : undefined
-    const response = await createComment(newComment.value, props.articleId, userId, replyToId)
+    const replyToId = _replyingTo.value ? _replyingTo.value.id : null
+    const response = await createComment(newComment.value, props.articleId, replyToId)
     
     // 将新评论添加到列表顶部
-    comments.value.unshift(response.data)
+    const newCommentData = response.data
+    
+    // 如果添加成功，添加到评论列表
+    if (newCommentData) {
+      // 确保评论有用户名
+      newCommentData.username = userStore.username || "匿名用户"
+      newCommentData.userLiked = false
+      newCommentData.is_author = newCommentData.user_id === props.authorId
+      newCommentData.location = newCommentData.location || "未知地区"
+      
+      comments.value.unshift(newCommentData)
     totalComments.value++
+    }
     
     // 清空输入框和回复状态
     newComment.value = ''
@@ -321,6 +366,11 @@ const submitComment = async () => {
     emit('comment-added')
   } catch (error) {
     console.error('提交评论失败:', error)
+    if (error.response && error.response.status === 401) {
+      alert('需要登录才能发表评论')
+    } else {
+      alert('评论发表失败，请稍后重试')
+    }
   } finally {
     submitting.value = false
   }

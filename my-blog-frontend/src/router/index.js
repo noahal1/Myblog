@@ -5,6 +5,7 @@ import Login from '@/components/Login.vue'
 import About from '@/views/About.vue'
 import CreateArticle from '../views/CreateArticle.vue'
 import KnowledgeBase from '../views/KnowledgeBase.vue'
+import { useUserStore } from '../stores/user'
 
 const routes = [
   {
@@ -51,5 +52,39 @@ const router = createRouter({
     }
   }
 })
+
+// 导航守卫，验证用户身份
+router.beforeEach(async (to, from, next) => {
+  // 初始化用户状态
+  const userStore = useUserStore();
+  
+  // 如果用户有token但未登录，则尝试验证
+  if (userStore.token && !userStore.isLogin) {
+    try {
+      // 尝试验证token并刷新用户状态
+      await userStore.initUserState();
+    } catch (error) {
+      console.error('验证用户身份失败:', error);
+    }
+  }
+  
+  // 如果页面需要认证
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    // 检查用户是否已登录
+    if (!userStore.isAuthenticated) {
+      // 未登录，重定向到登录页
+      next({ 
+        path: '/login',
+        query: { redirect: to.fullPath } // 保存原目标路径
+      });
+    } else {
+      // 已登录，继续
+      next();
+    }
+  } else {
+    // 页面不需要认证，继续
+    next();
+  }
+});
 
 export default router

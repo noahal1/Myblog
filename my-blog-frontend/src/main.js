@@ -57,7 +57,19 @@ app.use(router)
 app.use(vuetify) // 注册 Vuetify
 
 // 在应用挂载前初始化用户状态
-const userStore = useUserStore()
-userStore.initUserState()
+const initApp = async () => {
+  const userStore = useUserStore()
+  try {
+    // 异步初始化用户状态
+    await userStore.initUserState()
+    console.log('用户状态初始化完成', userStore.isAuthenticated ? '已登录' : '未登录')
+  } catch (error) {
+    console.error('初始化用户状态失败:', error)
+  } finally {
+    // 无论成功或失败，都挂载应用
+    app.mount('#app')
+  }
+}
 
-app.mount('#app')
+// 执行初始化
+initApp()
