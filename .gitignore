@@ -25,3 +25,4 @@ dist-ssr
 *.sln
 *.sw?
 /my-blog-backend/.env
+docker-compose.yml
