@@ -20,10 +20,19 @@ from .logger import log
 load_dotenv()
 
 # JWT配置
-SECRET_KEY = os.getenv("JWT_SECRET", "your_secret_key_change_this_in_production")
+SECRET_KEY = os.getenv("JWT_SECRET")
+if not SECRET_KEY:
+    # 在开发环境可以使用随机生成的密钥，但在生产环境中必须通过环境变量设置
+    if os.getenv("ENVIRONMENT", "development") == "production":
+        raise ValueError("在生产环境中必须设置JWT_SECRET环境变量")
+    else:
+        import secrets
+        SECRET_KEY = secrets.token_hex(32)
+        print("警告: 使用随机生成的JWT密钥，这在生产环境中是不安全的")
+
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 默认24小时
-REFRESH_TOKEN_EXPIRE_DAYS = 30  # 刷新令牌有效期30天
+REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "30"))  # 刷新令牌有效期30天
 
 # OAuth2密码流认证
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token", auto_error=False)

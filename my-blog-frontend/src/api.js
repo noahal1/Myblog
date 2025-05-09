@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL, API_CONFIG } from './config';
+import { userStorage } from './utils/secureStorage';
 
 // 创建axios实例
 const apiClient = axios.create({
@@ -31,7 +32,7 @@ function addRefreshSubscriber(callback) {
 
 // 刷新Token
 async function refreshToken() {
-  const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
+  const userInfo = userStorage.getUserInfo();
   if (!userInfo || !userInfo.refreshToken) {
     return null;
   }
@@ -52,7 +53,7 @@ async function refreshToken() {
       userId: userId || userInfo.userId,
       isLogin: true
     };
-    localStorage.setItem('user', JSON.stringify(updatedUserInfo));
+    userStorage.saveUserInfo(updatedUserInfo);
     
     console.log('Token刷新成功');
     return access_token;
@@ -65,7 +66,7 @@ async function refreshToken() {
 
 // 检查Token是否即将过期
 function isTokenExpired() {
-  const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
+  const userInfo = userStorage.getUserInfo();
   if (!userInfo || !userInfo.expiresAt) {
     return true;
   }
@@ -73,7 +74,7 @@ function isTokenExpired() {
   // 如果Token过期前5分钟，认为即将过期
   const expiresAt = userInfo.expiresAt * 1000; // 转为毫秒
   const now = Date.now();
-  const thresholdMs = 5 * 60 * 1000; // 5分钟
+  const thresholdMs = API_CONFIG.REFRESH_THRESHOLD_MINUTES * 60 * 1000; // 使用配置的阈值
   
   return now > expiresAt - thresholdMs;
 }
@@ -191,7 +192,7 @@ export const login = async (username, password) => {
       username: username
     };
     
-    localStorage.setItem('user', JSON.stringify(userInfo));
+    userStorage.saveUserInfo(userInfo);
     return userInfo;
   } catch (error) {
     return handleApiError(error, null); // 登录失败不重试
@@ -209,7 +210,7 @@ export const register = async (username, email, password) => {
 
 // 注销
 export const logout = () => {
-  localStorage.removeItem('user');
+  userStorage.clearUserInfo();
   window.location.href = '/login';
 };
 
@@ -282,7 +283,11 @@ const handleApiError = (error, retryCallback) => {
   // 处理401错误，如果是登录页面或没有token，直接抛出错误
   if (error.response?.status === 401) {
     // 只有当用户已登录时才清理状态
+<<<<<<< HEAD
     const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
+=======
+    const userInfo = userStorage.getUserInfo();
+>>>>>>> feature-branch
     if (userInfo.token) {
       console.warn('身份验证失败，请重新登录');
     }
@@ -298,6 +303,7 @@ const handleApiError = (error, retryCallback) => {
 apiClient.interceptors.request.use(
   async config => {
     // 获取用户信息对象
+<<<<<<< HEAD
     const userInfo = localStorage.getItem('user');
     if (userInfo) {
       try {
@@ -315,6 +321,23 @@ apiClient.interceptors.request.use(
             
             // 如果token即将过期且有刷新token，尝试刷新，但不阻塞请求
             if (now > (expiryTime - thresholdMs) && user.refreshToken && !isRefreshing && !config.url.includes('/api/token/refresh')) {
+=======
+    const userInfo = userStorage.getUserInfo();
+    if (userInfo) {
+      try {
+        // 如果有token，直接使用它
+        if (userInfo && userInfo.token) {
+          config.headers.Authorization = `Bearer ${userInfo.token}`;
+          
+          // 检查token是否即将过期
+          if (userInfo.expiresAt) {
+            const expiryTime = new Date(userInfo.expiresAt * 1000); // 转换为毫秒
+            const now = new Date();
+            const thresholdMs = API_CONFIG.REFRESH_THRESHOLD_MINUTES * 60 * 1000; // 使用配置的阈值
+            
+            // 如果token即将过期且有刷新token，尝试刷新，但不阻塞请求
+            if (now > (expiryTime - thresholdMs) && userInfo.refreshToken && !isRefreshing && !config.url.includes('/api/token/refresh')) {
+>>>>>>> feature-branch
               // 设置标志，避免多次刷新
               isRefreshing = true;
               

@@ -31,7 +31,7 @@
                 <span class="text-h5 font-weight-bold mb-2 typing-text" ref="typingName"></span>
               </div>
               
-              <p class="text-body-1 text-medium-emphasis mb-4 fade-in-text" data-aos="fade-up" data-aos-delay="200">全栈开发者 & 技术爱好者</p>
+              <p class="text-body-1 text-medium-emphasis mb-4 fade-in-text" data-aos="fade-up" data-aos-delay="200">全栈开发者 & MES工程师</p>
               
               <div class="social-links d-flex justify-center" data-aos="fade-up" data-aos-delay="300">
                 <v-btn icon variant="text" color="primary" class="mx-1 floating-icon"href="https://github.com/noahal1">
@@ -56,7 +56,7 @@
                   👋欢迎来到我的博客！我是Noahall，一名热爱技术和艺术的全栈开发者。我致力于探索最新的网络技术和开发方法，并在这里分享我的创作和开发心得。
                 </p>
                 <p class="text-body-1 mb-4 slide-up-text" data-aos="fade-up" data-aos-delay="100">
-                  🚀我的技术栈涵盖前端Vue2、3框架，后端Python、Node.js，以及Docker、云服务部署。我相信技术应该服务于人类，使生活更加便捷和美好。
+                  🚀我的技术栈涵盖前端Vue2、3框架，后端Python，MySQL以及Docker、云服务部署。我相信技术应该服务于人类，使生活更加便捷和美好。
                 </p>
                 <p class="text-body-1 slide-up-text" data-aos="fade-up" data-aos-delay="200">
                   👨‍💻除了编程，我也热爱写作、观影、音乐、DIY、运动，这些爱好给了我不同的视角和灵感
