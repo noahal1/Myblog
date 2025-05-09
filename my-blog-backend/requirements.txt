@@ -10,11 +10,8 @@ greenlet==3.1.1
 h11==0.14.0
 httptools==0.6.4
 idna==3.10
-<<<<<<< HEAD
-=======
 requests==2.32.3
->>>>>>> feature-branch
-
+cachetools==5.5.2
 passlib==1.7.4
 pendulum==3.0.0
 pip==23.2.1
