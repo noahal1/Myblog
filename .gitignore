@@ -7,12 +7,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 *.pyc
-__pycache__
+*/__pycache__
+*/.vite_cache
 
 node_modules
 dist
 dist-ssr
 *.local
+
 
 # Editor directories and files
 .vscode/*
@@ -26,3 +28,7 @@ dist-ssr
 *.sw?
 /my-blog-backend/.env
 docker-compose.yml
+dev
+docker_ali.md
+my-blog-frontend/.vite_cache/deps/@vueuse_core.js
+my-blog-frontend/.vite_cache/deps/@vueuse_core.js.map
