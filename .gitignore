@@ -6,11 +6,15 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*.pyc
+*/__pycache__
+.vite_cache/*
 
 node_modules
 dist
 dist-ssr
 *.local
+
 
 # Editor directories and files
 .vscode/*
@@ -23,3 +27,6 @@ dist-ssr
 *.sln
 *.sw?
 /my-blog-backend/.env
+docker-compose.yml
+dev
+docker_ali.md

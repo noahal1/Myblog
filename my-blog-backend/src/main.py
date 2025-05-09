@@ -18,6 +18,10 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
 from redis import Redis
+<<<<<<< HEAD
+=======
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+>>>>>>> feature-branch
 
 from src.model import models
 from src.model.database import engine, SessionLocal, get_db
@@ -34,17 +38,70 @@ app = FastAPI(title="My Blog API",
               version="1.0.0")
 
 # 添加中间件
+<<<<<<< HEAD
+=======
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
+>>>>>>> feature-branch
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=allowed_origins,  
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # 添加日志中间件
 app.add_middleware(LoggingMiddleware)
 
+<<<<<<< HEAD
+=======
+# 添加速率限制中间件
+class RateLimitMiddleware:
+    def __init__(self, app, max_requests: int = 100, window_seconds: int = 60):
+        self.app = app
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.requests = {}  # IP -> [timestamp1, timestamp2, ...]
+
+    async def __call__(self, request: Request, call_next):
+        ip = request.client.host
+        now = datetime.now()
+        
+        # 清理过期的请求记录
+        if ip in self.requests:
+            self.requests[ip] = [ts for ts in self.requests[ip] if now - ts < timedelta(seconds=self.window_seconds)]
+        else:
+            self.requests[ip] = []
+        
+        # 检查请求数量是否超过限制
+        if len(self.requests[ip]) >= self.max_requests:
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "请求过于频繁，请稍后再试"}
+            )
+        
+        # 记录当前请求
+        self.requests[ip].append(now)
+        
+        # 继续处理请求
+        response = await call_next(request)
+        return response
+
+# 只在生产环境中启用速率限制
+if os.getenv("ENVIRONMENT") == "production":
+    # 添加可信主机中间件
+    app.add_middleware(
+        TrustedHostMiddleware, 
+        allowed_hosts=os.getenv("ALLOWED_HOSTS", "*").split(",")
+    )
+    
+    # 添加速率限制
+    max_requests = int(os.getenv("RATE_LIMIT_MAX_REQUESTS", "100"))
+    window_seconds = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
+    app.add_middleware(RateLimitMiddleware, max_requests=max_requests, window_seconds=window_seconds)
+
+>>>>>>> feature-branch
 # 数据库配置
 DATABASE_URL = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 

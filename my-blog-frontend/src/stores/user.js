@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { API_BASE_URL } from '../config.js'
+import { API_BASE_URL, API_CONFIG, APP_CONFIG } from '../config.js'
+import { userStorage } from '../utils/secureStorage'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -33,11 +34,11 @@ export const useUserStore = defineStore('user', {
       this.avatar = userData.avatar || ''
       this.lastLoginTime = new Date().toISOString()
       
-      this.saveToLocalStorage()
+      this.saveUserData()
     },
     
-    saveToLocalStorage() {
-      localStorage.setItem('user', JSON.stringify({
+    saveUserData() {
+      const userData = {
         username: this.username,
         token: this.token,
         refreshToken: this.refreshToken,
@@ -46,7 +47,9 @@ export const useUserStore = defineStore('user', {
         userId: this.userId,
         avatar: this.avatar,
         lastLoginTime: this.lastLoginTime
-      }))
+      }
+      
+      userStorage.saveUserInfo(userData)
     },
     
     logout() {
@@ -59,15 +62,21 @@ export const useUserStore = defineStore('user', {
       this.avatar = ''
       this.lastLoginTime = null
       
-      localStorage.removeItem('user')
+      userStorage.clearUserInfo()
     },
     
+<<<<<<< HEAD
     // 从本地存储恢复用户状态
     async initUserState() {
       const savedUser = localStorage.getItem('user')
       if (savedUser) {
+=======
+    // 从存储恢复用户状态
+    async initUserState() {
+      const userData = userStorage.getUserInfo()
+      if (userData) {
+>>>>>>> feature-branch
         try {
-          const userData = JSON.parse(savedUser)
           this.username = userData.username || ''
           this.token = userData.token || ''
           this.refreshToken = userData.refreshToken || ''
@@ -77,13 +86,13 @@ export const useUserStore = defineStore('user', {
           this.avatar = userData.avatar || ''
           this.lastLoginTime = userData.lastLoginTime || null
           
-          // 如果登录时间超过7天，自动登出
+          // 如果登录时间超过配置的最大会话天数，自动登出
           if (this.lastLoginTime) {
             const loginDate = new Date(this.lastLoginTime)
             const now = new Date()
             const diffDays = Math.floor((now - loginDate) / (1000 * 60 * 60 * 24))
             
-            if (diffDays > 7) {
+            if (diffDays > APP_CONFIG.MAX_SESSION_DAYS) {
               console.log('登录已过期，自动登出')
               this.logout()
               return false
@@ -96,7 +105,11 @@ export const useUserStore = defineStore('user', {
             if (this.expiresAt) {
               const expiryTime = this.expiresAt * 1000 // 转换为毫秒
               const now = Date.now()
+<<<<<<< HEAD
               const thresholdMs = 5 * 60 * 1000 // 5分钟
+=======
+              const thresholdMs = API_CONFIG.REFRESH_THRESHOLD_MINUTES * 60 * 1000
+>>>>>>> feature-branch
               
               // 如果token已过期或即将过期，并且有刷新token
               if (now > (expiryTime - thresholdMs) && this.refreshToken) {
@@ -148,8 +161,13 @@ export const useUserStore = defineStore('user', {
             return false;
           }
           
+<<<<<<< HEAD
           // 如果token即将过期（5分钟内），尝试提前刷新
           const thresholdMs = 5 * 60 * 1000; // 5分钟
+=======
+          // 如果token即将过期，尝试提前刷新
+          const thresholdMs = API_CONFIG.REFRESH_THRESHOLD_MINUTES * 60 * 1000;
+>>>>>>> feature-branch
           if (now > (expiryTime - thresholdMs) && this.refreshToken) {
             console.log('Token即将过期，尝试提前刷新');
             // 异步刷新，但不等待结果
@@ -196,7 +214,11 @@ export const useUserStore = defineStore('user', {
         this.userId = userId || this.userId;
         this.isLogin = true;
         
+<<<<<<< HEAD
         this.saveToLocalStorage();
+=======
+        this.saveUserData();
+>>>>>>> feature-branch
         console.log('访问令牌刷新成功');
         return true;
       } catch (error) {
@@ -218,7 +240,7 @@ export const useUserStore = defineStore('user', {
       if (userData.avatar) this.avatar = userData.avatar
       if (userData.userId) this.userId = userData.userId
       
-      this.saveToLocalStorage()
+      this.saveUserData()
     }
   }
 })
