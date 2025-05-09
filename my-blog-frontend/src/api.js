@@ -283,15 +283,9 @@ const handleApiError = (error, retryCallback) => {
   // 处理401错误，如果是登录页面或没有token，直接抛出错误
   if (error.response?.status === 401) {
     // 只有当用户已登录时才清理状态
-<<<<<<< HEAD
-<<<<<<< HEAD
-    const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
-=======
+
     const userInfo = userStorage.getUserInfo();
->>>>>>> feature-branch
-=======
-    const userInfo = userStorage.getUserInfo();
->>>>>>> e41fb12 (合并冲突解决)
+
     if (userInfo.token) {
       console.warn('身份验证失败，请重新登录');
     }
@@ -307,28 +301,7 @@ const handleApiError = (error, retryCallback) => {
 apiClient.interceptors.request.use(
   async config => {
     // 获取用户信息对象
-<<<<<<< HEAD
-<<<<<<< HEAD
-    const userInfo = localStorage.getItem('user');
-=======
-    const userInfo = userStorage.getUserInfo();
->>>>>>> e41fb12 (合并冲突解决)
-    if (userInfo) {
-      try {
-        // 如果有token，直接使用它
-        if (userInfo && userInfo.token) {
-          config.headers.Authorization = `Bearer ${userInfo.token}`;
-          
-          // 检查token是否即将过期
-          if (userInfo.expiresAt) {
-            const expiryTime = new Date(userInfo.expiresAt * 1000); // 转换为毫秒
-            const now = new Date();
-            const thresholdMs = API_CONFIG.REFRESH_THRESHOLD_MINUTES * 60 * 1000; // 使用配置的阈值
-            
-            // 如果token即将过期且有刷新token，尝试刷新，但不阻塞请求
-<<<<<<< HEAD
-            if (now > (expiryTime - thresholdMs) && user.refreshToken && !isRefreshing && !config.url.includes('/api/token/refresh')) {
-=======
+
     const userInfo = userStorage.getUserInfo();
     if (userInfo) {
       try {
@@ -343,11 +316,9 @@ apiClient.interceptors.request.use(
             const thresholdMs = API_CONFIG.REFRESH_THRESHOLD_MINUTES * 60 * 1000; // 使用配置的阈值
             
             // 如果token即将过期且有刷新token，尝试刷新，但不阻塞请求
+
             if (now > (expiryTime - thresholdMs) && userInfo.refreshToken && !isRefreshing && !config.url.includes('/api/token/refresh')) {
->>>>>>> feature-branch
-=======
-            if (now > (expiryTime - thresholdMs) && userInfo.refreshToken && !isRefreshing && !config.url.includes('/api/token/refresh')) {
->>>>>>> e41fb12 (合并冲突解决)
+
               // 设置标志，避免多次刷新
               isRefreshing = true;
               

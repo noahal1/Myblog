@@ -37,7 +37,7 @@ export const SECURITY_CONFIG = {
 if (SECURITY_CONFIG.CONTENT_SECURITY_POLICY && typeof document !== 'undefined') {
   const meta = document.createElement('meta');
   meta.httpEquiv = 'Content-Security-Policy';
-  meta.content = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';";
+  meta.content = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http: https: *;";
   document.head.appendChild(meta);
 }
 

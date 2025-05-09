@@ -180,14 +180,10 @@ class IPLocationService:
         return False
     
     def _query_ip_location(self, ip: str) -> Dict:
-        """查询IP地址的地理位置"""
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
+
         default_result = {"province": "未知", "city": "未知", "isp": "未知"}
         
-        # 检查是否为内网或特殊IP地址
->>>>>>> e41fb12 (合并冲突解决)
+
         try:
             ip_obj = ipaddress.ip_address(ip)
             if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_reserved:
@@ -250,23 +246,6 @@ class IPLocationService:
                         print(f"IP查询失败(尝试{attempt+1}/{retry_count}): {str(e)}")
                     # 继续尝试
             
-<<<<<<< HEAD
-            if response.status_code == 200:
-                data = response.json()
-                return {
-                    "province": data.get("region", "未知"),
-                    "city": data.get("city", "未知"),
-                    "isp": data.get("org", "未知").split(" ")[1] if data.get("org") else "未知",
-                    "country": data.get("country", "未知"),
-                    "country_code": data.get("country", "")
-                }
-        
-        except Exception as e:
-            print(f"查询IP地址失败: {e}")
-        
-        # 默认返回未知
-        return {"province": "未知", "city": "未知", "isp": "未知"}
-=======
         default_result = {"province": "未知", "city": "未知", "isp": "未知"}
         
         # 检查是否为内网或特殊IP地址
@@ -334,11 +313,6 @@ class IPLocationService:
             
         # 所有API都失败，返回默认结果
         return default_result
->>>>>>> feature-branch
-=======
-        # 所有API都失败，返回默认结果
-        return default_result
->>>>>>> e41fb12 (合并冲突解决)
 
 # 单例模式
 ip_location_service = IPLocationService()
