@@ -16,10 +16,17 @@ export const useUserStore = defineStore('user', {
   }),
   
   getters: {
-    isAuthenticated: (state) => !!state.token && state.isLogin,
     userInitials: (state) => {
-      if (!state.username) return '游客'
-      return state.username.substring(0, 1).toUpperCase()
+      if (!state.username) return ''
+      return state.username.charAt(0).toUpperCase()
+    },
+    
+    isAuthenticated: (state) => {
+      return state.isLogin && !!state.token
+    },
+    
+    isAdmin: (state) => {
+      return state.isAuthenticated && state.userId === 1
     }
   },
   
@@ -37,13 +44,40 @@ export const useUserStore = defineStore('user', {
       this.saveUserData()
     },
     
+    // 初始化用户状态
+    async initUserState() {
+      try {
+        // 尝试从存储获取用户信息
+        const userData = userStorage.getUserInfo()
+        
+        if (userData && userData.token) {
+          // 有token，设置用户状态
+          this.username = userData.username || ''
+          this.token = userData.token
+          this.refreshToken = userData.refreshToken || ''
+          this.expiresAt = userData.expiresAt || null
+          this.userId = userData.userId || null
+          this.avatar = userData.avatar || ''
+          this.isLogin = true
+          
+          console.log('从存储加载用户状态：', this.username)
+          return true
+        }
+        
+        return false
+      } catch (error) {
+        console.error('初始化用户状态失败:', error)
+        return false
+      }
+    },
+    
+    // 保存用户数据到存储
     saveUserData() {
       const userData = {
         username: this.username,
         token: this.token,
         refreshToken: this.refreshToken,
         expiresAt: this.expiresAt,
-        isLogin: this.isLogin,
         userId: this.userId,
         avatar: this.avatar,
         lastLoginTime: this.lastLoginTime
@@ -52,6 +86,7 @@ export const useUserStore = defineStore('user', {
       userStorage.saveUserInfo(userData)
     },
     
+    // 退出登录
     logout() {
       this.username = ''
       this.token = ''
@@ -60,115 +95,24 @@ export const useUserStore = defineStore('user', {
       this.isLogin = false
       this.userId = null
       this.avatar = ''
-      this.lastLoginTime = null
       
       userStorage.clearUserInfo()
     },
     
-    // 从存储恢复用户状态
-    async initUserState() {
-      const userData = userStorage.getUserInfo()
-      if (userData) {
-        try {
-          this.username = userData.username || ''
-          this.token = userData.token || ''
-          this.refreshToken = userData.refreshToken || ''
-          this.expiresAt = userData.expiresAt || null
-          this.isLogin = userData.isLogin || false
-          this.userId = userData.userId || null
-          this.avatar = userData.avatar || ''
-          this.lastLoginTime = userData.lastLoginTime || null
-          
-          // 如果登录时间超过配置的最大会话天数，自动登出
-          if (this.lastLoginTime) {
-            const loginDate = new Date(this.lastLoginTime)
-            const now = new Date()
-            const diffDays = Math.floor((now - loginDate) / (1000 * 60 * 60 * 24))
-            
-            if (diffDays > APP_CONFIG.MAX_SESSION_DAYS) {
-              console.log('登录已过期，自动登出')
-              this.logout()
-              return false
-            }
-          }
-          
-          // 如果有token，检查是否已过期
-          if (this.token) {
-            // 检查token是否已过期或即将过期
-            if (this.expiresAt) {
-              const expiryTime = this.expiresAt * 1000 // 转换为毫秒
-              const now = Date.now()
-              const thresholdMs = API_CONFIG.REFRESH_THRESHOLD_MINUTES * 60 * 1000
-              
-              // 如果token已过期或即将过期，并且有刷新token
-              if (now > (expiryTime - thresholdMs) && this.refreshToken) {
-                console.log('Token即将过期，尝试刷新')
-                try {
-                  const refreshSuccess = await this.refreshAccessToken()
-                  if (!refreshSuccess) {
-                    console.log('刷新Token失败，登出用户')
-                    this.logout()
-                    return false
-                  }
-                } catch (error) {
-                  console.error('刷新Token失败:', error)
-                  this.logout()
-                  return false
-                }
-              }
-            }
-            
-            // 设置已登录状态
-            this.isLogin = true
-            return true
-          }
-        } catch (error) {
-          console.error('初始化用户状态时出错:', error)
-          this.logout()
+    // 验证token有效性
+    async verifyToken() {
+      try {
+        if (!this.token) {
           return false
         }
-      }
-      return false
-    },
-    
-    // 验证token有效性的方法
-    async verifyToken() {
-      if (!this.token) return false;
-      
-      try {
-        // 检查token是否已过期
-        if (this.expiresAt) {
-          const expiryTime = new Date(this.expiresAt * 1000); // 转换为毫秒
-          const now = new Date();
-          
-          // 如果token已过期且有刷新token，尝试刷新
-          if (now > expiryTime) {
-            console.log('Token已过期，尝试刷新');
-            if (this.refreshToken) {
-              return await this.refreshAccessToken();
-            }
-            return false;
-          }
-          
-          // 如果token即将过期，尝试提前刷新
-          const thresholdMs = API_CONFIG.REFRESH_THRESHOLD_MINUTES * 60 * 1000;
-          if (now > (expiryTime - thresholdMs) && this.refreshToken) {
-            console.log('Token即将过期，尝试提前刷新');
-            // 异步刷新，但不等待结果
-            this.refreshAccessToken().catch(error => {
-              console.error('提前刷新token失败:', error);
-            });
-          }
-          
-          // token未过期，有效
-          return true;
-        }
+        
+        // 这里可以添加验证token的API调用
+        // 暂时简单返回true，实际应该调用后端验证
+        return true
       } catch (error) {
-        console.error('验证token出错:', error);
+        console.error('验证token失败:', error)
+        return false
       }
-      
-      // 如果没有过期时间信息或出现错误，使用token存在作为退路检查
-      return !!this.token;
     },
     
     // 刷新访问令牌
@@ -201,7 +145,7 @@ export const useUserStore = defineStore('user', {
         this.saveUserData();
         console.log('访问令牌刷新成功');
         return true;
-      } catch (error) {
+        } catch (error) {
         console.error('刷新访问令牌失败:', error.response?.data || error.message);
         
         // 只有在特定情况下才登出

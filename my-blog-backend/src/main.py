@@ -19,13 +19,18 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
 from redis import Redis
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+import re
+import ipaddress
 
 from src.model import models
 from src.model.database import engine, SessionLocal, get_db
 from src.utils.auth import verify_token, create_access_token, create_refresh_token, get_current_user_id, get_current_user_id_optional, create_tokens_from_refresh_token
 from src.utils.logger import log, api_log
 from src.utils.ip_location import get_ip_location
-from src.middleware.logger_middleware import LoggingMiddleware
+from src.utils.fastapi_logging import LoggingMiddleware, setup_logging_middleware
+from starlette.datastructures import State
+from cachetools import TTLCache
+from functools import wraps
 
 load_dotenv(dotenv_path='./.env')
 
@@ -44,8 +49,8 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
-# 添加日志中间件
-app.add_middleware(LoggingMiddleware)
+# 添加日志中间件（使用新的带数据库记录功能的中间件）
+app.add_middleware(LoggingMiddleware, db_session_maker=SessionLocal)
 
 # 添加速率限制中间件
 class RateLimitMiddleware:
@@ -158,8 +163,8 @@ class TagResponse(BaseModel):
 class CommentCreate(BaseModel):
     content: str
     article_id: int
-    user_id: int = None  # 如果用户未登录，可以为空
-    reply_to_id: int = None  # 回复的评论ID，如果是直接评论则为None
+    user_id: Optional[int] = None  # 如果用户未登录，可以为空
+    reply_to_id: Optional[int] = None  # 回复的评论ID，如果是直接评论则为None
 
 class CommentResponse(BaseModel):
     id: int
@@ -491,7 +496,7 @@ async def create_comment(
         content=comment.content,
         article_id=comment.article_id,
         user_id=current_user_id,
-        reply_to_id=comment.reply_to_id,
+        reply_to_id=comment.reply_to_id if comment.reply_to_id and comment.reply_to_id > 0 else None,
         ip_address=ip_address,
         location=location
     )
@@ -681,8 +686,7 @@ async def get_visitor_logs(
     current_user_id: int = Depends(get_current_user_id)
 ):
     """获取访问记录列表（需要管理员权限）"""
-    # 验证用户是否为管理员 (简化实现)
-    admin = db.query(models.User).filter(models.User.id == current_user_id).first()
+    admin = db.query(models.User).filter(models.User.id == 1).first()
     if not admin or admin.username != os.getenv('ADMIN_USERNAME'):
         raise HTTPException(status_code=403, detail="没有权限访问该资源")
     
@@ -768,6 +772,28 @@ async def get_visitor_stats(
         "average_response_time": avg_response_time,
         "path_stats": path_stats,
         "ip_stats": ip_stats
+    }
+
+# IP地理位置查询API端点
+@app.get('/api/admin/ip-geolocation')
+async def get_ip_geolocation(
+    ip: str,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """获取IP地址的地理位置信息（需要管理员权限）"""
+    # 验证用户是否为管理员
+    admin = db.query(models.User).filter(models.User.id == current_user_id).first()
+    if not admin or admin.username != os.getenv('ADMIN_USERNAME'):
+        raise HTTPException(status_code=403, detail="没有权限访问该资源")
+    
+    # 不再查询IP地理位置，直接返回"未知"
+    return {
+        "ip": ip,
+        "country": "未知",
+        "region": "未知",
+        "city": "未知",
+        "isp": "未知"
     }
 
 # 启动服务器

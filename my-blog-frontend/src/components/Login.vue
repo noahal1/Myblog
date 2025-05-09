@@ -32,7 +32,7 @@
         <!-- 错误提示 -->
         <v-alert
           v-if="errorMessage"
-          type="error"
+          :type="alertType"
           variant="tonal"
           closable
           class="mb-4"
@@ -185,6 +185,7 @@ const showPassword = ref(false)
 const rememberMe = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
+const alertType = ref('error')
 
 // 表单验证规则
 const rules = {
@@ -261,10 +262,12 @@ const handleSubmit = async () => {
       console.log('注册成功:', response.data);
       isLogin.value = true;
       errorMessage.value = '注册成功，请登录';
+      alertType.value = 'success';
     }
   } catch (error) {
     console.error('操作失败:', error);
     errorMessage.value = error.response?.data?.detail || error.message || '操作失败';
+    alertType.value = 'error';
   } finally {
     loading.value = false;
   }

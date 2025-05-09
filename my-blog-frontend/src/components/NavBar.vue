@@ -125,6 +125,14 @@
                     rounded="lg"
                   />
                   <v-list-item
+                    v-if="isAdmin"
+                    to="/admin"
+                    prepend-icon="mdi-view-dashboard"
+                    title="管理仪表盘"
+                    class="menu-item"
+                    rounded="lg"
+                  />
+                  <v-list-item
                     @click="handleLogout"
                     prepend-icon="mdi-logout"
                     title="退出登录"
@@ -187,6 +195,7 @@ const mobileMenuOpen = ref(false)
 
 const isMobile = computed(() => display.mdAndDown.value)
 const isSmallScreen = computed(() => display.smAndDown.value)
+const isAdmin = computed(() => userStore.userId === 1)
 
 const navItems = [
   { to: '/', icon: 'mdi-home', label: '首页' },

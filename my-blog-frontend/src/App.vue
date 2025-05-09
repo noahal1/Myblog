@@ -144,7 +144,7 @@ const toggleTheme = () => {
 
 // 初始化应用
 onMounted(async () => {
-  // 初始化主题
+// 初始化主题
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme) {
     currentTheme.value = savedTheme

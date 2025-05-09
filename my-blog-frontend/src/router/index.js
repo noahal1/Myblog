@@ -5,6 +5,7 @@ import Login from '@/components/Login.vue'
 import About from '@/views/About.vue'
 import CreateArticle from '../views/CreateArticle.vue'
 import KnowledgeBase from '../views/KnowledgeBase.vue'
+import AdminView from '../views/AdminView.vue'
 import { useUserStore } from '../stores/user'
 
 const routes = [
@@ -38,6 +39,12 @@ const routes = [
     path: '/knowledge',
     name: 'knowledge',
     component: KnowledgeBase
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: AdminView,
+    meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]
 
@@ -77,8 +84,16 @@ router.beforeEach(async (to, from, next) => {
         path: '/login',
         query: { redirect: to.fullPath } // 保存原目标路径
       });
+    } else if (to.matched.some(record => record.meta.requiresAdmin)) {
+      // 如果页面需要管理员权限，检查用户是否是管理员（用户ID为1）
+      if (userStore.userId === 1) {
+        next(); // 是管理员，允许访问
+      } else {
+        // 不是管理员，重定向到首页
+        next({ path: '/' });
+      }
     } else {
-      // 已登录，继续
+      // 已登录且不需要管理员权限，继续
       next();
     }
   } else {

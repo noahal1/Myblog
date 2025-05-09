@@ -179,3 +179,13 @@ class LogManager:
 log_manager = LogManager()
 log = log_manager.get_logger()
 api_log = log_manager.get_api_logger() 
+
+def setup_logging():
+    """初始化应用程序的日志系统
+    
+    可以在应用程序启动时调用此函数来确保日志系统被正确设置
+    
+    Returns:
+        LogManager: 日志管理器实例
+    """
+    return log_manager 

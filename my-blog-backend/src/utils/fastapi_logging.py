@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy.orm import Session
 from src.model.models import VisitorLog
-from src.utils.auth import get_current_user_id
+from src.utils.auth import get_current_user_id_optional
 from .logger import log_manager, log, api_log
 
 
@@ -23,10 +23,15 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         request_id = str(uuid.uuid4())
         
         # 获取认证信息和用户ID
+        user_id = None
         try:
-            user_id = await get_current_user_id(request)
-        except:
-            user_id = None
+            # 尝试从请求头中获取token
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header.replace("Bearer ", "")
+                user_id = await get_current_user_id_optional(token)
+        except Exception as e:
+            log.warning(f"获取用户ID失败: {str(e)}")
         
         # 初始化请求日志上下文
         log_manager.init_request_logger(request_id, user_id)
@@ -82,6 +87,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             
             # 如果提供了数据库会话，保存访问记录
             if self.db_session_maker:
+                db = None
                 try:
                     db = self.db_session_maker()
                     visitor_log = VisitorLog(
@@ -96,11 +102,14 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                     )
                     db.add(visitor_log)
                     db.commit()
+                    log.debug(f"已保存访问记录: {path}, IP: {client_ip}")
                 except Exception as e:
                     log.error(f"保存访问记录失败: {str(e)}")
-                    db.rollback()
+                    if db:
+                        db.rollback()
                 finally:
-                    db.close()
+                    if db:
+                        db.close()
             
             return response
             

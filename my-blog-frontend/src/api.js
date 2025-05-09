@@ -214,6 +214,35 @@ export const logout = () => {
   window.location.href = '/login';
 };
 
+// 获取访问记录列表
+export const getVisitorLogs = async (params = {}) => {
+  try {
+    return await apiClient.get('/api/admin/visitor-logs', { params });
+  } catch (error) {
+    return handleApiError(error, () => getVisitorLogs(params));
+  }
+};
+
+// 获取访问统计数据
+export const getVisitorStats = async (days = 7) => {
+  try {
+    return await apiClient.get('/api/admin/visitor-stats', { params: { days } });
+  } catch (error) {
+    return handleApiError(error, () => getVisitorStats(days));
+  }
+};
+
+// 获取IP地理位置信息
+export const getIpGeolocation = async (ip) => {
+  try {
+    const response = await apiClient.get('/api/admin/ip-geolocation', { params: { ip } });
+    return response.data;
+  } catch (error) {
+    console.error('获取IP地理位置失败:', error);
+    return null;
+  }
+};
+
 // 错误处理和重试逻辑
 const handleApiError = (error, retryCallback) => {
   const requestId = error.config?.url;
@@ -244,16 +273,16 @@ const handleApiError = (error, retryCallback) => {
     if (retryCallback) {
       return new Promise((resolve, reject) => {
         // 如果当前没有其他请求正在刷新token，则开始刷新
-        if (!isRefreshing) {
-          isRefreshing = true;
-          
+    if (!isRefreshing) {
+      isRefreshing = true;
+      
           refreshToken()
             .then(newToken => {
-              isRefreshing = false;
-              if (newToken) {
+        isRefreshing = false;
+        if (newToken) {
                 console.log('使用新token重试请求');
                 // 如果刷新成功，通知所有等待的请求
-                onTokenRefreshed(newToken);
+          onTokenRefreshed(newToken);
                 
                 // 替换当前请求的token并重试
                 error.config.headers.Authorization = `Bearer ${newToken}`;
@@ -261,20 +290,20 @@ const handleApiError = (error, retryCallback) => {
               } else {
                 // 如果刷新失败，拒绝所有等待的请求
                 reject(error);
-              }
+        }
             })
             .catch(refreshError => {
-              isRefreshing = false;
+        isRefreshing = false;
               console.error('刷新token失败:', refreshError);
               reject(error);
-            });
+      });
         } else {
           // 如果已经有请求在刷新token，将当前请求加入队列
-          addRefreshSubscriber(newToken => {
+        addRefreshSubscriber(newToken => {
             console.log('使用刷新的token重试队列中的请求');
-            error.config.headers.Authorization = `Bearer ${newToken}`;
-            resolve(axios(error.config));
-          });
+          error.config.headers.Authorization = `Bearer ${newToken}`;
+          resolve(axios(error.config));
+        });
         }
       });
     }
@@ -308,7 +337,7 @@ apiClient.interceptors.request.use(
         // 如果有token，直接使用它
         if (userInfo && userInfo.token) {
           config.headers.Authorization = `Bearer ${userInfo.token}`;
-          
+        
           // 检查token是否即将过期
           if (userInfo.expiresAt) {
             const expiryTime = new Date(userInfo.expiresAt * 1000); // 转换为毫秒
@@ -320,14 +349,14 @@ apiClient.interceptors.request.use(
             if (now > (expiryTime - thresholdMs) && userInfo.refreshToken && !isRefreshing && !config.url.includes('/api/token/refresh')) {
 
               // 设置标志，避免多次刷新
-              isRefreshing = true;
+      isRefreshing = true;
               
               // 异步刷新token，不阻塞当前请求
               refreshToken().then(newToken => {
-                isRefreshing = false;
-                if (newToken) {
+      isRefreshing = false;
+      if (newToken) {
                   onTokenRefreshed(newToken);
-                }
+      }
               }).catch(error => {
                 isRefreshing = false;
                 console.error('刷新令牌失败:', error);
@@ -335,9 +364,9 @@ apiClient.interceptors.request.use(
               });
             }
           }
-        }
-      } catch (e) {
-        console.error('解析用户信息失败:', e);
+          }
+        } catch (e) {
+          console.error('解析用户信息失败:', e);
         // 出错时不添加令牌
       }
     }

@@ -58,7 +58,7 @@ app.use(vuetify) // 注册 Vuetify
 
 // 在应用挂载前初始化用户状态
 const initApp = async () => {
-  const userStore = useUserStore()
+const userStore = useUserStore()
   try {
     // 异步初始化用户状态
     await userStore.initUserState()
@@ -67,7 +67,7 @@ const initApp = async () => {
     console.error('初始化用户状态失败:', error)
   } finally {
     // 无论成功或失败，都挂载应用
-    app.mount('#app')
+app.mount('#app')
   }
 }
 
