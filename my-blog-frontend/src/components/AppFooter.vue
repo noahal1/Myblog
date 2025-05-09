@@ -127,7 +127,7 @@
             href="https://beian.miit.gov.cn/" 
             target="_blank"
             class="beian-link"
-          >津ICP备XXXX号</a>
+          >鲁ICP备2025161138号</a>
         </div>
       </div>
     </v-container>
