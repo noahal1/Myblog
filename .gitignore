@@ -30,8 +30,3 @@ dist-ssr
 docker-compose.yml
 dev
 docker_ali.md
-<<<<<<< HEAD
-=======
-my-blog-frontend/.vite_cache/deps/@vueuse_core.js
-my-blog-frontend/.vite_cache/deps/@vueuse_core.js.map
->>>>>>> e41fb12 (合并冲突解决)
