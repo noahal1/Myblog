@@ -181,40 +181,73 @@ class IPLocationService:
     
     def _query_ip_location(self, ip: str) -> Dict:
         """查询IP地址的地理位置"""
+        default_result = {"province": "未知", "city": "未知", "isp": "未知"}
+        
+        # 检查是否为内网或特殊IP地址
         try:
-            # 使用IP.SB的API（无需API密钥）
-            url = f"https://api.ip.sb/geoip/{ip}"
-            response = requests.get(url, timeout=3)
-            
-            if response.status_code == 200:
-                data = response.json()
+            ip_obj = ipaddress.ip_address(ip)
+            if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_reserved:
                 return {
-                    "province": data.get("region", "未知"),
-                    "city": data.get("city", "未知"),
-                    "isp": data.get("organization", "未知"),
-                    "country": data.get("country", "未知"),
-                    "country_code": data.get("country_code", "")
+                    "province": "内网IP" if ip_obj.is_private else "保留地址",
+                    "city": "局域网" if ip_obj.is_private else "保留地址",
+                    "isp": "本地网络"
                 }
+        except:
+            return default_result
             
-            # 备用方案：使用ipinfo.io（每天有免费使用额度）
-            url = f"https://ipinfo.io/{ip}/json"
-            response = requests.get(url, timeout=3)
+        # 添加重试和超时机制
+        retry_count = 3
+        api_endpoints = [
+            (f"https://api.ip.sb/geoip/{ip}", lambda data: {
+                "province": data.get("region", "未知"),
+                "city": data.get("city", "未知"),
+                "isp": data.get("organization", "未知"),
+                "country": data.get("country", "未知"),
+                "country_code": data.get("country_code", "")
+            }),
+            (f"https://ipinfo.io/{ip}/json", lambda data: {
+                "province": data.get("region", "未知"),
+                "city": data.get("city", "未知"),
+                "isp": data.get("org", "未知").split(" ")[1] if data.get("org") else "未知",
+                "country": data.get("country", "未知"),
+                "country_code": data.get("country", "")
+            })
+        ]
+        
+        # 创建安全的请求会话
+        session = requests.Session()
+        session.headers.update({
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Accept": "application/json"
+        })
+        
+        for endpoint, parser in api_endpoints:
+            for attempt in range(retry_count):
+                try:
+                    response = session.get(endpoint, timeout=(3, 5))  # 连接超时3秒，读取超时5秒
+                    if response.status_code == 200:
+                        try:
+                            data = response.json()
+                            result = parser(data)
+                            # 验证结果有效性
+                            if result["province"] != "未知" or result["city"] != "未知":
+                                return result
+                        except (ValueError, KeyError):
+                            pass  # 解析错误，继续尝试下一个API
+                    
+                    # 如果请求受限，等待一秒后重试
+                    if response.status_code == 429:
+                        import time
+                        time.sleep(1)
+                        continue
+                        
+                except (requests.RequestException, ValueError, KeyError) as e:
+                    if attempt == retry_count - 1:
+                        print(f"IP查询失败(尝试{attempt+1}/{retry_count}): {str(e)}")
+                    # 继续尝试
             
-            if response.status_code == 200:
-                data = response.json()
-                return {
-                    "province": data.get("region", "未知"),
-                    "city": data.get("city", "未知"),
-                    "isp": data.get("org", "未知").split(" ")[1] if data.get("org") else "未知",
-                    "country": data.get("country", "未知"),
-                    "country_code": data.get("country", "")
-                }
-        
-        except Exception as e:
-            print(f"查询IP地址失败: {e}")
-        
-        # 默认返回未知
-        return {"province": "未知", "city": "未知", "isp": "未知"}
+        # 所有API都失败，返回默认结果
+        return default_result
 
 # 单例模式
 ip_location_service = IPLocationService()
