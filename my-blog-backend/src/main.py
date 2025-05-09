@@ -19,9 +19,13 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
 from redis import Redis
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 >>>>>>> feature-branch
+=======
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+>>>>>>> e41fb12 (合并冲突解决)
 
 from src.model import models
 from src.model.database import engine, SessionLocal, get_db
@@ -39,9 +43,13 @@ app = FastAPI(title="My Blog API",
 
 # 添加中间件
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
 >>>>>>> feature-branch
+=======
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
+>>>>>>> e41fb12 (合并冲突解决)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,  
@@ -54,7 +62,10 @@ app.add_middleware(
 app.add_middleware(LoggingMiddleware)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> e41fb12 (合并冲突解决)
 # 添加速率限制中间件
 class RateLimitMiddleware:
     def __init__(self, app, max_requests: int = 100, window_seconds: int = 60):
@@ -101,7 +112,10 @@ if os.getenv("ENVIRONMENT") == "production":
     window_seconds = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
     app.add_middleware(RateLimitMiddleware, max_requests=max_requests, window_seconds=window_seconds)
 
+<<<<<<< HEAD
 >>>>>>> feature-branch
+=======
+>>>>>>> e41fb12 (合并冲突解决)
 # 数据库配置
 DATABASE_URL = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 

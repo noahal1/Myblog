@@ -8,7 +8,11 @@ pnpm-debug.log*
 lerna-debug.log*
 *.pyc
 */__pycache__
+<<<<<<< HEAD
 .vite_cache/*
+=======
+./vite_cache/
+>>>>>>> e41fb12 (合并冲突解决)
 
 node_modules
 dist
@@ -30,3 +34,8 @@ dist-ssr
 docker-compose.yml
 dev
 docker_ali.md
+<<<<<<< HEAD
+=======
+my-blog-frontend/.vite_cache/deps/@vueuse_core.js
+my-blog-frontend/.vite_cache/deps/@vueuse_core.js.map
+>>>>>>> e41fb12 (合并冲突解决)

@@ -66,6 +66,7 @@ export const useUserStore = defineStore('user', {
     },
     
 <<<<<<< HEAD
+<<<<<<< HEAD
     // 从本地存储恢复用户状态
     async initUserState() {
       const savedUser = localStorage.getItem('user')
@@ -76,6 +77,12 @@ export const useUserStore = defineStore('user', {
       const userData = userStorage.getUserInfo()
       if (userData) {
 >>>>>>> feature-branch
+=======
+    // 从存储恢复用户状态
+    async initUserState() {
+      const userData = userStorage.getUserInfo()
+      if (userData) {
+>>>>>>> e41fb12 (合并冲突解决)
         try {
           this.username = userData.username || ''
           this.token = userData.token || ''
@@ -106,10 +113,14 @@ export const useUserStore = defineStore('user', {
               const expiryTime = this.expiresAt * 1000 // 转换为毫秒
               const now = Date.now()
 <<<<<<< HEAD
+<<<<<<< HEAD
               const thresholdMs = 5 * 60 * 1000 // 5分钟
 =======
               const thresholdMs = API_CONFIG.REFRESH_THRESHOLD_MINUTES * 60 * 1000
 >>>>>>> feature-branch
+=======
+              const thresholdMs = API_CONFIG.REFRESH_THRESHOLD_MINUTES * 60 * 1000
+>>>>>>> e41fb12 (合并冲突解决)
               
               // 如果token已过期或即将过期，并且有刷新token
               if (now > (expiryTime - thresholdMs) && this.refreshToken) {
@@ -162,12 +173,17 @@ export const useUserStore = defineStore('user', {
           }
           
 <<<<<<< HEAD
+<<<<<<< HEAD
           // 如果token即将过期（5分钟内），尝试提前刷新
           const thresholdMs = 5 * 60 * 1000; // 5分钟
 =======
           // 如果token即将过期，尝试提前刷新
           const thresholdMs = API_CONFIG.REFRESH_THRESHOLD_MINUTES * 60 * 1000;
 >>>>>>> feature-branch
+=======
+          // 如果token即将过期，尝试提前刷新
+          const thresholdMs = API_CONFIG.REFRESH_THRESHOLD_MINUTES * 60 * 1000;
+>>>>>>> e41fb12 (合并冲突解决)
           if (now > (expiryTime - thresholdMs) && this.refreshToken) {
             console.log('Token即将过期，尝试提前刷新');
             // 异步刷新，但不等待结果
@@ -215,10 +231,14 @@ export const useUserStore = defineStore('user', {
         this.isLogin = true;
         
 <<<<<<< HEAD
+<<<<<<< HEAD
         this.saveToLocalStorage();
 =======
         this.saveUserData();
 >>>>>>> feature-branch
+=======
+        this.saveUserData();
+>>>>>>> e41fb12 (合并冲突解决)
         console.log('访问令牌刷新成功');
         return true;
       } catch (error) {
