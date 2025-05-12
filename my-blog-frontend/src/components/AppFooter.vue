@@ -374,7 +374,7 @@ import LogoIcon from './icons/LogoIcon.vue'
 
 // 微信二维码相关
 const wechatDialog = ref(false)
-const wechatQRCodeUrl = ref('public/images/wechat.png')
+const wechatQRCodeUrl = ref('/images/wechat.png')
 const avatarUrl = ref('/images/avatar.jpg')
 
 // 主题相关
