@@ -42,10 +42,10 @@ app = FastAPI(title="My Blog API",
 # 配置CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # 允许的前端域
+    allow_origins=["http://localhost:5173", "http://noahblog.top", "http://www.noahblog.top"],  # 允许的前端域
     allow_credentials=True,
-    allow_methods=["*"],  # 允许所有HTTP方法
-    allow_headers=["*"],  # 允许所有HTTP头
+    allow_methods=["*"],  
+    allow_headers=["*"],  
 )
 
 # 添加日志中间件（使用新的带数据库记录功能的中间件）
