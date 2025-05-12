@@ -48,4 +48,14 @@ export const getIpGeolocation = async (ip) => {
     city: "未知",
     isp: "未知"
   };
-}; 
+};
+
+// 创建axios实例
+const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  timeout: 10000,
+  withCredentials: true, // 跨域请求时发送cookies
+  headers: {
+    'Content-Type': 'application/json'
+  }
+}); 

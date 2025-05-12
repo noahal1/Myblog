@@ -163,7 +163,6 @@ async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
     
     try:
         token_data = verify_token(token)
-        
         user_id = token_data.user_id
         if not user_id:
             log.error("JWT中未包含用户ID")
@@ -172,7 +171,6 @@ async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
                 detail="用户认证信息无效",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
         # 确保user_id是整数
         return int(user_id)
     except JWTError as e:

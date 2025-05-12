@@ -236,10 +236,9 @@ class IPLocationService:
                     except (ValueError, KeyError) as e:
                         print(f"解析IP数据错误: {str(e)}, 数据: {response.text[:200]}")
                 
-                # 如果请求受限，等待一秒后重试
-                if response.status_code == 429:
-                    time.sleep(1)
-                    continue
+                        if response.status_code == 429:
+                            time.sleep(1)
+                        continue
                     
             except (requests.RequestException, ValueError, KeyError) as e:
                 if attempt == retry_count - 1:
@@ -251,7 +250,6 @@ class IPLocationService:
             # 添加国家信息
             local_result["country"] = "中国"
             return local_result
-            
         return default_result
 
 # 单例模式

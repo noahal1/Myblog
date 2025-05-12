@@ -182,7 +182,9 @@ export default defineConfig(({ command, mode }) => {
       proxy: {
         '/api': {
           target: env.VITE_API_BASE_URL || 'http://localhost:8000',
-          changeOrigin: true
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path
         }
       },
       open: true, // 自动打开浏览器

@@ -39,14 +39,13 @@ app = FastAPI(title="My Blog API",
              description="My Blog API Documentation",
               version="1.0.0")
 
-# 添加中间件
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
+# 配置CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,  
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # 允许的前端域
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["*"],  # 允许所有HTTP方法
+    allow_headers=["*"],  # 允许所有HTTP头
 )
 
 # 添加日志中间件（使用新的带数据库记录功能的中间件）
@@ -262,8 +261,8 @@ async def login(credentials: UserLogin, db: Session = Depends(get_db)):
     }
 
 @app.get('/api/health')
-async def health_check():
-    return {"status": "OK", "timestamp": datetime.utcnow().isoformat()}
+def health_check():
+    return {"status": "ok"}
 
 @app.get('/api/articles', response_model=list[ArticleResponse])
 @cache(expire=300)  # 缓存5分钟
@@ -503,14 +502,15 @@ async def create_comment(
     
     db.add(db_comment)
     
-    # 更新文章评论计数
+    # 计算并更新文章的评论数
     article = db.query(models.Article).filter(models.Article.id == comment.article_id).first()
     if article:
         if article.comments_count is None:
-            article.comments_count = 0
-        article.comments_count = article.comments_count + 1
+            article.comments_count = 1
+        else:
+            article.comments_count += 1
+        db.commit()
     
-    db.commit()
     db.refresh(db_comment)
     
     # 获取用户名
@@ -576,7 +576,7 @@ async def delete_comment(
         if article.comments_count is None:
             article.comments_count = 0
         elif article.comments_count > 0:
-            article.comments_count = article.comments_count - 1
+            article.comments_count -= 1
     
     # 获取用户名用于日志记录
     username = "未知用户"
