@@ -142,7 +142,7 @@
         <v-card-text class="text-center">
           <div class="qrcode-container">
             <v-img
-              :src="`https://s21.ax1x.com/2025/04/27/pETG8KJ.png`"
+              :src="wechatQRCodeUrl"
               alt="noahall"
               class="mx-auto qrcode-image"
               contain
@@ -374,7 +374,7 @@ import LogoIcon from './icons/LogoIcon.vue'
 
 // 微信二维码相关
 const wechatDialog = ref(false)
-const wechatQRCodeUrl = ref('/images/wechat-qrcode.png')
+const wechatQRCodeUrl = ref('public/images/wechat.png')
 const avatarUrl = ref('/images/avatar.jpg')
 
 // 主题相关
