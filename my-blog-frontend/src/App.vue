@@ -18,9 +18,11 @@ export default {
     <nav-bar @toggle-theme="toggleTheme" :current-theme="currentTheme" />
     <v-main>
       <router-view v-slot="{ Component }">
-        <keep-alive :include="['HomeView', 'ArchiveView']">
-          <component :is="Component" />
-        </keep-alive>
+        <transition name="fade" mode="out-in">
+          <keep-alive :include="['HomeView', 'ArchiveView']">
+            <component :is="Component" />
+          </keep-alive>
+        </transition>
       </router-view>
     </v-main>
     <app-footer />
@@ -29,6 +31,7 @@ export default {
 
 <style>
 @import './assets/styles.css';
+
 
 /* 全局样式 */
 body {

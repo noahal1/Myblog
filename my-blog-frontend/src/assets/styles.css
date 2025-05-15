@@ -50,6 +50,22 @@ html, body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* 页面切换淡入淡出动画 */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+.fade-enter-to, .fade-leave-from {
+  opacity: 1;
+}
+
+.article-item.animate-item {
+  animation: fadeIn 0.7s cubic-bezier(0.4,0,0.2,1) both;
+  animation-delay: var(--animation-delay, 0s);
+}
+
 /*======================
   1. 布局类
 ======================*/
@@ -191,4 +207,4 @@ html, body {
 
 @media (min-width: 1905px) {
   .hide-xl { display: none !important; }
-} 
+}

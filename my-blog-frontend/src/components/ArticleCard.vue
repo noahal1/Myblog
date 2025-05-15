@@ -1,6 +1,6 @@
 <template>
   <v-card
-    class="article-card"
+    class="article-card animated fadeIn"
     :elevation="isHovered ? 8 : 2"
     :ripple="false"
     @click="$emit('click')"
@@ -9,10 +9,10 @@
   >
     <div class="card-content">
       <!-- 文章标题 -->
-      <v-card-title class="title text-primary pb-0" v-once>
+      <v-card-title class="title text-primary pb-0 animated slideInUp" v-once>
         {{ article.title }}
       </v-card-title>
-      <v-card-subtitle class="meta py-2">
+      <v-card-subtitle class="meta py-2 animated fadeIn" style="animation-delay:0.1s;">
         <v-icon icon="mdi-calendar" size="small" class="mr-1" />
         <span class="text-caption">{{ formattedDate }}</span>
         
@@ -26,7 +26,7 @@
           icon="mdi-thumb-up-outline"
           size="x-small"
           variant="text"
-          class="ml-2"
+          class="ml-2 animated bounceIn"
           @click.stop="handleLike"
           :color="hasLiked ? 'primary' : ''"
         ></v-btn>
@@ -34,12 +34,12 @@
       </v-card-subtitle>
       
       <!-- 文章摘要 -->
-      <v-card-text class="preview py-2">
+      <v-card-text class="preview py-2 animated fadeIn" style="animation-delay:0.15s;">
         {{ article.summary }}
       </v-card-text>
       
       <!-- 阅读更多按钮 -->
-      <v-card-actions class="actions">
+      <v-card-actions class="actions animated fadeIn" style="animation-delay:0.2s;">
         <v-spacer></v-spacer>
         <v-btn
           variant="text"
@@ -59,6 +59,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { likeArticle } from '../api'
 import '@/assets/styles/views/home.css'
+import '../assets/animate.css'
 
 // 定义props
 const props = defineProps({

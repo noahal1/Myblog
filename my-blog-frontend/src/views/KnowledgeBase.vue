@@ -144,7 +144,6 @@
                 <v-card
                   class="article-card h-100"
                   @click="viewArticle(article.id)"
-                  variant="outlined"
                   :ripple="false"
                   hover
                 >
@@ -564,7 +563,7 @@ onMounted(() => {
 .article-list-item {
   background: rgba(var(--v-theme-surface), 0.8);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(var(--primary-blue), 0.05);
+  border: 0px solid rgba(var(--primary-blue), 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 

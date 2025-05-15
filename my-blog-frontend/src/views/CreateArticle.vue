@@ -1,7 +1,7 @@
 <template>
-  <div class="create-article">
+  <div class="create-article animated fadeIn">
     <v-container class="py-8">
-      <v-card class="create-article-card mx-auto" max-width="1000" elevation="4">
+      <v-card class="create-article-card mx-auto animated slideInUp" max-width="1000" elevation="4">
         <div class="card-header pa-6">
           <h1 class="text-h4 font-weight-bold gradient-text mb-2">创建新文章</h1>
           <p class="text-subtitle-1 text-medium-emphasis">在这里分享您的想法和知识</p>
@@ -14,13 +14,13 @@
             required
             variant="outlined"
             prepend-inner-icon="mdi-format-title"
-            class="mb-6"
+            class="mb-6 animated fadeIn"
             :rules="[v => !!v || '标题不能为空']"
             placeholder="输入一个吸引人的标题"
           ></v-text-field>
           
           <!-- 图片上传 -->
-          <div class="mb-6">
+          <div class="mb-6 animated fadeIn" style="animation-delay:0.1s;">
             <label class="text-subtitle-1 mb-2 d-block">文章封面</label>
             <div class="d-flex align-center cover-upload">
               <v-img
@@ -29,9 +29,9 @@
                 height="150"
                 width="280"
                 cover
-                class="rounded me-4"
+                class="rounded me-4 animated bounceIn"
               ></v-img>
-              <div v-else class="image-placeholder d-flex justify-center align-center rounded me-4">
+              <div v-else class="image-placeholder d-flex justify-center align-center rounded me-4 animated fadeIn">
                 <v-icon size="40" color="grey-lighten-1">mdi-image</v-icon>
               </div>
               
@@ -45,6 +45,7 @@
                   prepend-icon="mdi-camera"
                   @update:model-value="handleImageUpload"
                   hide-details
+                  class="animated fadeIn"
                 ></v-file-input>
                 <p class="text-caption mt-2 text-grey">
                   建议尺寸: 1200x600，支持 JPG、PNG、WebP 格式
@@ -54,22 +55,17 @@
           </div>
           
           <!-- Markdown 编辑器 -->
-          <div class="mb-6">
+          <div class="mb-6 animated fadeIn" style="animation-delay:0.2s;">
             <label class="text-subtitle-1 mb-2 d-block">文章内容</label>
             <MdEditor
               v-model="article.content"
               :theme="editorTheme"
-              :toolbarsExclude="toolbarsExclude"
               previewTheme="github"
               :autoFocus="false"
               @onChange="checkFormValidity"
               style="height: 500px"
               codeTheme="github"
-              :showCodeRowNumber="true"
-              :autoDetectCode="true"
-              :footers="[]"
-              :tabWidth="2"
-              outlined
+              :toolbars="['bold','underline','italic','strikeThrough','title','sub','sup','quote','unorderedList','orderedList','task','codeRow','code','link','image','table','mermaid','katex','revoke','next','save','prettier','pageFullscreen','fullscreen','preview','htmlPreview','catalog']"
             />
           </div>
           
@@ -79,7 +75,7 @@
             required
             variant="outlined"
             rows="3"
-            class="mb-6"
+            class="mb-6 animated fadeIn"
             :rules="[v => !!v || '摘要不能为空']"
             placeholder="简要概述文章内容，会显示在文章列表中"
             prepend-inner-icon="mdi-text-short"
@@ -95,7 +91,7 @@
             chips
             multiple
             closable-chips
-            class="mb-6"
+            class="mb-6 animated fadeIn"
             :loading="loading"
             :error-messages="error"
             prepend-inner-icon="mdi-tag-multiple"
@@ -108,6 +104,7 @@
               color="secondary"
               @click="router.go(-1)"
               prepend-icon="mdi-arrow-left"
+              class="animated fadeIn"
             >
               返回
             </v-btn>
@@ -116,7 +113,7 @@
               <v-btn
                 variant="outlined"
                 color="secondary"
-                class="me-2"
+                class="me-2 animated fadeIn"
                 @click="saveAsDraft"
                 :loading="savingDraft"
                 prepend-icon="mdi-content-save"
@@ -132,7 +129,7 @@
                 size="large"
                 prepend-icon="mdi-send"
                 elevation="2"
-                class="px-6"
+                class="px-6 animated fadeIn"
               >
                 发布文章
               </v-btn>
@@ -147,11 +144,15 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import apiClient from '../api'
 import { getTags, createArticle } from '../api'
-import MdEditor from 'md-editor-v3'
+import { MdEditor } from 'md-editor-v3'
 import { useTheme } from 'vuetify'
 import 'md-editor-v3/lib/style.css'
+import '@mdi/font/css/materialdesignicons.min.css'
+import '../assets/animate.css'
+import 'katex/dist/katex.min.css'
+import 'highlight.js/styles/github.css'
+
 
 const router = useRouter()
 const loading = ref(false)
@@ -170,21 +171,16 @@ const editorTheme = computed(() => {
   return theme.global.current.value.dark ? 'dark' : 'light'
 })
 
-// 不需要的工具栏按钮
-const toolbarsExclude = ['save']
-
 const article = ref({
   title: '',
   content: '',
   summary: '',
   tags: [],
-  category: '',
   cover_image: '',
   is_published: true
 })
 
 const availableTags = ref([])
-
 
 // 图片上传处理
 const handleImageUpload = async () => {
@@ -381,4 +377,4 @@ onMounted(() => {
 :deep(.md-editor-dark) {
   --md-border-color: rgba(255, 255, 255, 0.2) !important;
 }
-</style> 
+</style>

@@ -35,9 +35,7 @@ from functools import wraps
 load_dotenv(dotenv_path='./.env')
 
 # 创建FastAPI应用
-app = FastAPI(title="My Blog API",
-             description="My Blog API Documentation",
-              version="1.0.0")
+app = FastAPI(title="Noah's Blog API",description="noah's blog api doc",version="1.0.0")
 
 # 配置CORS
 app.add_middleware(
@@ -84,7 +82,7 @@ class RateLimitMiddleware:
         response = await call_next(request)
         return response
 
-# 只在生产环境中启用速率限制
+
 if os.getenv("ENVIRONMENT") == "production":
     # 添加可信主机中间件
     app.add_middleware(
@@ -92,7 +90,6 @@ if os.getenv("ENVIRONMENT") == "production":
         allowed_hosts=os.getenv("ALLOWED_HOSTS", "*").split(",")
     )
     
-    # 添加速率限制
     max_requests = int(os.getenv("RATE_LIMIT_MAX_REQUESTS", "100"))
     window_seconds = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
     app.add_middleware(RateLimitMiddleware, max_requests=max_requests, window_seconds=window_seconds)

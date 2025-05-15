@@ -11,6 +11,7 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { useUserStore } from './stores/user'
+import 'md-editor-v3/lib/style.css'
 
 // 创建 Vuetify 实例
 const vuetify = createVuetify({
