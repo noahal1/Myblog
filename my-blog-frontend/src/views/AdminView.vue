@@ -427,6 +427,7 @@ const articleHeaders = [
   { title: '操作', key: 'actions', sortable: false }
 ]
 
+
 const pathStats = computed(() => visitorStats.value?.path_stats || {})
 const ipStats = computed(() => visitorStats.value?.ip_stats || {})
 
@@ -632,53 +633,27 @@ const fetchVisitorStats = async () => {
   }
 }
 
-const openEditDialog = async (article) => {
-  loadingArticles.value = true
-  try {
-    const res = await getArticleDetail(article.id)
-    editArticle.value = res.data
-    editDialog.value = true
-  } catch (error) {
-    console.error('获取文章详情失败:', error)
-    showSnackbar('获取文章详情失败', 'error')
-  } finally {
-    loadingArticles.value = false
-  }
+// 根据状态码获取颜色
+const getStatusColor = (statusCode) => {
+  if (statusCode >= 200 && statusCode < 300) return 'success'
+  if (statusCode >= 300 && statusCode < 400) return 'info'
+  if (statusCode >= 400 && statusCode < 500) return 'warning'
+  return 'error'
 }
 
-const submitEdit = async (formData) => {
-  loadingArticles.value = true
-  try {
-    await updateArticleDetail(editArticle.value.id, formData)
-    showSnackbar('文章更新成功')
-    editDialog.value = false
-    fetchArticlesByStatus()
-  } catch (error) {
-    console.error('更新文章失败:', error)
-    showSnackbar('更新文章失败', 'error')
-  } finally {
-    loadingArticles.value = false
-  }
+// 格式化日期
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  date.setTime(date.getTime() + 8 * 60 * 60 * 1000)
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
 }
-
-// 监听分页变化
-watch(page, () => {
-  if (activeTab.value === 'logs') {
-    fetchVisitorLogs()
-  }
-})
-
-watch(articlePage, () => {
-  if (activeTab.value === 'articles') {
-    fetchArticlesByStatus()
-  }
-})
-
-// 监听文章状态变化
-watch(articleStatus, () => {
-  articlePage.value = 1 // 重置分页
-  fetchArticlesByStatus()
-})
 
 onMounted(async () => {
   // 检查是否已登录，如果未登录尝试初始化用户状态
