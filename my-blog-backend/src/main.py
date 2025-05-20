@@ -21,6 +21,7 @@ from redis import Redis
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import re
 import ipaddress
+from fastapi.responses import JSONResponse
 
 from src.model import models
 from src.model.database import engine, SessionLocal, get_db
@@ -68,7 +69,6 @@ class RateLimitMiddleware:
         
         # 检查请求数量是否超过限制
         if len(self.requests[ip]) >= self.max_requests:
-            from fastapi.responses import JSONResponse
             return JSONResponse(
                 status_code=429,
                 content={"detail": "请求过于频繁，请稍后再试"}
@@ -730,7 +730,11 @@ async def get_visitor_logs(
     # 应用分页并获取结果
     logs = query.order_by(models.VisitorLog.request_time.desc()).offset(offset).limit(limit).all()
     
-    return logs
+    # 设置响应头，包含总数信息
+    response = Response(content=json.dumps([log.__dict__ for log in logs], default=str), media_type="application/json")
+    response.headers["X-Total-Count"] = str(total)
+    
+    return response
 
 @app.get('/api/admin/visitor-stats', response_model=VisitorStatsResponse)
 async def get_visitor_stats(
@@ -815,105 +819,36 @@ async def get_ip_geolocation(
     }
 
 # 文章审核相关API
-@app.get('/api/admin/pending-articles', response_model=list[ArticleResponse])
-async def get_pending_articles(
-    skip: int = 0, 
-    limit: int = 10, 
-    db: Session = Depends(get_db),
-    current_user_id: int = Depends(get_current_user_id)
-):
-    """获取待审核文章列表（仅管理员可访问）"""
-    # 检查当前用户是否为管理员（ID为1）
-    if current_user_id != 1:
-        raise HTTPException(status_code=403, detail="仅管理员可以访问此功能")
-    
-    # 查询状态为pending的文章
-    articles = db.query(models.Article).filter(
-        models.Article.status == "pending"
-    ).options(
-        joinedload(models.Article.tags_relationship),
-        joinedload(models.Article.author)
-    ).order_by(models.Article.created_at.desc()).offset(skip).limit(limit).all()
-    
-    # 转换查询结果
-    articles_data = []
-    for article in articles:
-        tag_names = [tag.name for tag in article.tags_relationship] if article.tags_relationship else []
-        
-        articles_data.append({
-            'id': article.id,
-            'title': article.title,
-            'content': article.content,
-            'summary': article.summary,
-            'author_id': article.author_id,
-            'author_name': article.author.username if article.author else "未知",
-            'created_at': article.created_at.isoformat(),
-            'updated_at': article.updated_at.isoformat(),
-            'views': article.views,
-            'likes': article.likes,
-            'tags': tag_names,
-            'status': article.status
-        })
-    
-    return articles_data
-
-@app.put('/api/admin/articles/{article_id}/status')
-async def update_article_status(
-    article_id: int,
-    status: str,
-    db: Session = Depends(get_db),
-    current_user_id: int = Depends(get_current_user_id)
-):
-    """更新文章状态（审核）"""
-    # 检查当前用户是否为管理员（ID为1）
-    if current_user_id != 1:
-        raise HTTPException(status_code=403, detail="仅管理员可以审核文章")
-    
-    # 检查状态值是否有效
-    valid_statuses = ["pending", "published", "rejected"]
-    if status not in valid_statuses:
-        raise HTTPException(status_code=400, detail="无效的状态值")
-    
-    # 查找文章
-    article = db.query(models.Article).filter(models.Article.id == article_id).first()
-    if not article:
-        raise HTTPException(status_code=404, detail="文章不存在")
-    
-    # 更新状态
-    article.status = status
-    db.commit()
-    
-    # 返回成功信息
-    return {"message": "文章状态已更新", "article_id": article_id, "status": status}
-
 @app.get('/api/admin/articles', response_model=list[ArticleResponse])
 async def get_admin_articles(
     skip: int = 0, 
-    limit: int = 10,
+    limit: int = 10, 
     status: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(get_current_user_id)
 ):
-    """获取文章列表（管理员专用，可过滤状态）"""
-    # 检查当前用户是否为管理员
+    """获取文章列表（管理员版，可按状态筛选）"""
+    # 检查当前用户是否为管理员（ID为1）
     if current_user_id != 1:
         raise HTTPException(status_code=403, detail="仅管理员可以访问此功能")
     
-    # 构建查询
-    query = db.query(models.Article)
+    # 构建基础查询
+    query = db.query(models.Article).options(
+        joinedload(models.Article.tags_relationship),
+        joinedload(models.Article.author)
+    )
     
-    # 如果指定了状态，则按状态过滤
+    # 如果指定了状态，进行过滤
     if status:
         query = query.filter(models.Article.status == status)
     
     # 获取总数
     total_count = query.count()
     
-    # 查询文章
-    articles = query.options(
-        joinedload(models.Article.tags_relationship),
-        joinedload(models.Article.author)
-    ).order_by(models.Article.created_at.desc()).offset(skip).limit(limit).all()
+    # 分页和排序
+    articles = query.order_by(
+        models.Article.created_at.desc()
+    ).offset(skip).limit(limit).all()
     
     # 转换查询结果
     articles_data = []
@@ -935,10 +870,64 @@ async def get_admin_articles(
             'status': article.status
         })
     
-    # 在响应头中添加分页信息
-    response = Response(content=json.dumps(articles_data), media_type="application/json")
+    # 设置响应头，包含总数信息
+    response = JSONResponse(content=articles_data)
     response.headers["X-Total-Count"] = str(total_count)
-    response.headers["X-Total-Pages"] = str(math.ceil(total_count / limit))
+    
+    return response
+
+@app.get('/api/admin/articles/to-process', response_model=list[ArticleResponse])
+async def get_to_process_articles(
+    skip: int = 0, 
+    limit: int = 10, 
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """获取需要处理的文章（待审核+已拒绝）"""
+    # 检查当前用户是否为管理员（ID为1）
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以访问此功能")
+    
+    # 查询待审核和已拒绝的文章
+    query = db.query(models.Article).filter(
+        models.Article.status.in_(["pending", "rejected"])
+    ).options(
+        joinedload(models.Article.tags_relationship),
+        joinedload(models.Article.author)
+    )
+    
+    # 获取总数
+    total_count = query.count()
+    
+    # 获取文章并按创建时间排序
+    articles = query.order_by(
+        models.Article.created_at.desc()
+    ).offset(skip).limit(limit).all()
+    
+    # 转换查询结果
+    articles_data = []
+    for article in articles:
+        tag_names = [tag.name for tag in article.tags_relationship] if article.tags_relationship else []
+        
+        articles_data.append({
+            'id': article.id,
+            'title': article.title,
+            'content': article.content,
+            'summary': article.summary,
+            'author_id': article.author_id,
+            'author_name': article.author.username if article.author else "未知",
+            'created_at': article.created_at.isoformat(),
+            'updated_at': article.updated_at.isoformat(),
+            'views': article.views,
+            'likes': article.likes,
+            'tags': tag_names,
+            'status': article.status
+        })
+    
+    # 设置响应头，包含总数信息
+    response = JSONResponse(content=articles_data)
+    response.headers["X-Total-Count"] = str(total_count)
+    
     return response
 
 @app.get('/api/admin/articles/{article_id}', response_model=ArticleResponse)
@@ -978,6 +967,35 @@ async def get_admin_article(
     }
     
     return article_data
+
+@app.put('/api/admin/articles/{article_id}/status')
+async def update_article_status(
+    article_id: int,
+    status: str,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """更新文章状态（审核）"""
+    # 检查当前用户是否为管理员（ID为1）
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以审核文章")
+    
+    # 检查状态值是否有效
+    valid_statuses = ["pending", "published", "rejected"]
+    if status not in valid_statuses:
+        raise HTTPException(status_code=400, detail="无效的状态值")
+    
+    # 查找文章
+    article = db.query(models.Article).filter(models.Article.id == article_id).first()
+    if not article:
+        raise HTTPException(status_code=404, detail="文章不存在")
+    
+    # 更新状态
+    article.status = status
+    db.commit()
+    
+    # 返回成功信息
+    return {"message": "文章状态已更新", "article_id": article_id, "status": status}
 
 # 启动服务器
 if __name__ == "__main__":

@@ -353,11 +353,12 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
-import { getVisitorLogs, getVisitorStats, getPendingArticles, updateArticleStatus, getAdminArticles } from '../api'
+import { getVisitorLogs, getVisitorStats, getAdminArticles, getArticlesToProcess } from '../api'
 import ArticleForm from '../components/ArticleForm.vue'
 import { getArticleDetail, updateArticleDetail, getAdminArticleDetail } from '../api'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import { updateArticleStatus } from '../api'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -373,11 +374,9 @@ const days = ref(7)
 const hasPermission = computed(() => userStore.isAdmin)
 
 // 文章审核相关
-const pendingArticles = ref([])
 const adminArticles = ref([])
 const loadingArticles = ref(false)
 const articlePage = ref(1)
-const totalPendingArticles = ref(0)
 const totalAdminArticles = ref(0)
 const articleDialog = ref(false)
 const selectedArticle = ref({})
@@ -460,44 +459,45 @@ const getArticleStatusText = (status) => {
   }
 }
 
+// 更新文章状态的通用函数
+const updateArticleStatusAndRefresh = async (article, newStatus) => {
+  loadingArticles.value = true
+  try {
+    await updateArticleStatus(article.id, newStatus)
+    const statusTextMap = {
+      'published': '通过审核',
+      'rejected': '被拒绝',
+      'pending': '撤回至待审核状态'
+    }
+    showSnackbar(`文章已${statusTextMap[newStatus]}`)
+    // 重新加载文章列表
+    fetchArticlesByStatus()
+  } catch (error) {
+    console.error('更新文章状态失败:', error)
+    showSnackbar('更新文章状态失败', 'error')
+  } finally {
+    loadingArticles.value = false
+  }
+}
+
 // 按状态获取文章列表
 const fetchArticlesByStatus = async () => {
   if (!hasPermission.value) return
   
   loadingArticles.value = true
   try {
-    // 特殊处理"需要处理"选项，获取待审核和被拒绝的文章
+    // 特殊处理"需要处理"选项，使用专门的API
     if (articleStatus.value === 'to_process') {
-      // 首先获取待审核文章
-      const pendingResponse = await getAdminArticles(1, 50, 'pending')
-      const pendingArticles = pendingResponse?.data || []
-      
-      // 然后获取被拒绝文章
-      const rejectedResponse = await getAdminArticles(1, 50, 'rejected')
-      const rejectedArticles = rejectedResponse?.data || []
-      
-      // 合并两种文章
-      adminArticles.value = [...pendingArticles, ...rejectedArticles]
-      
-      // 按创建时间排序，最新的在前面
-      adminArticles.value.sort((a, b) => {
-        return new Date(b.created_at) - new Date(a.created_at)
-      })
-      
-      // 手动处理分页
-      const startIndex = (articlePage.value - 1) * 10
-      const endIndex = startIndex + 10
-      adminArticles.value = adminArticles.value.slice(startIndex, endIndex)
-      
-      // 计算总数
-      const totalItems = (pendingResponse?.headers?.['x-total-count'] || 0) + 
-                        (rejectedResponse?.headers?.['x-total-count'] || 0)
-      totalAdminArticles.value = parseInt(totalItems)
+      const response = await getArticlesToProcess(articlePage.value, 10)
+      if (response && response.data) {
+        adminArticles.value = response.data
+        totalAdminArticles.value = parseInt(response.headers['x-total-count']) || 0
+      }
     } else {
       // 正常处理单一状态
       const response = await getAdminArticles(articlePage.value, 10, articleStatus.value || null)
       if (response && response.data) {
-        adminArticles.value = response.data || []
+        adminArticles.value = response.data
         totalAdminArticles.value = parseInt(response.headers['x-total-count']) || 0
       }
     }
@@ -509,19 +509,44 @@ const fetchArticlesByStatus = async () => {
   }
 }
 
-// 撤回文章至待审核状态
-const pendingArticle = async (article) => {
-  loadingArticles.value = true
+// 查看文章详情
+const viewArticle = (article) => {
+  selectedArticle.value = article
+  articleDialog.value = true
+}
+
+// 审核相关操作函数 - 使用统一的更新函数替代原有的三个函数
+// 通过文章
+const approveArticle = (article) => updateArticleStatusAndRefresh(article, 'published')
+// 拒绝文章
+const rejectArticle = (article) => updateArticleStatusAndRefresh(article, 'rejected')
+// 撤回文章
+const pendingArticle = (article) => updateArticleStatusAndRefresh(article, 'pending')
+
+// 根据状态码获取颜色
+const getStatusColor = (statusCode) => {
+  if (statusCode >= 200 && statusCode < 300) return 'success'
+  if (statusCode >= 300 && statusCode < 400) return 'info'
+  if (statusCode >= 400 && statusCode < 500) return 'warning'
+  return 'error'
+}
+
+// 格式化日期
+const formatDate = (dateString) => {
+  if (!dateString) return '未知'
+  
   try {
-    await updateArticleStatus(article.id, 'pending')
-    showSnackbar('文章已撤回至待审核状态')
-    // 重新加载文章列表
-    fetchArticlesByStatus()
-  } catch (error) {
-    console.error('更新文章状态失败:', error)
-    showSnackbar('更新文章状态失败', 'error')
-  } finally {
-    loadingArticles.value = false
+    const date = new Date(dateString)
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+  } catch (e) {
+    return dateString
   }
 }
 
@@ -571,8 +596,15 @@ const fetchVisitorLogs = async () => {
     
     const response = await getVisitorLogs(params)
     if (response && response.data) {
-      visitorLogs.value = response.data.logs || []
-      totalLogs.value = response.data.total || 0
+      // 后端直接返回日志数组，不是包含logs和total字段的对象
+      visitorLogs.value = Array.isArray(response.data) ? response.data : []
+      
+      // 从headers中获取总数，如果没有则使用当前数组长度
+      const totalHeader = response.headers && response.headers['x-total-count']
+      totalLogs.value = totalHeader ? parseInt(totalHeader) : visitorLogs.value.length
+      
+      // 打印调试信息
+      console.log('访问记录数据:', visitorLogs.value)
     }
   } catch (error) {
     console.error('获取访问记录失败:', error)
@@ -600,90 +632,6 @@ const fetchVisitorStats = async () => {
   }
 }
 
-// 获取待审核文章
-const fetchPendingArticles = async () => {
-  if (!hasPermission.value) return
-  
-  loadingArticles.value = true
-  try {
-    const response = await getPendingArticles(articlePage.value, 10)
-    if (response && response.data) {
-      pendingArticles.value = response.data.articles || []
-      totalPendingArticles.value = response.data.total || 0
-    }
-  } catch (error) {
-    console.error('获取待审核文章失败:', error)
-    showSnackbar('获取待审核文章失败', 'error')
-  } finally {
-    loadingArticles.value = false
-  }
-}
-
-// 查看文章详情
-const viewArticle = (article) => {
-  selectedArticle.value = article
-  articleDialog.value = true
-}
-
-// 通过文章
-const approveArticle = async (article) => {
-  loadingArticles.value = true
-  try {
-    await updateArticleStatus(article.id, 'published')
-    showSnackbar('文章已通过审核')
-    // 重新加载文章列表
-    fetchPendingArticles()
-  } catch (error) {
-    console.error('审核文章失败:', error)
-    showSnackbar('审核文章失败', 'error')
-  } finally {
-    loadingArticles.value = false
-  }
-}
-
-// 拒绝文章
-const rejectArticle = async (article) => {
-  loadingArticles.value = true
-  try {
-    await updateArticleStatus(article.id, 'rejected')
-    showSnackbar('文章已被拒绝')
-    // 重新加载文章列表
-    fetchPendingArticles()
-  } catch (error) {
-    console.error('审核文章失败:', error)
-    showSnackbar('审核文章失败', 'error')
-  } finally {
-    loadingArticles.value = false
-  }
-}
-
-// 根据状态码获取颜色
-const getStatusColor = (statusCode) => {
-  if (statusCode >= 200 && statusCode < 300) return 'success'
-  if (statusCode >= 300 && statusCode < 400) return 'info'
-  if (statusCode >= 400 && statusCode < 500) return 'warning'
-  return 'error'
-}
-
-// 格式化日期
-const formatDate = (dateString) => {
-  if (!dateString) return '未知'
-  
-  try {
-    const date = new Date(dateString)
-    return date.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    })
-  } catch (e) {
-    return dateString
-  }
-}
-
 const openEditDialog = async (article) => {
   loadingArticles.value = true
   try {
@@ -704,7 +652,7 @@ const submitEdit = async (formData) => {
     await updateArticleDetail(editArticle.value.id, formData)
     showSnackbar('文章更新成功')
     editDialog.value = false
-    fetchPendingArticles()
+    fetchArticlesByStatus()
   } catch (error) {
     console.error('更新文章失败:', error)
     showSnackbar('更新文章失败', 'error')
@@ -748,11 +696,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.admin-view {
-  min-height: calc(100vh - 64px);
-  padding-bottom: 2rem;
-}
-
+/* 简化后的样式 */
 .max-width-200 {
   max-width: 200px;
 }

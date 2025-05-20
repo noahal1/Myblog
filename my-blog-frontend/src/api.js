@@ -243,13 +243,21 @@ export const getIpGeolocation = async (ip) => {
   }
 };
 
-// 获取待审核文章列表
-export const getPendingArticles = async (page = 1, limit = 10) => {
-  const skip = (page - 1) * limit;
+// 获取文章详情
+export const getArticleDetail = async (articleId) => {
   try {
-    return await apiClient.get(`/api/admin/pending-articles?skip=${skip}&limit=${limit}`);
+    return await apiClient.get(`/api/articles/${articleId}`);
   } catch (error) {
-    return handleApiError(error, () => getPendingArticles(page, limit));
+    return handleApiError(error, () => getArticleDetail(articleId));
+  }
+};
+
+// 获取管理员版文章详情
+export const getAdminArticleDetail = async (articleId) => {
+  try {
+    return await apiClient.get(`/api/admin/articles/${articleId}`);
+  } catch (error) {
+    return handleApiError(error, () => getAdminArticleDetail(articleId));
   }
 };
 
@@ -258,15 +266,10 @@ export const updateArticleStatus = async (articleId, status) => {
   return await apiClient.put(`/api/admin/articles/${articleId}/status?status=${status}`);
 };
 
-// 获取文章详情
-export const getArticleDetail = async (id) => {
-  return await apiClient.get(`/api/admin/articles/${id}`)
-}
-
 // 更新文章详情
 export const updateArticleDetail = async (id, data) => {
-  return await apiClient.put(`/api/admin/articles/${id}`, data)
-}
+  return await apiClient.put(`/api/admin/articles/${id}`, data);
+};
 
 // 获取所有文章、管理员版
 export const getAdminArticles = async (page = 1, limit = 10, status = null) => {
@@ -284,13 +287,15 @@ export const getAdminArticles = async (page = 1, limit = 10, status = null) => {
   }
 };
 
-// 管理员获取文章详情（无状态限制）
-export const getAdminArticleDetail = async (id) => {
+// 获取需要处理的文章（待审核和已拒绝）
+export const getArticlesToProcess = async (page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+  const params = { skip, limit };
+  
   try {
-    const response = await apiClient.get(`/api/admin/articles/${id}`);
-    return response.data;
+    return await apiClient.get('/api/admin/articles/to-process', { params });
   } catch (error) {
-    return handleApiError(error, () => getAdminArticleDetail(id));
+    return handleApiError(error, () => getArticlesToProcess(page, limit));
   }
 };
 

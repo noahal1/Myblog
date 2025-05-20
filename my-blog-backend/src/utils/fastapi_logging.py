@@ -1,5 +1,6 @@
 import time
 import uuid
+import ipaddress
 from typing import Callable
 
 from fastapi import FastAPI, Request, Response
@@ -16,6 +17,16 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, db_session_maker=None):
         super().__init__(app)
         self.db_session_maker = db_session_maker
+    
+    def is_loopback_address(self, ip):
+        """检查IP地址是否为环回地址（localhost）"""
+        try:
+            ip_obj = ipaddress.ip_address(ip)
+            # 检查IPv4环回地址 (127.0.0.0/8) 或 IPv6环回地址 (::1)
+            return ip_obj.is_loopback
+        except ValueError:
+            # 如果IP地址格式无效，默认不视为环回地址
+            return False
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """处理请求和响应"""
@@ -47,6 +58,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # 如果存在X-Forwarded-For头，使用第一个IP地址
             client_ip = forwarded_for.split(",")[0].strip()
         
+        # 检查是否为环回地址
+        is_loopback = self.is_loopback_address(client_ip)
+        
         # 获取请求相关信息
         user_agent = request.headers.get("User-Agent", "Unknown")
         path = request.url.path
@@ -56,7 +70,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         # 记录请求开始信息
         start_time = time.time()
         api_logger.info(
-            f"{method} {path} - 开始处理 - IP: {client_ip}",
+            f"{method} {path} - 开始处理 - IP: {client_ip}{' (环回地址)' if is_loopback else ''}",
             extra={
                 "method": method,
                 "path": path,
@@ -85,8 +99,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # 添加请求ID到响应头
             response.headers["X-Request-ID"] = request_id
             
-            # 如果提供了数据库会话，保存访问记录
-            if self.db_session_maker:
+            # 如果提供了数据库会话，且不是环回地址，则保存访问记录
+            if self.db_session_maker and not is_loopback:
                 db = None
                 try:
                     db = self.db_session_maker()
@@ -110,6 +124,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 finally:
                     if db:
                         db.close()
+            elif is_loopback:
+                log.debug(f"跳过环回地址访问记录: {path}, IP: {client_ip}")
             
             return response
             
