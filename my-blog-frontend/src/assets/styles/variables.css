@@ -1,0 +1,72 @@
+/*======================
+  CSS变量
+======================*/
+
+:root {
+  /* 主色调 */
+  --primary-blue: 0, 49, 83;/* 普鲁士蓝*/  
+  --accent-grey: 229, 221, 215; /*雾灰色*/
+  --secondary-purple: 156, 39, 176;
+  --accent-orange: 255, 109, 0; 
+  
+  /* 渐变与效果 */
+  --gradient-angle: 135deg;
+  --neon-gradient: linear-gradient(
+    var(--gradient-angle),
+    rgba(var(--primary-blue), 0.8) 0%,
+    rgba(var(--secondary-purple), 0.6) 50%,
+    rgba(var(--accent-orange), 0.4) 100%
+  );
+  --card-shadow: 0 8px 32px rgba(var(--primary-blue), 0.15);
+  --hover-shadow: 0 12px 36px rgba(var(--secondary-purple), 0.25);
+  --card-hover-elevate: translateY(-5px);
+  
+  /* 文本与边框 */
+  --text-primary: 33, 33, 33;
+  --text-secondary: 97, 97, 97;
+  --text-tertiary: 120, 120, 120;
+  --border-radius: 12px;
+  --border-radius-md: 8px;
+  --border-radius-sm: 4px;
+  --border-subtle: 1px solid rgba(var(--primary-blue), 0.1);
+  
+  /* 动画速度 */
+  --transition-default: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow-text: 0.6s ease;
+  
+  /* 字体 */
+  --font-heading: 'Space Grotesk', system-ui;
+  --font-body: 'Inter', 'Roboto', sans-serif;
+  
+  /* 层级 */
+  --z-index-nav: 1000;
+  --z-index-modal: 2000;
+  --z-index-top: 9999;
+  
+  /* 布局 */
+  --header-gradient: linear-gradient(
+    var(--gradient-angle),
+    rgba(var(--primary-blue), 0.05),
+    rgba(var(--secondary-purple), 0.03),
+    rgba(var(--accent-orange), 0.01)
+  );
+  
+  font-family: var(--font-body);
+  line-height: 1.6;
+  font-weight: 400;
+  color-scheme: light dark;
+}
+
+/* 暗色模式变量 */
+.v-theme--dark {
+  --primary-blue: 100, 130, 250;
+  --accent-orange: 255, 160, 65;
+  --secondary-purple: 186, 104, 200;
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --hover-shadow: 0 12px 36px rgba(var(--primary-blue), 0.35);
+  --text-primary: 240, 240, 240;
+  --text-secondary: 200, 200, 200;
+  --text-tertiary: 170, 170, 170;
+} 

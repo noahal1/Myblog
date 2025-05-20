@@ -1,0 +1,368 @@
+/* 首页样式 */
+.home-view {
+  min-height: 100vh;
+  opacity: 1 !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* 标语样式 */
+.tagline-text {
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: rgb(var(--accent-orange));
+  transition: color 1.5s ease;
+}
+
+.subtitle-text {
+  font-style: italic;
+  transition: color 2.0s ease;
+}
+
+/* Hero Banner样式 */
+.hero-banner {
+  background: radial-gradient(circle at 30% 30%, rgba(var(--primary-blue), 0.05), transparent 400px),
+              radial-gradient(circle at 70% 70%, rgba(var(--accent-orange), 0.05), transparent 400px);
+  padding: 140px 0 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden; 
+  will-change: transform;
+  background-position: 50% 0%;
+  margin-top: -56px; 
+  height: 400px; 
+}
+
+/* 调整hero内容区域的z-index，确保内容正确显示 */
+.hero-banner .v-container {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.tagline-prefix {
+  font-size: 3.0rem;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+  transform: translateZ(0); 
+}
+
+/* 渐变文字优化 */
+.gradient-text {
+  font-size: 3rem;
+  font-weight: 700;
+  background-image: linear-gradient(135deg, #ff7a18, #af002d 45%, #319197 55%, #5561ff, #ff7a18);
+  background-size: 300% 300%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  display: inline-block;
+  animation: gradient-shift 15s ease infinite;
+  will-change: background-position; 
+}
+
+/* 渐变背景动画 */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+  opacity: 0.7;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  will-change: transform, opacity;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.hero-subtitle:hover {
+  opacity: 1;
+  transform: scale(1.02) translateZ(0);
+  text-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+.search-input {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* 分类标签优化 */
+.category-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  padding: 8px;
+}
+
+.category-chip {
+  margin: 0 4px;
+  transition: transform 0.3s ease;
+}
+
+.category-chip:hover {
+  transform: translateY(-3px);
+}
+
+/* 文章网格优化 */
+.article-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  opacity: 1 !important;
+  min-height: 200px;
+  position: relative;
+}
+
+.article-item {
+  opacity: 1 !important;
+  display: block !important;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+
+.home-view .v-card.article-card {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  height: 100% !important;
+  cursor: pointer !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  will-change: transform; /* 性能优化 */
+}
+
+.home-view .v-card.article-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.v-theme--dark .v-card.article-card {
+  background: rgba(33, 33, 33, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.08) !important;
+}
+
+.v-theme--dark .v-card.article-card .v-card-text {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.v-theme--dark .v-card.article-card .v-card-title {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.v-theme--dark .v-card.article-card .v-card-subtitle {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+/* 标题样式 - 仅应用于非组件的默认样式 */
+.home-view .title:not(.v-card-title) {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+/* 摘要样式 - 仅应用于非组件的默认样式 */
+.home-view .preview:not(.v-card-text) {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+/* 元信息样式 - 仅应用于非组件的默认样式 */
+.home-view .meta:not(.v-card-subtitle) {
+  font-size: 0.85rem;
+  color: #999;
+  display: flex;
+  gap: 1rem;
+}
+
+/* 分页相关样式 */
+.pagination-wrapper {
+  opacity: 0;
+  transform: translateY(20px);
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  animation: fadeIn 0.5s forwards 0.2s;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 返回顶部按钮优化 */
+.back-to-top {
+  position: fixed !important;
+  bottom: 40px !important;
+  right: 40px !important;
+  z-index: 100 !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(51, 51, 51, 0.15) !important;
+  transition: all 0.3s ease !important;
+}
+
+.back-to-top:hover {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  transform: translateY(-5px);
+}
+
+.back-to-top i {
+  font-size: 1.5rem;
+  color: #c2c2c2;
+}
+
+/* 响应式调整 - 平板 */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .hero-banner {
+    padding-top: 120px; /* 移动端减少顶部内边距 */
+  }
+  
+  .tagline-prefix {
+    font-size: 1.5rem !important;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+  
+  .article-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero .gradient-text {
+    font-size: 2.3rem !important;
+  }
+  
+  .back-to-top {
+    bottom: 30px !important;
+    right: 20px !important;
+  }
+  
+  .back-to-top i {
+    font-size: 1.2rem;
+  }
+}
+
+/* 响应式调整 - 移动端 */
+@media (max-width: 480px) {
+  .gradient-text {
+    font-size: 3rem !important;
+  }
+  
+  .tagline-prefix,
+  .tagline-suffix {
+    font-size: 2rem !important;
+  }
+  
+  .back-to-top {
+    width: 40px;
+    height: 40px;
+    bottom: 15px;
+    right: 15px;
+  }
+}
+
+/* 加载状态优化 */
+.v-skeleton-loader {
+  border-radius: var(--border-radius, 8px);
+  overflow: hidden;
+}
+
+/* 文章卡片动画优化 */
+.animate-item {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s forwards;
+  animation-delay: var(--animation-delay, 0s);
+  will-change: opacity, transform; /* 性能优化 */
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 空状态动画 */
+.empty-state {
+  animation: bounceIn 0.8s cubic-bezier(0.25, 0.1, 0.25, 1.5);
+}
+
+@keyframes bounceIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 减少印刷样式 */
+@media print {
+  .back-to-top,
+  .search-input,
+  .category-tags {
+    display: none !important;
+  }
+}
+
+/* 深色模式调整 */
+.v-theme--dark .back-to-top {
+  background-color: rgba(var(--surface, 33, 33, 33), 0.8) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.v-theme--dark .back-to-top i {
+  color: rgba(var(--primary-blue), 0.9);
+}
+
+/* 提高动画性能 */
+.hero-banner,
+.gradient-text,
+.hero-subtitle,
+.article-card {
+  will-change: transform; /* 仅对有动画的元素使用 */
+  transform: translateZ(0); /* 硬件加速 */
+} 

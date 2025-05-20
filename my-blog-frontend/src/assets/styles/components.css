@@ -1,0 +1,172 @@
+/*======================
+  组件相关样式
+======================*/
+
+/* 卡片样式 */
+.card-effect {
+  background: rgba(var(--v-theme-surface), 0.7);
+  border-radius: var(--border-radius);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--card-shadow);
+  transition: all var(--transition-default);
+  border: 1px solid rgba(var(--primary-blue), 0.1);
+  overflow: hidden;
+}
+
+.card-effect:hover {
+  transform: var(--card-hover-elevate);
+  box-shadow: var(--hover-shadow);
+  border-color: rgba(var(--primary-blue), 0.2);
+}
+
+/* 文章卡片 */
+.article-card {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  transition: all var(--transition-slow);
+  background: linear-gradient(
+    var(--gradient-angle),
+    rgba(var(--v-theme-surface), 0.85),
+    rgba(var(--v-theme-surface), 0.75)
+  );
+  backdrop-filter: blur(10px);
+  box-shadow: var(--card-shadow);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  border: 1px solid rgba(var(--primary-blue), 0.08);
+  position: relative;
+}
+
+.article-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--hover-shadow);
+  border-color: rgba(var(--primary-blue), 0.15);
+}
+
+.article-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg,
+    rgba(var(--primary-blue), 0.7),
+    rgba(var(--secondary-purple), 0.5),
+    rgba(var(--accent-orange), 0.3)
+  );
+  transform: scaleX(0);
+  transform-origin: top;
+  transition: transform var(--transition-default);
+}
+
+.article-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* 按钮样式 */
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-default);
+}
+
+.btn-glow::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(var(--primary-blue), 0.3) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: width var(--transition-slow), height var(--transition-slow);
+  z-index: 0;
+}
+
+.btn-glow:hover::after {
+  width: 250px;
+  height: 250px;
+}
+
+/* 导航栏 */
+.nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: all 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+  border-bottom: 1px solid transparent;
+}
+
+.nav-bar.scrolled {
+  background: rgba(255, 255, 255, 0);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px) saturate(200%);
+  border-bottom: 1px solid rgba(var(--primary-blue), 0.1);
+}
+
+.nav-bar.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.v-theme--dark .nav-bar.transparent {
+  background: rgba(18, 18, 18, 0.3);
+}
+
+.v-theme--dark .nav-bar.scrolled {
+  background: rgba(18, 18, 18, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 表单样式 */
+.custom-input .v-field {
+  border-radius: var(--border-radius-sm) !important;
+  transition: all var(--transition-default);
+}
+
+.custom-input .v-field:hover {
+  box-shadow: 0 0 0 1px rgba(var(--primary-blue), 0.2);
+}
+
+.custom-input .v-field.v-field--focused {
+  box-shadow: 0 0 0 2px rgba(var(--primary-blue), 0.3);
+}
+
+/* 加载状态 */
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.loader-pulse {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(var(--primary-blue), 0.7);
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+} 
