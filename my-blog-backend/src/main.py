@@ -46,7 +46,6 @@ app.add_middleware(
     allow_headers=["*"],  
 )
 
-# 添加日志中间件（使用新的带数据库记录功能的中间件）
 app.add_middleware(LoggingMiddleware, db_session_maker=SessionLocal)
 
 # 添加速率限制中间件
@@ -266,11 +265,14 @@ def health_check():
 @app.get('/api/articles', response_model=list[ArticleResponse])
 @cache(expire=300)  # 缓存5分钟
 async def get_articles(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    """获取文章列表"""
-    # 查询文章总数用于分页
-    total_count = db.query(func.count(models.Article.id)).scalar()
+    """获取文章列表，仅返回已发布的文章"""
+    # 只查询已发布的文章总数
+    total_count = db.query(func.count(models.Article.id)).filter(models.Article.status == "published").scalar()
 
-    articles = db.query(models.Article).options(
+    # 只查询已发布的文章
+    articles = db.query(models.Article).filter(
+        models.Article.status == "published"
+    ).options(
         joinedload(models.Article.tags_relationship),
         joinedload(models.Article.author)  # 预加载作者信息
     ).order_by(models.Article.created_at.desc()).offset(skip).limit(limit).all()
@@ -324,12 +326,27 @@ async def create_tag(tag: TagCreate, db: Session = Depends(get_db)):
     return new_tag
     
 @app.get('/api/articles/{article_id}', response_model=ArticleResponse)
-async def get_article(article_id: int, db: Session = Depends(get_db)):
+async def get_article(article_id: int, db: Session = Depends(get_db), current_user_id: Optional[int] = Depends(get_current_user_id_optional)):
+    """获取文章详情，普通用户只能查看已发布文章，作者和管理员可查看自己的未发布文章"""
     article = db.query(models.Article).options(joinedload(models.Article.tags_relationship)).filter(models.Article.id == article_id).first()
     if article is None:
         raise HTTPException(status_code=404, detail="文章不存在")
+    
+    # 检查文章状态和用户权限
+    # 如果文章未发布，只有作者和管理员可以查看
+    if article.status != "published":
+        # 未登录用户不能查看未发布文章
+        if not current_user_id:
+            raise HTTPException(status_code=403, detail="该文章尚未发布")
+        
+        # 非文章作者且非管理员不能查看未发布文章
+        if current_user_id != article.author_id and current_user_id != 1:
+            raise HTTPException(status_code=403, detail="该文章尚未发布")
+    
+    # 增加访问量
     article.views += 1
     db.commit()
+    
     tag_names = [tag.name for tag in article.tags_relationship] if article.tags_relationship else []
     
     article_data = {
@@ -689,8 +706,8 @@ async def get_visitor_logs(
     current_user_id: int = Depends(get_current_user_id)
 ):
     """获取访问记录列表（需要管理员权限）"""
-    admin = db.query(models.User).filter(models.User.id == 1).first()
-    if not admin or admin.username != os.getenv('ADMIN_USERNAME'):
+    # 验证用户是否为管理员（ID为1）
+    if current_user_id != 1:
         raise HTTPException(status_code=403, detail="没有权限访问该资源")
     
     # 构建查询
@@ -722,9 +739,8 @@ async def get_visitor_stats(
     current_user_id: int = Depends(get_current_user_id)
 ):
     """获取访问统计数据（需要管理员权限）"""
-    # 验证用户是否为管理员
-    admin = db.query(models.User).filter(models.User.id == current_user_id).first()
-    if not admin or admin.username != os.getenv('ADMIN_USERNAME'):
+    # 验证用户是否为管理员，只检查ID是否为1
+    if current_user_id != 1:
         raise HTTPException(status_code=403, detail="没有权限访问该资源")
     
     # 设置时间范围
@@ -785,9 +801,8 @@ async def get_ip_geolocation(
     current_user_id: int = Depends(get_current_user_id)
 ):
     """获取IP地址的地理位置信息（需要管理员权限）"""
-    # 验证用户是否为管理员
-    admin = db.query(models.User).filter(models.User.id == current_user_id).first()
-    if not admin or admin.username != os.getenv('ADMIN_USERNAME'):
+    # 验证用户是否为管理员（ID为1）
+    if current_user_id != 1:
         raise HTTPException(status_code=403, detail="没有权限访问该资源")
     
     # 不再查询IP地理位置，直接返回"未知"
@@ -870,6 +885,99 @@ async def update_article_status(
     
     # 返回成功信息
     return {"message": "文章状态已更新", "article_id": article_id, "status": status}
+
+@app.get('/api/admin/articles', response_model=list[ArticleResponse])
+async def get_admin_articles(
+    skip: int = 0, 
+    limit: int = 10,
+    status: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """获取文章列表（管理员专用，可过滤状态）"""
+    # 检查当前用户是否为管理员
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以访问此功能")
+    
+    # 构建查询
+    query = db.query(models.Article)
+    
+    # 如果指定了状态，则按状态过滤
+    if status:
+        query = query.filter(models.Article.status == status)
+    
+    # 获取总数
+    total_count = query.count()
+    
+    # 查询文章
+    articles = query.options(
+        joinedload(models.Article.tags_relationship),
+        joinedload(models.Article.author)
+    ).order_by(models.Article.created_at.desc()).offset(skip).limit(limit).all()
+    
+    # 转换查询结果
+    articles_data = []
+    for article in articles:
+        tag_names = [tag.name for tag in article.tags_relationship] if article.tags_relationship else []
+        
+        articles_data.append({
+            'id': article.id,
+            'title': article.title,
+            'content': article.content,
+            'summary': article.summary,
+            'author_id': article.author_id,
+            'author_name': article.author.username if article.author else "未知",
+            'created_at': article.created_at.isoformat(),
+            'updated_at': article.updated_at.isoformat(),
+            'views': article.views,
+            'likes': article.likes,
+            'tags': tag_names,
+            'status': article.status
+        })
+    
+    # 在响应头中添加分页信息
+    response = Response(content=json.dumps(articles_data), media_type="application/json")
+    response.headers["X-Total-Count"] = str(total_count)
+    response.headers["X-Total-Pages"] = str(math.ceil(total_count / limit))
+    return response
+
+@app.get('/api/admin/articles/{article_id}', response_model=ArticleResponse)
+async def get_admin_article(
+    article_id: int, 
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """管理员获取任意文章详情（无状态限制）"""
+    # 检查当前用户是否为管理员
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以访问此功能")
+    
+    article = db.query(models.Article).options(joinedload(models.Article.tags_relationship)).filter(models.Article.id == article_id).first()
+    if article is None:
+        raise HTTPException(status_code=404, detail="文章不存在")
+    
+    tag_names = [tag.name for tag in article.tags_relationship] if article.tags_relationship else []
+    
+    # 获取作者信息
+    author = db.query(models.User).filter(models.User.id == article.author_id).first()
+    author_name = author.username if author else "未知"
+    
+    article_data = {
+        'id': article.id,
+        'title': article.title,
+        'content': article.content,
+        'summary': article.summary,
+        'author_id': article.author_id,
+        'author_name': author_name,
+        'created_at': article.created_at.isoformat(),
+        'updated_at': article.updated_at.isoformat(),
+        'views': article.views,
+        'likes': article.likes,
+        'tags': tag_names,
+        'status': article.status
+    }
+    
+    return article_data
 
 # 启动服务器
 if __name__ == "__main__":

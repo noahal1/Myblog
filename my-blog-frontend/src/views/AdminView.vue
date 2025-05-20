@@ -1,12 +1,12 @@
 <template>
   <div class="admin-view">
-    <v-container>
+    <v-container v-if="hasPermission">
       <h1 class="text-h4 mb-4">管理控制台</h1>
       
       <v-tabs v-model="activeTab" class="mb-4" @update:model-value="handleTabChange">
         <v-tab value="stats">访问统计</v-tab>
         <v-tab value="logs">访问记录</v-tab>
-        <v-tab value="articles">文章审核</v-tab>
+        <v-tab value="articles">文章管理</v-tab>
       </v-tabs>
       
       <v-window v-model="activeTab">
@@ -175,16 +175,37 @@
         <!-- 文章审核视图 -->
         <v-window-item value="articles">
           <v-card elevation="2">
-            <v-card-title>待审核文章</v-card-title>
+            <v-card-title class="d-flex align-center">
+              文章管理
+              <v-spacer></v-spacer>
+              <v-select
+                v-model="articleStatus"
+                :items="statusOptions"
+                label="状态筛选"
+                density="compact"
+                class="max-width-200 ml-4"
+                @update:model-value="fetchArticlesByStatus"
+              ></v-select>
+            </v-card-title>
             <v-card-text>
               <v-data-table
                 :headers="articleHeaders"
-                :items="pendingArticles"
+                :items="adminArticles"
                 :loading="loadingArticles"
                 :items-per-page="10"
               >
                 <template v-slot:item.created_at="{ item }">
                   {{ formatDate(item.created_at) }}
+                </template>
+
+                <template v-slot:item.status="{ item }">
+                  <v-chip
+                    :color="getArticleStatusColor(item.status)"
+                    size="small"
+                    text-color="white"
+                  >
+                    {{ getArticleStatusText(item.status) }}
+                  </v-chip>
                 </template>
                 
                 <template v-slot:item.actions="{ item }">
@@ -196,29 +217,49 @@
                   >
                     查看
                   </v-btn>
-                  <v-btn
-                    color="success"
-                    size="small"
-                    class="mr-2"
-                    @click="approveArticle(item)"
-                  >
-                    通过
-                  </v-btn>
-                  <v-btn
-                    color="error"
-                    size="small"
-                    @click="rejectArticle(item)"
-                  >
-                    拒绝
-                  </v-btn>
+                  <template v-if="item.status === 'pending'">
+                    <v-btn
+                      color="success"
+                      size="small"
+                      class="mr-2"
+                      @click="approveArticle(item)"
+                    >
+                      通过
+                    </v-btn>
+                    <v-btn
+                      color="error"
+                      size="small"
+                      @click="rejectArticle(item)"
+                    >
+                      拒绝
+                    </v-btn>
+                  </template>
+                  <template v-else-if="item.status === 'rejected'">
+                    <v-btn
+                      color="success"
+                      size="small"
+                      @click="approveArticle(item)"
+                    >
+                      通过
+                    </v-btn>
+                  </template>
+                  <template v-else>
+                    <v-btn
+                      color="warning"
+                      size="small"
+                      @click="pendingArticle(item)"
+                    >
+                      撤回发布
+                    </v-btn>
+                  </template>
                 </template>
                 
                 <template v-slot:bottom>
                   <div class="d-flex justify-center">
                     <v-pagination
                       v-model="articlePage"
-                      :length="Math.ceil(totalPendingArticles / 10)"
-                      @update:model-value="fetchPendingArticles"
+                      :length="Math.ceil(totalAdminArticles / 10)"
+                      @update:model-value="fetchArticlesByStatus"
                     ></v-pagination>
                   </div>
                 </template>
@@ -232,7 +273,8 @@
               <v-card-title>{{ selectedArticle.title }}</v-card-title>
               <v-card-subtitle>
                 作者: {{ selectedArticle.author_name || '未知' }} | 
-                创建时间: {{ formatDate(selectedArticle.created_at) }}
+                创建时间: {{ formatDate(selectedArticle.created_at) }} |
+                状态: {{ getArticleStatusText(selectedArticle.status) }}
               </v-card-subtitle>
               <v-card-text>
                 <div class="mb-4">
@@ -243,8 +285,16 @@
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="primary" @click="articleDialog = false">关闭</v-btn>
-                <v-btn color="success" @click="approveArticle(selectedArticle); articleDialog = false">通过</v-btn>
-                <v-btn color="error" @click="rejectArticle(selectedArticle); articleDialog = false">拒绝</v-btn>
+                <template v-if="selectedArticle.status === 'pending'">
+                  <v-btn color="success" @click="approveArticle(selectedArticle); articleDialog = false">通过</v-btn>
+                  <v-btn color="error" @click="rejectArticle(selectedArticle); articleDialog = false">拒绝</v-btn>
+                </template>
+                <template v-else-if="selectedArticle.status === 'rejected'">
+                  <v-btn color="success" @click="approveArticle(selectedArticle); articleDialog = false">通过</v-btn>
+                </template>
+                <template v-else>
+                  <v-btn color="warning" @click="pendingArticle(selectedArticle); articleDialog = false">撤回发布</v-btn>
+                </template>
               </v-card-actions>
             </v-card>
           </v-dialog>
@@ -270,6 +320,25 @@
         </v-window-item>
       </v-window>
     </v-container>
+
+    <!-- 权限不足提示 -->
+    <v-container v-else>
+      <v-alert
+        type="error"
+        title="访问被拒绝"
+        text="您没有权限访问管理控制台"
+        class="mt-4"
+      >
+        <p class="mt-2">请确认您已登录并拥有管理员权限</p>
+        <v-btn
+          color="primary"
+          class="mt-4"
+          @click="goToHome"
+        >
+          返回首页
+        </v-btn>
+      </v-alert>
+    </v-container>
     
     <!-- 全局提示 -->
     <v-snackbar
@@ -284,10 +353,14 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
-import { getVisitorLogs, getVisitorStats, getPendingArticles, updateArticleStatus } from '../api'
+import { getVisitorLogs, getVisitorStats, getPendingArticles, updateArticleStatus, getAdminArticles } from '../api'
 import ArticleForm from '../components/ArticleForm.vue'
-import { getArticleDetail, updateArticleDetail } from '../api'
+import { getArticleDetail, updateArticleDetail, getAdminArticleDetail } from '../api'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '../stores/user'
 
+const router = useRouter()
+const userStore = useUserStore()
 const activeTab = ref('stats')
 const loading = ref(false)
 const visitorLogs = ref([])
@@ -296,15 +369,21 @@ const totalLogs = ref(0)
 const page = ref(1)
 const days = ref(7)
 
+// 使用userStore中的isAdmin getter
+const hasPermission = computed(() => userStore.isAdmin)
+
 // 文章审核相关
 const pendingArticles = ref([])
+const adminArticles = ref([])
 const loadingArticles = ref(false)
 const articlePage = ref(1)
 const totalPendingArticles = ref(0)
+const totalAdminArticles = ref(0)
 const articleDialog = ref(false)
 const selectedArticle = ref({})
 const editDialog = ref(false)
 const editArticle = ref(null)
+const articleStatus = ref('to_process')
 
 // 提示信息
 const snackbar = ref({
@@ -345,11 +424,106 @@ const articleHeaders = [
   { title: '标题', key: 'title' },
   { title: '作者', key: 'author_name' },
   { title: '创建时间', key: 'created_at' },
+  { title: '状态', key: 'status' },
   { title: '操作', key: 'actions', sortable: false }
 ]
 
 const pathStats = computed(() => visitorStats.value?.path_stats || {})
 const ipStats = computed(() => visitorStats.value?.ip_stats || {})
+
+// 文章状态选项
+const statusOptions = [
+  { title: '需要处理', value: 'to_process' },
+  { title: '待审核', value: 'pending' },
+  { title: '已发布', value: 'published' },
+  { title: '已拒绝', value: 'rejected' },
+  { title: '全部', value: '' }
+]
+
+// 获取文章状态颜色
+const getArticleStatusColor = (status) => {
+  switch(status) {
+    case 'published': return 'success'
+    case 'pending': return 'warning'
+    case 'rejected': return 'error'
+    default: return 'grey'
+  }
+}
+
+// 获取文章状态文本
+const getArticleStatusText = (status) => {
+  switch(status) {
+    case 'published': return '已发布'
+    case 'pending': return '待审核'
+    case 'rejected': return '已拒绝'
+    default: return '未知'
+  }
+}
+
+// 按状态获取文章列表
+const fetchArticlesByStatus = async () => {
+  if (!hasPermission.value) return
+  
+  loadingArticles.value = true
+  try {
+    // 特殊处理"需要处理"选项，获取待审核和被拒绝的文章
+    if (articleStatus.value === 'to_process') {
+      // 首先获取待审核文章
+      const pendingResponse = await getAdminArticles(1, 50, 'pending')
+      const pendingArticles = pendingResponse?.data || []
+      
+      // 然后获取被拒绝文章
+      const rejectedResponse = await getAdminArticles(1, 50, 'rejected')
+      const rejectedArticles = rejectedResponse?.data || []
+      
+      // 合并两种文章
+      adminArticles.value = [...pendingArticles, ...rejectedArticles]
+      
+      // 按创建时间排序，最新的在前面
+      adminArticles.value.sort((a, b) => {
+        return new Date(b.created_at) - new Date(a.created_at)
+      })
+      
+      // 手动处理分页
+      const startIndex = (articlePage.value - 1) * 10
+      const endIndex = startIndex + 10
+      adminArticles.value = adminArticles.value.slice(startIndex, endIndex)
+      
+      // 计算总数
+      const totalItems = (pendingResponse?.headers?.['x-total-count'] || 0) + 
+                        (rejectedResponse?.headers?.['x-total-count'] || 0)
+      totalAdminArticles.value = parseInt(totalItems)
+    } else {
+      // 正常处理单一状态
+      const response = await getAdminArticles(articlePage.value, 10, articleStatus.value || null)
+      if (response && response.data) {
+        adminArticles.value = response.data || []
+        totalAdminArticles.value = parseInt(response.headers['x-total-count']) || 0
+      }
+    }
+  } catch (error) {
+    console.error('获取文章列表失败:', error)
+    showSnackbar('获取文章列表失败', 'error')
+  } finally {
+    loadingArticles.value = false
+  }
+}
+
+// 撤回文章至待审核状态
+const pendingArticle = async (article) => {
+  loadingArticles.value = true
+  try {
+    await updateArticleStatus(article.id, 'pending')
+    showSnackbar('文章已撤回至待审核状态')
+    // 重新加载文章列表
+    fetchArticlesByStatus()
+  } catch (error) {
+    console.error('更新文章状态失败:', error)
+    showSnackbar('更新文章状态失败', 'error')
+  } finally {
+    loadingArticles.value = false
+  }
+}
 
 // 处理标签页变更
 const handleTabChange = (tab) => {
@@ -357,8 +531,8 @@ const handleTabChange = (tab) => {
     fetchVisitorStats()
   } else if (tab === 'logs' && visitorLogs.value.length === 0) {
     fetchVisitorLogs()
-  } else if (tab === 'articles' && pendingArticles.value.length === 0) {
-    fetchPendingArticles()
+  } else if (tab === 'articles' && adminArticles.value.length === 0) {
+    fetchArticlesByStatus()
   }
 }
 
@@ -371,8 +545,15 @@ const showSnackbar = (text, color = 'success') => {
   }
 }
 
+// 返回首页
+const goToHome = () => {
+  router.push('/')
+}
+
 // 获取访问记录
 const fetchVisitorLogs = async () => {
+  if (!hasPermission.value) return
+  
   loading.value = true
   try {
     const params = {
@@ -403,6 +584,8 @@ const fetchVisitorLogs = async () => {
 
 // 获取访问统计
 const fetchVisitorStats = async () => {
+  if (!hasPermission.value) return
+  
   loading.value = true
   try {
     const response = await getVisitorStats(days.value)
@@ -419,6 +602,8 @@ const fetchVisitorStats = async () => {
 
 // 获取待审核文章
 const fetchPendingArticles = async () => {
+  if (!hasPermission.value) return
+  
   loadingArticles.value = true
   try {
     const response = await getPendingArticles(articlePage.value, 10)
@@ -537,13 +722,28 @@ watch(page, () => {
 
 watch(articlePage, () => {
   if (activeTab.value === 'articles') {
-    fetchPendingArticles()
+    fetchArticlesByStatus()
   }
 })
 
-onMounted(() => {
-  // 只加载当前激活标签的数据
-  handleTabChange(activeTab.value)
+// 监听文章状态变化
+watch(articleStatus, () => {
+  articlePage.value = 1 // 重置分页
+  fetchArticlesByStatus()
+})
+
+onMounted(async () => {
+  // 检查是否已登录，如果未登录尝试初始化用户状态
+  if (!userStore.isAuthenticated) {
+    await userStore.initUserState()
+  }
+
+  // 只有有权限时才加载数据
+  if (hasPermission.value) {
+    handleTabChange(activeTab.value)
+  } else {
+    showSnackbar('没有权限访问该资源，只有管理员(用户ID=1)才能访问', 'error')
+  }
 })
 </script>
 
