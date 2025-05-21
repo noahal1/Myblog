@@ -30,3 +30,4 @@ dist-ssr
 docker-compose.yml
 dev
 docker_ali.md
+.cursor

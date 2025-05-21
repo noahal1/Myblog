@@ -8,10 +8,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AntfuBackground: typeof import('./components/AntfuBackground.vue')['default']
     AppFooter: typeof import('./components/AppFooter.vue')['default']
     ArticleCard: typeof import('./components/ArticleCard.vue')['default']
-    BinaryBackground: typeof import('./components/BinaryBackground.vue')['default']
     CommentSection: typeof import('./components/CommentSection.vue')['default']
     FaviconIcon: typeof import('./components/icons/FaviconIcon.vue')['default']
     Login: typeof import('./components/Login.vue')['default']
