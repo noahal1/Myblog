@@ -127,11 +127,7 @@ const formatDate = (date) => {
   
   return date.toLocaleDateString('zh-CN', {
     year: 'numeric',
-<<<<<<< HEAD
-    month: 'long',
-=======
     month: 'numeric',
->>>>>>> win-main
     day: 'numeric'
   });
 };

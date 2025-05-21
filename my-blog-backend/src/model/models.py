@@ -31,11 +31,7 @@ class Article(Base):
     likes = Column(Integer, default=0)
     comments_count = Column(Integer, default=0)
     tags = Column(String(255))
-<<<<<<< HEAD
-    
-=======
     status = Column(String(20), default="pending")  
->>>>>>> win-main
     author = relationship("User", back_populates="articles")
     comments = relationship("Comment", back_populates="article")
     tags_relationship = relationship('Tag', secondary='article_tags', back_populates='articles')

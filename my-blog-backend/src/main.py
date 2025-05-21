@@ -21,10 +21,7 @@ from redis import Redis
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import re
 import ipaddress
-<<<<<<< HEAD
-=======
 from fastapi.responses import JSONResponse
->>>>>>> win-main
 
 from src.model import models
 from src.model.database import engine, SessionLocal, get_db
@@ -50,10 +47,6 @@ app.add_middleware(
     allow_headers=["*"],  
 )
 
-<<<<<<< HEAD
-# 添加日志中间件（使用新的带数据库记录功能的中间件）
-=======
->>>>>>> win-main
 app.add_middleware(LoggingMiddleware, db_session_maker=SessionLocal)
 
 # 添加速率限制中间件
@@ -76,10 +69,6 @@ class RateLimitMiddleware:
         
         # 检查请求数量是否超过限制
         if len(self.requests[ip]) >= self.max_requests:
-<<<<<<< HEAD
-            from fastapi.responses import JSONResponse
-=======
->>>>>>> win-main
             return JSONResponse(
                 status_code=429,
                 content={"detail": "请求过于频繁，请稍后再试"}
@@ -132,11 +121,8 @@ class ArticleResponse(BaseModel):
     views: int
     likes: int
     tags: list[str]
-<<<<<<< HEAD
-=======
     status: Optional[str] = "published"
     author_name: Optional[str] = None
->>>>>>> win-main
     
     class Config:
         orm_mode = True
@@ -279,13 +265,6 @@ def health_check():
 @app.get('/api/articles', response_model=list[ArticleResponse])
 @cache(expire=300)  # 缓存5分钟
 async def get_articles(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-<<<<<<< HEAD
-    """获取文章列表"""
-    # 查询文章总数用于分页
-    total_count = db.query(func.count(models.Article.id)).scalar()
-
-    articles = db.query(models.Article).options(
-=======
     """获取文章列表，仅返回已发布的文章"""
     # 只查询已发布的文章总数
     total_count = db.query(func.count(models.Article.id)).filter(models.Article.status == "published").scalar()
@@ -294,7 +273,6 @@ async def get_articles(skip: int = 0, limit: int = 10, db: Session = Depends(get
     articles = db.query(models.Article).filter(
         models.Article.status == "published"
     ).options(
->>>>>>> win-main
         joinedload(models.Article.tags_relationship),
         joinedload(models.Article.author)  # 预加载作者信息
     ).order_by(models.Article.created_at.desc()).offset(skip).limit(limit).all()
@@ -348,16 +326,6 @@ async def create_tag(tag: TagCreate, db: Session = Depends(get_db)):
     return new_tag
     
 @app.get('/api/articles/{article_id}', response_model=ArticleResponse)
-<<<<<<< HEAD
-async def get_article(article_id: int, db: Session = Depends(get_db)):
-    article = db.query(models.Article).options(joinedload(models.Article.tags_relationship)).filter(models.Article.id == article_id).first()
-    if article is None:
-        raise HTTPException(status_code=404, detail="文章不存在")
-    article.views += 1
-    db.commit()
-    tag_names = [tag.name for tag in article.tags_relationship] if article.tags_relationship else []
-    
-=======
 async def get_article(article_id: int, db: Session = Depends(get_db), current_user_id: Optional[int] = Depends(get_current_user_id_optional)):
     """获取文章详情，普通用户只能查看已发布文章，作者和管理员可查看自己的未发布文章"""
     article = db.query(models.Article).options(joinedload(models.Article.tags_relationship)).filter(models.Article.id == article_id).first()
@@ -385,17 +353,13 @@ async def get_article(article_id: int, db: Session = Depends(get_db), current_us
     author = db.query(models.User).filter(models.User.id == article.author_id).first()
     author_name = author.username if author else "未知作者"
     
->>>>>>> win-main
     article_data = {
         'id': article.id,
         'title': article.title,
         'content': article.content,
         'summary': article.summary,
         'author_id': article.author_id,
-<<<<<<< HEAD
-=======
         'author_name': author_name,
->>>>>>> win-main
         'created_at': article.created_at.isoformat(),
         'updated_at': article.updated_at.isoformat(),
         'views': article.views,
@@ -425,23 +389,16 @@ async def create_article(
         tag_names = [tag.name for tag in tag_objects]
 
     # 创建新文章，使用当前登录用户的ID
-<<<<<<< HEAD
-=======
     # 如果用户不是管理员（ID不为1），文章状态设为pending需要审核
     status = "published" if current_user_id == 1 else "pending"
     
->>>>>>> win-main
     db_article = models.Article(
         title=article.title,
         content=article.content,
         summary=article.summary,
         author_id=current_user_id,  # 使用从JWT获取的用户ID
-<<<<<<< HEAD
-        tags=",".join(tag_names) if tag_names else None  # 使用逗号分隔的标签名
-=======
         tags=",".join(tag_names) if tag_names else None,  # 使用逗号分隔的标签名
         status=status  # 设置文章状态
->>>>>>> win-main
     )
 
     db.add(db_article)
@@ -754,13 +711,8 @@ async def get_visitor_logs(
     current_user_id: int = Depends(get_current_user_id)
 ):
     """获取访问记录列表（需要管理员权限）"""
-<<<<<<< HEAD
-    admin = db.query(models.User).filter(models.User.id == 1).first()
-    if not admin or admin.username != os.getenv('ADMIN_USERNAME'):
-=======
     # 验证用户是否为管理员（ID为1）
     if current_user_id != 1:
->>>>>>> win-main
         raise HTTPException(status_code=403, detail="没有权限访问该资源")
     
     # 构建查询
@@ -783,15 +735,11 @@ async def get_visitor_logs(
     # 应用分页并获取结果
     logs = query.order_by(models.VisitorLog.request_time.desc()).offset(offset).limit(limit).all()
     
-<<<<<<< HEAD
-    return logs
-=======
     # 设置响应头，包含总数信息
     response = Response(content=json.dumps([log.__dict__ for log in logs], default=str), media_type="application/json")
     response.headers["X-Total-Count"] = str(total)
     
     return response
->>>>>>> win-main
 
 @app.get('/api/admin/visitor-stats', response_model=VisitorStatsResponse)
 async def get_visitor_stats(
@@ -800,14 +748,8 @@ async def get_visitor_stats(
     current_user_id: int = Depends(get_current_user_id)
 ):
     """获取访问统计数据（需要管理员权限）"""
-<<<<<<< HEAD
-    # 验证用户是否为管理员
-    admin = db.query(models.User).filter(models.User.id == current_user_id).first()
-    if not admin or admin.username != os.getenv('ADMIN_USERNAME'):
-=======
     # 验证用户是否为管理员，只检查ID是否为1
     if current_user_id != 1:
->>>>>>> win-main
         raise HTTPException(status_code=403, detail="没有权限访问该资源")
     
     # 设置时间范围
@@ -868,14 +810,8 @@ async def get_ip_geolocation(
     current_user_id: int = Depends(get_current_user_id)
 ):
     """获取IP地址的地理位置信息（需要管理员权限）"""
-<<<<<<< HEAD
-    # 验证用户是否为管理员
-    admin = db.query(models.User).filter(models.User.id == current_user_id).first()
-    if not admin or admin.username != os.getenv('ADMIN_USERNAME'):
-=======
     # 验证用户是否为管理员（ID为1）
     if current_user_id != 1:
->>>>>>> win-main
         raise HTTPException(status_code=403, detail="没有权限访问该资源")
     
     # 不再查询IP地理位置，直接返回"未知"
@@ -887,8 +823,6 @@ async def get_ip_geolocation(
         "isp": "未知"
     }
 
-<<<<<<< HEAD
-=======
 # 文章审核相关API
 @app.get('/api/admin/articles', response_model=list[ArticleResponse])
 async def get_admin_articles(
@@ -1068,7 +1002,6 @@ async def update_article_status(
     # 返回成功信息
     return {"message": "文章状态已更新", "article_id": article_id, "status": status}
 
->>>>>>> win-main
 # 启动服务器
 if __name__ == "__main__":
     import uvicorn

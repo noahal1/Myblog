@@ -243,8 +243,6 @@ export const getIpGeolocation = async (ip) => {
   }
 };
 
-<<<<<<< HEAD
-=======
 // 获取文章详情
 export const getArticleDetail = async (articleId) => {
   try {
@@ -301,7 +299,6 @@ export const getArticlesToProcess = async (page = 1, limit = 10) => {
   }
 };
 
->>>>>>> win-main
 // 错误处理和重试逻辑
 const handleApiError = (error, retryCallback) => {
   const requestId = error.config?.url;

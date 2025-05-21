@@ -1,9 +1,6 @@
 import time
 import uuid
-<<<<<<< HEAD
-=======
 import ipaddress
->>>>>>> win-main
 from typing import Callable
 
 from fastapi import FastAPI, Request, Response
@@ -21,8 +18,6 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.db_session_maker = db_session_maker
     
-<<<<<<< HEAD
-=======
     def is_loopback_address(self, ip):
         """检查IP地址是否为环回地址（localhost）"""
         try:
@@ -33,7 +28,6 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # 如果IP地址格式无效，默认不视为环回地址
             return False
     
->>>>>>> win-main
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """处理请求和响应"""
         # 生成请求ID
@@ -64,12 +58,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # 如果存在X-Forwarded-For头，使用第一个IP地址
             client_ip = forwarded_for.split(",")[0].strip()
         
-<<<<<<< HEAD
-=======
         # 检查是否为环回地址
         is_loopback = self.is_loopback_address(client_ip)
         
->>>>>>> win-main
         # 获取请求相关信息
         user_agent = request.headers.get("User-Agent", "Unknown")
         path = request.url.path
@@ -79,11 +70,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         # 记录请求开始信息
         start_time = time.time()
         api_logger.info(
-<<<<<<< HEAD
-            f"{method} {path} - 开始处理 - IP: {client_ip}",
-=======
             f"{method} {path} - 开始处理 - IP: {client_ip}{' (环回地址)' if is_loopback else ''}",
->>>>>>> win-main
             extra={
                 "method": method,
                 "path": path,
@@ -112,13 +99,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # 添加请求ID到响应头
             response.headers["X-Request-ID"] = request_id
             
-<<<<<<< HEAD
-            # 如果提供了数据库会话，保存访问记录
-            if self.db_session_maker:
-=======
             # 如果提供了数据库会话，且不是环回地址，则保存访问记录
             if self.db_session_maker and not is_loopback:
->>>>>>> win-main
                 db = None
                 try:
                     db = self.db_session_maker()
@@ -142,11 +124,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 finally:
                     if db:
                         db.close()
-<<<<<<< HEAD
-=======
             elif is_loopback:
                 log.debug(f"跳过环回地址访问记录: {path}, IP: {client_ip}")
->>>>>>> win-main
             
             return response
             
