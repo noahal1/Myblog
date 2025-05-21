@@ -19,6 +19,9 @@ export default defineConfig(({ command, mode }) => {
   // 设置第三个参数为 '' 来加载所有环境变量，而不管是否有 `VITE_` 前缀。
   const env = loadEnv(mode, process.cwd(), '')
   
+  // 检测是否为低内存环境（服务器）
+  const isLowMemoryEnv = process.env.LOW_MEMORY === 'true' || process.env.NODE_ENV === 'production'
+  
   return {
     plugins: [
       vue({
@@ -37,6 +40,10 @@ export default defineConfig(({ command, mode }) => {
           'pinia'
         ],
         dts: 'src/auto-imports.d.ts',
+        // 兼容性调整
+        eslintrc: {
+          enabled: false
+        }
       }),
       Components({
         resolvers: [ElementPlusResolver()],
@@ -44,17 +51,19 @@ export default defineConfig(({ command, mode }) => {
         dirs: ['src/components'],
         extensions: ['vue'],
         dts: 'src/components.d.ts',
+        // 兼容性调整
+        directives: true
       }),
-      // 启用压缩
-      viteCompression({
+      // 启用压缩 - 低内存环境下禁用
+      !isLowMemoryEnv && viteCompression({
         verbose: true,
         disable: false,
         threshold: 10240, // 大于10kb的文件才会被压缩
         algorithm: 'gzip',
         ext: '.gz',
       }),
-      // 图片压缩 - 仅在生产环境启用
-      mode === 'production' && viteImagemin({
+      // 图片压缩 - 仅在生产环境且非低内存环境下启用
+      mode === 'production' && !isLowMemoryEnv && viteImagemin({
         gifsicle: {
           optimizationLevel: 7,
           interlaced: false,
@@ -81,7 +90,8 @@ export default defineConfig(({ command, mode }) => {
           ],
         },
       }),
-      mode === 'production' && VitePWA({
+      // PWA插件 - 仅在生产环境且非低内存环境下启用
+      mode === 'production' && !isLowMemoryEnv && VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
         manifest: {
@@ -194,8 +204,10 @@ export default defineConfig(({ command, mode }) => {
     },
     build: {
       cssCodeSplit: true,
-      // 使用terser压缩器进行更彻底的优化
-      minify: 'terser',
+      // 增加小文件内联阈值，减少http请求数
+      assetsInlineLimit: 8192, // 8kb
+      // 在低内存环境下使用更简单的压缩
+      minify: isLowMemoryEnv ? false : 'terser',
       terserOptions: {
         compress: {
           drop_console: mode === 'production', // 生产环境下移除console
@@ -203,47 +215,44 @@ export default defineConfig(({ command, mode }) => {
           pure_funcs: mode === 'production' ? ['console.log'] : []
         }
       },
+      // 禁用brotli压缩，减少服务器负担
+      brotliSize: false,
       // 分包策略优化
       rollupOptions: {
         output: {
-          // 将依赖包分开打包
+          // 简化分包策略，减少构建复杂度
           manualChunks: (id) => {
+            // 在低内存环境下完全禁用分包
+            if (isLowMemoryEnv) {
+              return null; // 不分包
+            }
+            
+            // 普通环境下简单分包
             if (id.includes('node_modules')) {
-              // 将第三方库分成不同的块以优化缓存
-              if (id.includes('vue') || id.includes('pinia') || id.includes('vue-router')) {
-                return 'vendor-vue'
-              }
-              if (id.includes('vuetify')) {
-                return 'vendor-vuetify'
-              }
-              if (id.includes('marked') || id.includes('highlight.js') || id.includes('prismjs') || id.includes('md-editor')) {
-                return 'vendor-markdown'
-              }
-              if (id.includes('@mdi') || id.includes('material-design-icons')) {
-                return 'vendor-icons'
-              }
-              return 'vendor' // 所有其他第三方库
+              return 'vendor'; // 所有第三方库
             }
           },
-          // 静态资源分类打包
-          assetFileNames: (assetInfo) => {
-            const info = assetInfo.name.split('.')
-            let extType = info[info.length - 1]
-            if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(assetInfo.name)) {
-              extType = 'media'
-            } else if (/\.(png|jpe?g|gif|svg|webp)(\?.*)?$/i.test(assetInfo.name)) {
-              extType = 'img'
-            } else if (/\.(woff2?|eot|ttf|otf)(\?.*)?$/i.test(assetInfo.name)) {
-              extType = 'fonts'
-            }
-            return `assets/${extType}/[name]-[hash][extname]`
-          },
+          // 简化静态资源分类打包
+          assetFileNames: isLowMemoryEnv 
+            ? 'assets/[name]-[hash][extname]' 
+            : (assetInfo) => {
+                const info = assetInfo.name.split('.')
+                let extType = info[info.length - 1]
+                if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(assetInfo.name)) {
+                  extType = 'media'
+                } else if (/\.(png|jpe?g|gif|svg|webp)(\?.*)?$/i.test(assetInfo.name)) {
+                  extType = 'img'
+                } else if (/\.(woff2?|eot|ttf|otf)(\?.*)?$/i.test(assetInfo.name)) {
+                  extType = 'fonts'
+                }
+                return `assets/${extType}/[name]-[hash][extname]`
+              },
           chunkFileNames: 'assets/js/[name]-[hash].js',
           entryFileNames: 'assets/js/[name]-[hash].js',
         }
       },
       // 提高大型包警告限制
-      chunkSizeWarningLimit: 1500,
+      chunkSizeWarningLimit: 2000,
       // 只在生产环境禁用源码映射
       sourcemap: mode !== 'production'
     },
@@ -262,14 +271,36 @@ export default defineConfig(({ command, mode }) => {
         'vue', 
         'vue-router', 
         'pinia', 
-        'vuetify', 
-        'marked', 
-        'highlight.js', 
-        'axios',
-        'prismjs',
-        'dompurify',
-        'gsap'
-      ]
+        // 在低内存环境下减少预构建依赖
+        ...(isLowMemoryEnv ? [] : [
+          'vuetify', 
+          'marked', 
+          'highlight.js', 
+          'axios',
+          'prismjs',
+          'dompurify',
+          'gsap'
+        ])
+      ],
+      // 提高依赖预构建性能
+      esbuildOptions: {
+        target: 'es2020',
+        // 低内存环境下降低并行度
+        treeShaking: true,
+        legalComments: 'none',
+        // 低内存环境下禁用sourceMap
+        sourcemap: isLowMemoryEnv ? false : true
+      }
+    },
+    // esbuild优化配置
+    esbuild: {
+      drop: mode === 'production' || isLowMemoryEnv ? ['console', 'debugger'] : [],
+      target: 'es2020',
+      // 低内存环境下降低线程数
+      treeShaking: true,
+      legalComments: 'none',
+      // 减少构建时的内存使用
+      logOverride: { 'this-is-undefined-in-esm': 'silent' }
     },
     // 缓存设置
     cacheDir: '.vite_cache'
