@@ -13,14 +13,10 @@
         {{ article.title }}
       </v-card-title>
       <v-card-subtitle class="meta py-2 animated fadeIn" style="animation-delay:0.1s;">
-<<<<<<< HEAD
-        <v-icon icon="mdi-calendar" size="small" class="mr-1" />
-=======
         <v-icon icon="mdi-account" size="small" class="mr-1" />
         <span class="text-caption">{{ article.author_name || '未知作者' }}</span>
         
         <v-icon icon="mdi-calendar" size="small" class="ml-3 mr-1" />
->>>>>>> win-main
         <span class="text-caption">{{ formattedDate }}</span>
         
         <v-icon icon="mdi-eye" size="small" class="ml-3 mr-1" />
