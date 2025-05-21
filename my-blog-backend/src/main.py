@@ -349,12 +349,17 @@ async def get_article(article_id: int, db: Session = Depends(get_db), current_us
     
     tag_names = [tag.name for tag in article.tags_relationship] if article.tags_relationship else []
     
+    # 获取作者信息
+    author = db.query(models.User).filter(models.User.id == article.author_id).first()
+    author_name = author.username if author else "未知作者"
+    
     article_data = {
         'id': article.id,
         'title': article.title,
         'content': article.content,
         'summary': article.summary,
         'author_id': article.author_id,
+        'author_name': author_name,
         'created_at': article.created_at.isoformat(),
         'updated_at': article.updated_at.isoformat(),
         'views': article.views,

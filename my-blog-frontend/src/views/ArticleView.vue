@@ -51,9 +51,16 @@
                 {{ article.tags }}
               </v-chip>
             </template>
-            
-            <!-- 日期和阅读时间 -->
+            <!-- 日期和作者 -->
+
             <div class="text-caption text-medium-emphasis ml-auto">
+              <v-chip
+              class="mr-2"
+              variant="outlined"
+              size="small"
+            >
+              {{ article.author_name || '未知作者' }}
+            </v-chip>作于
               {{ formatDate(article.published_at || article.created_at || article.publish_date || new Date()) }} 
               <span v-if="article.read_time">· {{ article.read_time }} 分钟阅读</span>
             </div>
