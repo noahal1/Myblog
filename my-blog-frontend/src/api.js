@@ -243,6 +243,65 @@ export const getIpGeolocation = async (ip) => {
   }
 };
 
+<<<<<<< HEAD
+=======
+// 获取文章详情
+export const getArticleDetail = async (articleId) => {
+  try {
+    return await apiClient.get(`/api/articles/${articleId}`);
+  } catch (error) {
+    return handleApiError(error, () => getArticleDetail(articleId));
+  }
+};
+
+// 获取管理员版文章详情
+export const getAdminArticleDetail = async (articleId) => {
+  try {
+    return await apiClient.get(`/api/admin/articles/${articleId}`);
+  } catch (error) {
+    return handleApiError(error, () => getAdminArticleDetail(articleId));
+  }
+};
+
+// 更新审核状态
+export const updateArticleStatus = async (articleId, status) => {
+  return await apiClient.put(`/api/admin/articles/${articleId}/status?status=${status}`);
+};
+
+// 更新文章详情
+export const updateArticleDetail = async (id, data) => {
+  return await apiClient.put(`/api/admin/articles/${id}`, data);
+};
+
+// 获取所有文章、管理员版
+export const getAdminArticles = async (page = 1, limit = 10, status = null) => {
+  const skip = (page - 1) * limit;
+  const params = { skip, limit };
+  
+  if (status) {
+    params.status = status;
+  }
+  
+  try {
+    return await apiClient.get('/api/admin/articles', { params });
+  } catch (error) {
+    return handleApiError(error, () => getAdminArticles(page, limit, status));
+  }
+};
+
+// 获取需要处理的文章（待审核和已拒绝）
+export const getArticlesToProcess = async (page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+  const params = { skip, limit };
+  
+  try {
+    return await apiClient.get('/api/admin/articles/to-process', { params });
+  } catch (error) {
+    return handleApiError(error, () => getArticlesToProcess(page, limit));
+  }
+};
+
+>>>>>>> win-main
 // 错误处理和重试逻辑
 const handleApiError = (error, retryCallback) => {
   const requestId = error.config?.url;

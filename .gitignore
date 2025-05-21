@@ -30,4 +30,8 @@ dist-ssr
 docker-compose.yml
 dev
 docker_ali.md
+<<<<<<< HEAD
+=======
+.env
+>>>>>>> win-main
 .cursor
