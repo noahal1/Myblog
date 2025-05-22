@@ -237,7 +237,8 @@ const fetchArticles = async () => {
   loading.value = true;
   
   try {
-    const response = await getArticles(1, 100);
+    // 设置knowledge_base=false参数，只获取非知识库文章
+    const response = await getArticles(1, 100, false);
     
     // 处理响应
     if (response && response.data) {

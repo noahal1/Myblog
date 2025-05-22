@@ -123,6 +123,7 @@ class ArticleResponse(BaseModel):
     tags: list[str]
     status: Optional[str] = "published"
     author_name: Optional[str] = None
+    is_knowledge_base: Optional[bool] = False
     
     class Config:
         orm_mode = True
@@ -132,6 +133,7 @@ class ArticleCreate(BaseModel):
     content: str
     summary: str
     tags: list[int]
+    is_knowledge_base: Optional[bool] = False
 
 class UserCreate(BaseModel):
     username: str
@@ -264,15 +266,26 @@ def health_check():
 
 @app.get('/api/articles', response_model=list[ArticleResponse])
 @cache(expire=300)  # 缓存5分钟
-async def get_articles(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    """获取文章列表，仅返回已发布的文章"""
-    # 只查询已发布的文章总数
-    total_count = db.query(func.count(models.Article.id)).filter(models.Article.status == "published").scalar()
-
-    # 只查询已发布的文章
-    articles = db.query(models.Article).filter(
-        models.Article.status == "published"
-    ).options(
+async def get_articles(skip: int = 0, limit: int = 10, knowledge_base: Optional[bool] = None, db: Session = Depends(get_db)):
+    """获取文章列表，仅返回已发布的文章
+    
+    参数:
+    - skip: 分页起始位置
+    - limit: 每页显示数量
+    - knowledge_base: 是否只显示知识库文章，None代表不过滤
+    """
+    # 构建基础查询
+    query = db.query(models.Article).filter(models.Article.status == "published")
+    
+    # 如果指定了知识库标志，则添加过滤条件
+    if knowledge_base is not None:
+        query = query.filter(models.Article.is_knowledge_base == knowledge_base)
+    
+    # 查询文章总数
+    total_count = query.count()
+    
+    # 查询文章列表
+    articles = query.options(
         joinedload(models.Article.tags_relationship),
         joinedload(models.Article.author)  # 预加载作者信息
     ).order_by(models.Article.created_at.desc()).offset(skip).limit(limit).all()
@@ -293,6 +306,7 @@ async def get_articles(skip: int = 0, limit: int = 10, db: Session = Depends(get
             'views': article.views,
             'likes': article.likes,
             'tags': tag_names,
+            'is_knowledge_base': article.is_knowledge_base,
             'comments_count': article.comments_count if article.comments_count is not None else 0
         })
     # 在响应头中添加分页信息
@@ -364,7 +378,9 @@ async def get_article(article_id: int, db: Session = Depends(get_db), current_us
         'updated_at': article.updated_at.isoformat(),
         'views': article.views,
         'likes': article.likes,
-        'tags': tag_names  # 返回标签名称列表
+        'tags': tag_names,  # 返回标签名称列表
+        'status': article.status,
+        'is_knowledge_base': article.is_knowledge_base
     }
     return article_data
 
@@ -398,7 +414,8 @@ async def create_article(
         summary=article.summary,
         author_id=current_user_id,  # 使用从JWT获取的用户ID
         tags=",".join(tag_names) if tag_names else None,  # 使用逗号分隔的标签名
-        status=status  # 设置文章状态
+        status=status,  # 设置文章状态
+        is_knowledge_base=article.is_knowledge_base  # 添加知识库字段
     )
 
     db.add(db_article)
@@ -426,7 +443,8 @@ async def create_article(
         'updated_at': db_article.updated_at.isoformat(),
         'views': db_article.views,
         'likes': db_article.likes,
-        'tags': tag_names
+        'tags': tag_names,
+        'is_knowledge_base': db_article.is_knowledge_base
     }
 
 @app.on_event("startup")

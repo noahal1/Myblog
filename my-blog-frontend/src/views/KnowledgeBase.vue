@@ -207,6 +207,7 @@ const sortOption = ref('latest')
 const viewMode = ref('card')
 const currentPage = ref(1)
 const itemsPerPage = 9
+const totalArticles = ref(0)
 
 // 目录分类
 const categories = [
@@ -236,10 +237,6 @@ const tags = [
   { id: 12, name: '安全', count: 3, color: 'red-darken-3' },
 ]
 
-// 模拟知识库文章数据
-const mockArticles = [
-]
-
 // 根据分类和标签筛选文章
 const filteredArticles = computed(() => {
   // 首先根据搜索词过滤
@@ -261,7 +258,10 @@ const filteredArticles = computed(() => {
   // 根据标签过滤
   if (selectedTags.value.length > 0) {
     result = result.filter(article => 
-      article.tag_ids.some(tagId => selectedTags.value.includes(tagId))
+      article.tags.some(tagName => {
+        const tagId = tags.find(t => t.name === tagName)?.id
+        return tagId && selectedTags.value.includes(tagId)
+      })
     )
   }
   
@@ -316,6 +316,41 @@ const toggleTag = (tagId) => {
   currentPage.value = 1
 }
 
+// 将文章与分类关联（根据标签）
+const mapArticlesToCategories = (articles) => {
+  const categoryMap = {
+    'frontend': ['JavaScript', 'Vue', 'React', 'Angular', 'CSS', 'HTML', '前端'],
+    'backend': ['Python', 'Java', 'Node.js', 'Go', 'PHP', 'API', '后端'],
+    'database': ['MySQL', 'MongoDB', 'PostgreSQL', 'Redis', 'SQL', '数据库'],
+    'devops': ['Docker', 'Kubernetes', 'CI/CD', 'DevOps', '运维', 'Git'],
+    'ai': ['人工智能', '机器学习', 'AI', '深度学习', 'Python'],
+    'tools': ['工具', 'Git', 'VS Code', 'IDE', '效率'],
+    'career': ['职业', '面试', '简历', '求职', '职场']
+  }
+  
+  const result = []
+  
+  articles.forEach(article => {
+    // 默认分类为工具
+    let category = 'tools'
+    
+    // 根据文章标签确定分类
+    for (const [cat, keywords] of Object.entries(categoryMap)) {
+      if (article.tags.some(tag => keywords.includes(tag))) {
+        category = cat
+        break
+      }
+    }
+    
+    result.push({
+      ...article,
+      category_id: category
+    })
+  })
+  
+  return result
+}
+
 // 获取分类图标
 const getCategoryIcon = (categoryId) => {
   const category = categories.find(c => c.id === categoryId)
@@ -348,6 +383,18 @@ const getTagColor = (tagId) => {
   return tag ? tag.color : 'grey'
 }
 
+// 文章标签和标签表的映射
+const mapTagsToIds = (articleTags) => {
+  const tagIds = []
+  articleTags.forEach(tagName => {
+    const tag = tags.find(t => t.name === tagName)
+    if (tag) {
+      tagIds.push(tag.id)
+    }
+  })
+  return tagIds
+}
+
 // 格式化日期
 const formatDate = (dateString) => {
   const date = new Date(dateString)
@@ -373,13 +420,22 @@ const fetchArticles = async () => {
   loading.value = true
   
   try {
-    // 在实际应用中，这里应该调用 API
-    // const response = await getArticles(1, 100)
-    // articles.value = response.data
+    // 从API获取知识库文章
+    const response = await getArticles(1, 100, true)
+    totalArticles.value = parseInt(response.headers['x-total-count'] || 0)
     
-    // 使用模拟数据
-    await new Promise(resolve => setTimeout(resolve, 800))
-    articles.value = mockArticles
+    // 处理文章数据
+    const articlesData = response.data
+    
+    // 将文章与分类关联
+    const processedArticles = mapArticlesToCategories(articlesData)
+    
+    // 为每篇文章添加标签ID
+    processedArticles.forEach(article => {
+      article.tag_ids = mapTagsToIds(article.tags)
+    })
+    
+    articles.value = processedArticles
     
     // 更新各分类的文章数量
     categories.forEach(category => {
