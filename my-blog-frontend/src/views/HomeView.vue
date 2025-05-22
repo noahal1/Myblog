@@ -355,21 +355,13 @@ const setupHeroAnimation = () => {
       
       // 安全地应用变换
       try {
-        if (elements.tagline && document.body.contains(elements.tagline)) {
-          elements.tagline.style.transform = `translateY(${scrollY * speed1}px)`;
-        }
         
-        if (elements.gradientText && document.body.contains(elements.gradientText)) {
-          elements.gradientText.style.transform = `translateY(${scrollY * speed1 * 0.7}px)`;
-          elements.gradientText.style.backgroundPosition = `${scrollY * 0.05}% 50%`;
-        }
         
         if (elements.subtitle && document.body.contains(elements.subtitle)) {
           elements.subtitle.style.transform = `translateY(${scrollY * speed2}px)`;
-          elements.subtitle.style.opacity = Math.max(0.7, 1 - (scrollY * 0.001));
+          elements.subtitle.style.opacity = Math.max(0.7, 1 - (scrollY * 0.01));
         }
       } catch (error) {
-        // 忽略视差动画错误
       }
     });
   };
@@ -606,11 +598,4 @@ const getLatestUpdateDate = () => {
   margin-top: 0 !important;
 }
 
-/* 移除不需要的知识库风格相关样式 */
-.knowledge-info-bar,
-.site-motto,
-.stat-item,
-.knowledge-action-btn {
-  display: none !important;
-}
 </style>

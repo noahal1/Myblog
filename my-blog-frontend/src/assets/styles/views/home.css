@@ -19,7 +19,6 @@
   transition: color 2.0s ease;
 }
 
-/* Hero Banner样式 */
 .hero-banner {
   background: radial-gradient(circle at 30% 30%, rgba(var(--primary-blue), 0.05), transparent 400px),
               radial-gradient(circle at 70% 70%, rgba(var(--accent-orange), 0.05), transparent 400px);
@@ -58,7 +57,7 @@
 .gradient-text {
   font-size: 3rem;
   font-weight: 700;
-  background-image: linear-gradient(135deg, #ff7a18, #af002d 45%, #319197 55%, #5561ff, #ff7a18);
+  background-image: linear-gradient(135deg,rgb(170, 133, 255),rgb(124, 142, 215) 45%,rgb(255, 163, 238) 55%,rgb(255, 163, 164),rgb(255, 174, 174));
   background-size: 300% 300%;
   background-clip: text;
   -webkit-background-clip: text;

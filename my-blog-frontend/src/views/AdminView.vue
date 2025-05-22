@@ -1,12 +1,13 @@
 <template>
   <div class="admin-view">
-    <v-container v-if="hasPermission">
-      <h1 class="text-h4 mb-4">管理控制台</h1>
-      
-      <v-tabs v-model="activeTab" class="mb-4" @update:model-value="handleTabChange">
+    <v-container>
+      <div class="kb-header text-center mb-6">
+        <h1 class="text-h3 font-weight-bold gradient-text ">管理控制台</h1>
+      </div>
+      <v-tabs v-model="activeTab" class="mb-3">
         <v-tab value="stats">访问统计</v-tab>
         <v-tab value="logs">访问记录</v-tab>
-        <v-tab value="articles">文章管理</v-tab>
+        <v-tab value="articles">文章审核</v-tab>
       </v-tabs>
       
       <v-window v-model="activeTab">
@@ -160,15 +161,18 @@
               </template>
               
               <template v-slot:bottom>
-                <div class="d-flex justify-center">
-                  <v-pagination
-                    v-model="page"
-                    :length="Math.ceil(totalLogs / 10)"
-                    @update:model-value="fetchVisitorLogs"
-                  ></v-pagination>
-                </div>
+                <v-pagination
+                  v-model="page"
+                  :length="Math.ceil(totalLogs)"
+                  density="comfortable"
+                  @update:model-value="fetchVisitorLogs"
+                ></v-pagination>
               </template>
             </v-data-table>
+          </v-card>
+        </v-window-item>
+        <v-window-item value="articles">
+          <v-card>
           </v-card>
         </v-window-item>
         
@@ -671,7 +675,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.max-width-200 {
-  max-width: 200px;
+.admin-view {
+  min-height: calc(100vh - 64px);
+  padding-bottom: 2rem;
+}
+.gradient-text {
+  background: var(--neon-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 </style> 
