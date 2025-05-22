@@ -98,6 +98,15 @@
             placeholder="选择相关标签"
           ></v-autocomplete>
           
+          <v-switch
+            v-model="article.is_knowledge_base"
+            color="primary"
+            label="添加到知识库"
+            hint="知识库文章将在知识库页面展示，用于整理技术笔记和教程"
+            persistent-hint
+            class="mb-6 animated fadeIn"
+          ></v-switch>
+          
           <div class="d-flex justify-space-between mt-6">
             <v-btn
               variant="outlined"
@@ -177,7 +186,8 @@ const article = ref({
   summary: '',
   tags: [],
   cover_image: '',
-  is_published: true
+  is_published: true,
+  is_knowledge_base: false
 })
 
 const availableTags = ref([])

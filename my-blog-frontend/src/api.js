@@ -80,12 +80,19 @@ function isTokenExpired() {
 }
 
 // 获取文章列表
-export const getArticles = async (page = 1, limit = 10) => {
+export const getArticles = async (page = 1, limit = 10, knowledge_base = null) => {
   const skip = (page - 1) * limit;
+  const params = { skip, limit };
+  
+  // 如果指定了知识库参数，添加到请求参数中
+  if (knowledge_base !== null) {
+    params.knowledge_base = knowledge_base;
+  }
+  
   try {
-    return await apiClient.get(`/api/articles?skip=${skip}&limit=${limit}`);
+    return await apiClient.get('/api/articles', { params });
   } catch (error) {
-    return handleApiError(error, () => getArticles(page, limit));
+    return handleApiError(error, () => getArticles(page, limit, knowledge_base));
   }
 };
 

@@ -1,13 +1,12 @@
 <template>
   <div class="admin-view">
-    <v-container>
-      <div class="kb-header text-center mb-6">
-        <h1 class="text-h3 font-weight-bold gradient-text ">管理控制台</h1>
-      </div>
-      <v-tabs v-model="activeTab" class="mb-3">
+    <v-container v-if="hasPermission">
+      <h1 class="text-h4 mb-4">管理控制台</h1>
+      
+      <v-tabs v-model="activeTab" class="mb-4" @update:model-value="handleTabChange">
         <v-tab value="stats">访问统计</v-tab>
         <v-tab value="logs">访问记录</v-tab>
-        <v-tab value="articles">文章审核</v-tab>
+        <v-tab value="articles">文章管理</v-tab>
       </v-tabs>
       
       <v-window v-model="activeTab">
@@ -161,18 +160,15 @@
               </template>
               
               <template v-slot:bottom>
-                <v-pagination
-                  v-model="page"
-                  :length="Math.ceil(totalLogs)"
-                  density="comfortable"
-                  @update:model-value="fetchVisitorLogs"
-                ></v-pagination>
+                <div class="d-flex justify-center">
+                  <v-pagination
+                    v-model="page"
+                    :length="Math.ceil(totalLogs / 1)"
+                    @update:model-value="fetchVisitorLogs"
+                  ></v-pagination>
+                </div>
               </template>
             </v-data-table>
-          </v-card>
-        </v-window-item>
-        <v-window-item value="articles">
-          <v-card>
           </v-card>
         </v-window-item>
         
@@ -431,7 +427,6 @@ const articleHeaders = [
   { title: '操作', key: 'actions', sortable: false }
 ]
 
-
 const pathStats = computed(() => visitorStats.value?.path_stats || {})
 const ipStats = computed(() => visitorStats.value?.ip_stats || {})
 
@@ -637,27 +632,53 @@ const fetchVisitorStats = async () => {
   }
 }
 
-// 根据状态码获取颜色
-const getStatusColor = (statusCode) => {
-  if (statusCode >= 200 && statusCode < 300) return 'success'
-  if (statusCode >= 300 && statusCode < 400) return 'info'
-  if (statusCode >= 400 && statusCode < 500) return 'warning'
-  return 'error'
+const openEditDialog = async (article) => {
+  loadingArticles.value = true
+  try {
+    const res = await getArticleDetail(article.id)
+    editArticle.value = res.data
+    editDialog.value = true
+  } catch (error) {
+    console.error('获取文章详情失败:', error)
+    showSnackbar('获取文章详情失败', 'error')
+  } finally {
+    loadingArticles.value = false
+  }
 }
 
-// 格式化日期
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  date.setTime(date.getTime() + 8 * 60 * 60 * 1000)
-  return date.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  })
+const submitEdit = async (formData) => {
+  loadingArticles.value = true
+  try {
+    await updateArticleDetail(editArticle.value.id, formData)
+    showSnackbar('文章更新成功')
+    editDialog.value = false
+    fetchArticlesByStatus()
+  } catch (error) {
+    console.error('更新文章失败:', error)
+    showSnackbar('更新文章失败', 'error')
+  } finally {
+    loadingArticles.value = false
+  }
 }
+
+// 监听分页变化
+watch(page, () => {
+  if (activeTab.value === 'logs') {
+    fetchVisitorLogs()
+  }
+})
+
+watch(articlePage, () => {
+  if (activeTab.value === 'articles') {
+    fetchArticlesByStatus()
+  }
+})
+
+// 监听文章状态变化
+watch(articleStatus, () => {
+  articlePage.value = 1 // 重置分页
+  fetchArticlesByStatus()
+})
 
 onMounted(async () => {
   // 检查是否已登录，如果未登录尝试初始化用户状态
@@ -675,14 +696,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.admin-view {
-  min-height: calc(100vh - 64px);
-  padding-bottom: 2rem;
-}
-.gradient-text {
-  background: var(--neon-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.max-width-200 {
+  max-width: 200px;
 }
 </style> 

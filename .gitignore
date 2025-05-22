@@ -8,8 +8,8 @@ pnpm-debug.log*
 lerna-debug.log*
 *.pyc
 */__pycache__
-.vite_cache
-./vite_cache/
+*/.vite_cache
+*/my-blog-frontend/.vite_cache
 node_modules
 dist
 dist-ssr
