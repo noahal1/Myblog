@@ -1,17 +1,13 @@
 <template>
   <div class="admin-view">
     <v-container v-if="hasPermission">
-      <header class="glass-admin-header">
-        <h1 class="admin-main-title">管理控制台</h1>
-      </header>
-
-      <nav class="glass-admin-tabs" @update:model-value="handleTabChange">
-        <v-tabs v-model="activeTab" class="glass-tabs">
-          <v-tab value="stats" class="glass-tab">访问统计</v-tab>
-          <v-tab value="logs" class="glass-tab">访问记录</v-tab>
-          <v-tab value="articles" class="glass-tab">文章管理</v-tab>
-        </v-tabs>
-      </nav>
+      <h1 class="text-h4 mb-4">管理控制台</h1>
+      
+      <v-tabs v-model="activeTab" class="mb-4" @update:model-value="handleTabChange">
+        <v-tab value="stats">访问统计</v-tab>
+        <v-tab value="logs">访问记录</v-tab>
+        <v-tab value="articles">文章管理</v-tab>
+      </v-tabs>
       
       <v-window v-model="activeTab">
         <!-- 统计信息视图 -->
@@ -167,7 +163,7 @@
                 <div class="d-flex justify-center">
                   <v-pagination
                     v-model="page"
-                    :length="Math.ceil(totalLogs / 1)"
+                    :length="Math.ceil(totalLogs / 10)"
                     @update:model-value="fetchVisitorLogs"
                   ></v-pagination>
                 </div>
@@ -683,6 +679,53 @@ watch(articleStatus, () => {
   articlePage.value = 1 // 重置分页
   fetchArticlesByStatus()
 })
+const openEditDialog = async (article) => {
+  loadingArticles.value = true
+  try {
+    const res = await getArticleDetail(article.id)
+    editArticle.value = res.data
+    editDialog.value = true
+  } catch (error) {
+    console.error('获取文章详情失败:', error)
+    showSnackbar('获取文章详情失败', 'error')
+  } finally {
+    loadingArticles.value = false
+  }
+}
+
+const submitEdit = async (formData) => {
+  loadingArticles.value = true
+  try {
+    await updateArticleDetail(editArticle.value.id, formData)
+    showSnackbar('文章更新成功')
+    editDialog.value = false
+    fetchArticlesByStatus()
+  } catch (error) {
+    console.error('更新文章失败:', error)
+    showSnackbar('更新文章失败', 'error')
+  } finally {
+    loadingArticles.value = false
+  }
+}
+
+// 监听分页变化
+watch(page, () => {
+  if (activeTab.value === 'logs') {
+    fetchVisitorLogs()
+  }
+})
+
+watch(articlePage, () => {
+  if (activeTab.value === 'articles') {
+    fetchArticlesByStatus()
+  }
+})
+
+// 监听文章状态变化
+watch(articleStatus, () => {
+  articlePage.value = 1 // 重置分页
+  fetchArticlesByStatus()
+})
 
 onMounted(async () => {
   // 检查是否已登录，如果未登录尝试初始化用户状态
@@ -700,6 +743,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.max-width-200 {
+  max-width: 200px;
 .max-width-200 {
   max-width: 200px;
 }

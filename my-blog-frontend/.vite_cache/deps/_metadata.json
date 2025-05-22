@@ -1,78 +1,130 @@
 {
+<<<<<<< HEAD
   "hash": "8b600398",
   "configHash": "ea98ca04",
   "lockfileHash": "0fe9f8c6",
   "browserHash": "f0b44ee0",
+=======
+  "hash": "ff80a2b5",
+  "configHash": "1a5da95c",
+  "lockfileHash": "0fe9f8c6",
+  "browserHash": "ea18bcbe",
+>>>>>>> 9892c46 (格式问题解决)
   "optimized": {
     "vue": {
       "src": "../../node_modules/.pnpm/vue@3.5.14/node_modules/vue/dist/vue.runtime.esm-bundler.js",
       "file": "vue.js",
+<<<<<<< HEAD
       "fileHash": "5699ba47",
+=======
+      "fileHash": "7b14e676",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     },
     "vue-router": {
       "src": "../../node_modules/.pnpm/vue-router@4.5.1_vue@3.5.14/node_modules/vue-router/dist/vue-router.mjs",
       "file": "vue-router.js",
+<<<<<<< HEAD
       "fileHash": "68b53ae5",
+=======
+      "fileHash": "510b29ea",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     },
     "pinia": {
       "src": "../../node_modules/.pnpm/pinia@3.0.2_vue@3.5.14/node_modules/pinia/dist/pinia.mjs",
       "file": "pinia.js",
+<<<<<<< HEAD
       "fileHash": "d4e9eb50",
+=======
+      "fileHash": "cf30de70",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     },
     "vuetify": {
       "src": "../../node_modules/.pnpm/vuetify@3.8.5_vue@3.5.14/node_modules/vuetify/lib/framework.js",
       "file": "vuetify.js",
+<<<<<<< HEAD
       "fileHash": "618aebbb",
+=======
+      "fileHash": "34ea628d",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     },
     "marked": {
       "src": "../../node_modules/.pnpm/marked@15.0.11/node_modules/marked/lib/marked.esm.js",
       "file": "marked.js",
+<<<<<<< HEAD
       "fileHash": "34e372a5",
+=======
+      "fileHash": "98e66d39",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     },
     "highlight.js": {
       "src": "../../node_modules/.pnpm/highlight.js@11.11.1/node_modules/highlight.js/es/index.js",
       "file": "highlight__js.js",
+<<<<<<< HEAD
       "fileHash": "3f9efb1a",
+=======
+      "fileHash": "0a826e28",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     },
     "axios": {
       "src": "../../node_modules/.pnpm/axios@1.9.0/node_modules/axios/index.js",
       "file": "axios.js",
+<<<<<<< HEAD
       "fileHash": "d55e14fa",
+=======
+      "fileHash": "92705b66",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     },
     "prismjs": {
       "src": "../../node_modules/.pnpm/prismjs@1.30.0/node_modules/prismjs/prism.js",
       "file": "prismjs.js",
+<<<<<<< HEAD
       "fileHash": "e06dac12",
+=======
+      "fileHash": "53dbdd43",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": true
     },
     "dompurify": {
       "src": "../../node_modules/.pnpm/dompurify@3.2.5/node_modules/dompurify/dist/purify.es.mjs",
       "file": "dompurify.js",
+<<<<<<< HEAD
       "fileHash": "23ae2636",
+=======
+      "fileHash": "d98d26e0",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     },
     "gsap": {
       "src": "../../node_modules/.pnpm/gsap@3.13.0/node_modules/gsap/index.js",
       "file": "gsap.js",
+<<<<<<< HEAD
       "fileHash": "d205f747",
+=======
+      "fileHash": "4c131e6a",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     },
     "vuetify/components": {
       "src": "../../node_modules/.pnpm/vuetify@3.8.5_vue@3.5.14/node_modules/vuetify/lib/components/index.js",
       "file": "vuetify_components.js",
+<<<<<<< HEAD
       "fileHash": "a14f1749",
+=======
+      "fileHash": "8a575510",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     },
     "vuetify/directives": {
       "src": "../../node_modules/.pnpm/vuetify@3.8.5_vue@3.5.14/node_modules/vuetify/lib/directives/index.js",
       "file": "vuetify_directives.js",
+<<<<<<< HEAD
       "fileHash": "a232b264",
       "needsInterop": false
     },
@@ -110,11 +162,15 @@
       "src": "../../node_modules/.pnpm/typed.js@2.1.0/node_modules/typed.js/dist/typed.module.js",
       "file": "typed__js.js",
       "fileHash": "7a8741c6",
+=======
+      "fileHash": "8dde2a84",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     },
     "crypto-js": {
       "src": "../../node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/index.js",
       "file": "crypto-js.js",
+<<<<<<< HEAD
       "fileHash": "7d4aa6d8",
       "needsInterop": true
     },
@@ -128,48 +184,127 @@
       "src": "../../node_modules/.pnpm/markdown-it-anchor@9.2.0_@t_6f92f0cd9e26395da400cbc0c9747771/node_modules/markdown-it-anchor/dist/markdownItAnchor.mjs",
       "file": "markdown-it-anchor.js",
       "fileHash": "3a58be86",
+=======
+      "fileHash": "a23679c4",
+      "needsInterop": true
+    },
+    "md-editor-v3": {
+      "src": "../../node_modules/.pnpm/md-editor-v3@5.5.1_vue@3.5.14/node_modules/md-editor-v3/lib/es/index.mjs",
+      "file": "md-editor-v3.js",
+      "fileHash": "17fc66d6",
+      "needsInterop": false
+    },
+    "gsap/ScrollTrigger": {
+      "src": "../../node_modules/.pnpm/gsap@3.13.0/node_modules/gsap/ScrollTrigger.js",
+      "file": "gsap_ScrollTrigger.js",
+      "fileHash": "9aeddcf1",
+      "needsInterop": false
+    },
+    "gsap/ScrollToPlugin": {
+      "src": "../../node_modules/.pnpm/gsap@3.13.0/node_modules/gsap/ScrollToPlugin.js",
+      "file": "gsap_ScrollToPlugin.js",
+      "fileHash": "c227fe37",
+      "needsInterop": false
+    },
+    "aos": {
+      "src": "../../node_modules/.pnpm/aos@2.3.4/node_modules/aos/dist/aos.js",
+      "file": "aos.js",
+      "fileHash": "6e744179",
+      "needsInterop": true
+    },
+    "vanilla-tilt": {
+      "src": "../../node_modules/.pnpm/vanilla-tilt@1.8.1/node_modules/vanilla-tilt/lib/vanilla-tilt.es2015.js",
+      "file": "vanilla-tilt.js",
+      "fileHash": "427aaf6c",
+      "needsInterop": false
+    },
+    "typed.js": {
+      "src": "../../node_modules/.pnpm/typed.js@2.1.0/node_modules/typed.js/dist/typed.module.js",
+      "file": "typed__js.js",
+      "fileHash": "ab9126d0",
+      "needsInterop": false
+    },
+    "markdown-it": {
+      "src": "../../node_modules/.pnpm/markdown-it@10.0.0/node_modules/markdown-it/index.js",
+      "file": "markdown-it.js",
+      "fileHash": "ee89b56f",
+      "needsInterop": true
+    },
+    "markdown-it-anchor": {
+      "src": "../../node_modules/.pnpm/markdown-it-anchor@9.2.0_@types+markdown-it@14.1.2_markdown-it@10.0.0/node_modules/markdown-it-anchor/dist/markdownItAnchor.mjs",
+      "file": "markdown-it-anchor.js",
+      "fileHash": "79ce57b0",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     },
     "prismjs/components/prism-javascript": {
       "src": "../../node_modules/.pnpm/prismjs@1.30.0/node_modules/prismjs/components/prism-javascript.js",
       "file": "prismjs_components_prism-javascript.js",
+<<<<<<< HEAD
       "fileHash": "f1c9a356",
+=======
+      "fileHash": "d1b53438",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": true
     },
     "prismjs/components/prism-css": {
       "src": "../../node_modules/.pnpm/prismjs@1.30.0/node_modules/prismjs/components/prism-css.js",
       "file": "prismjs_components_prism-css.js",
+<<<<<<< HEAD
       "fileHash": "813783e7",
+=======
+      "fileHash": "d09896a4",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": true
     },
     "prismjs/components/prism-python": {
       "src": "../../node_modules/.pnpm/prismjs@1.30.0/node_modules/prismjs/components/prism-python.js",
       "file": "prismjs_components_prism-python.js",
+<<<<<<< HEAD
       "fileHash": "f788b066",
+=======
+      "fileHash": "6ebd02e0",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": true
     },
     "prismjs/components/prism-java": {
       "src": "../../node_modules/.pnpm/prismjs@1.30.0/node_modules/prismjs/components/prism-java.js",
       "file": "prismjs_components_prism-java.js",
+<<<<<<< HEAD
       "fileHash": "d4ba0c8e",
+=======
+      "fileHash": "6430a226",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": true
     },
     "prismjs/components/prism-bash": {
       "src": "../../node_modules/.pnpm/prismjs@1.30.0/node_modules/prismjs/components/prism-bash.js",
       "file": "prismjs_components_prism-bash.js",
+<<<<<<< HEAD
       "fileHash": "e01bb719",
+=======
+      "fileHash": "935993eb",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": true
     },
     "prismjs/components/prism-json": {
       "src": "../../node_modules/.pnpm/prismjs@1.30.0/node_modules/prismjs/components/prism-json.js",
       "file": "prismjs_components_prism-json.js",
+<<<<<<< HEAD
       "fileHash": "367314ec",
+=======
+      "fileHash": "28c00eec",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": true
     },
     "@vueuse/core": {
       "src": "../../node_modules/.pnpm/@vueuse+core@13.2.0_vue@3.5.14/node_modules/@vueuse/core/index.mjs",
       "file": "@vueuse_core.js",
+<<<<<<< HEAD
       "fileHash": "eca6577a",
+=======
+      "fileHash": "18b714c8",
+>>>>>>> 9892c46 (格式问题解决)
       "needsInterop": false
     }
   },
@@ -512,6 +647,7 @@
     },
     "dist-SMHR5XNN": {
       "file": "dist-SMHR5XNN.js"
+<<<<<<< HEAD
     },
     "dist-BKCXHUXP": {
       "file": "dist-BKCXHUXP.js"
@@ -533,6 +669,8 @@
     },
     "chunk-HPAZRYGH": {
       "file": "chunk-HPAZRYGH.js"
+=======
+>>>>>>> 9892c46 (格式问题解决)
     },
     "chunk-HT45T6MF": {
       "file": "chunk-HT45T6MF.js"
@@ -546,12 +684,39 @@
     "chunk-KPIGKPLZ": {
       "file": "chunk-KPIGKPLZ.js"
     },
+<<<<<<< HEAD
+=======
+    "dist-6FYG3ASD": {
+      "file": "dist-6FYG3ASD.js"
+    },
+    "dist-GBA2OTNS": {
+      "file": "dist-GBA2OTNS.js"
+    },
+    "chunk-KPIGKPLZ": {
+      "file": "chunk-KPIGKPLZ.js"
+    },
+    "dist-QLP7VGNT": {
+      "file": "dist-QLP7VGNT.js"
+    },
+>>>>>>> 9892c46 (格式问题解决)
     "chunk-6HJMPC73": {
       "file": "chunk-6HJMPC73.js"
     },
     "chunk-YSVKVPM6": {
       "file": "chunk-YSVKVPM6.js"
     },
+<<<<<<< HEAD
+=======
+    "chunk-QNYFJKQ3": {
+      "file": "chunk-QNYFJKQ3.js"
+    },
+    "chunk-BGWA2AGI": {
+      "file": "chunk-BGWA2AGI.js"
+    },
+    "chunk-EMLEO3OT": {
+      "file": "chunk-EMLEO3OT.js"
+    },
+>>>>>>> 9892c46 (格式问题解决)
     "chunk-HDI5JSZM": {
       "file": "chunk-HDI5JSZM.js"
     },
