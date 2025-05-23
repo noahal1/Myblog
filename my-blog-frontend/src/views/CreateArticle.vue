@@ -92,11 +92,38 @@
             multiple
             closable-chips
             class="mb-6 animated fadeIn"
-            :loading="loading"
-            :error-messages="error"
+            :loading="tagsLoading"
+            :error-messages="tagsError"
             prepend-inner-icon="mdi-tag-multiple"
-            placeholder="选择相关标签"
-          ></v-autocomplete>
+            placeholder="选择或创建新标签"
+          >
+            <template v-slot:prepend-item>
+              <v-list-item>
+                <v-text-field
+                  v-model="newTagName"
+                  label="创建新标签"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                  class="mx-2"
+                  :loading="creatingTag"
+                  append-inner-icon="mdi-plus"
+                  @click:append-inner="createNewTag"
+                  @keyup.enter="createNewTag"
+                ></v-text-field>
+              </v-list-item>
+              <v-divider class="mt-2"></v-divider>
+            </template>
+            <template v-slot:chip="{ props, item }">
+              <v-chip
+                v-bind="props"
+                :color="getTagColor(item.raw.name)"
+                class="ma-1"
+              >
+                {{ item.raw.name }}
+              </v-chip>
+            </template>
+          </v-autocomplete>
           
           <v-switch
             v-model="article.is_knowledge_base"
@@ -153,7 +180,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { getTags, createArticle } from '../api'
+import { getTags, createArticle, createTag } from '../api'
 import { MdEditor } from 'md-editor-v3'
 import { useTheme } from 'vuetify'
 import 'md-editor-v3/lib/style.css'
@@ -191,6 +218,10 @@ const article = ref({
 })
 
 const availableTags = ref([])
+const tagsLoading = ref(false)
+const tagsError = ref(null)
+const newTagName = ref('')
+const creatingTag = ref(false)
 
 // 图片上传处理
 const handleImageUpload = async () => {
@@ -223,25 +254,43 @@ const handleImageUpload = async () => {
 
 // 获取标签列表
 const fetchTags = async () => {
-  loading.value = true
-  error.value = null
+  tagsLoading.value = true
   try {
     const response = await getTags()
     availableTags.value = response.data
-  } catch (err) {
-    error.value = '获取标签失败'
-    console.error('获取标签失败:', err)
-    // 如果API调用失败，使用默认标签
-    availableTags.value = [
-      { id: 1, name: '前端开发' },
-      { id: 2, name: '后端技术' },
-      { id: 3, name: '随笔' },
-      { id: 4, name: '诗歌' },
-      { id: 5, name: '人工智能' }
-    ]
+  } catch (error) {
+    tagsError.value = '获取标签失败，请稍后重试'
+    console.error('获取标签失败:', error)
   } finally {
-    loading.value = false
+    tagsLoading.value = false
   }
+}
+
+// 创建新标签
+const createNewTag = async () => {
+  if (!newTagName.value.trim()) return
+  
+  creatingTag.value = true
+  try {
+    const response = await createTag(newTagName.value.trim())
+    const newTag = response.data
+    availableTags.value.push(newTag)
+    article.value.tags.push(newTag.id)
+    newTagName.value = ''
+  } catch (error) {
+    console.error('创建标签失败:', error)
+  } finally {
+    creatingTag.value = false
+  }
+}
+
+// 获取标签颜色
+const getTagColor = (tagName) => {
+  const colors = ['primary', 'secondary', 'success', 'info', 'warning']
+  const hash = tagName.split('').reduce((acc, char) => {
+    return char.charCodeAt(0) + ((acc << 5) - acc)
+  }, 0)
+  return colors[Math.abs(hash) % colors.length]
 }
 
 // 检查表单有效性
@@ -386,5 +435,12 @@ onMounted(() => {
 
 :deep(.md-editor-dark) {
   --md-border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.v-chip {
+  transition: all 0.3s ease;
+}
+.v-chip:hover {
+  transform: scale(1.05);
 }
 </style>

@@ -1,191 +1,340 @@
 <template>
   <div class="knowledge-base">
-    <v-container class="py-8">
-      <!-- 页面标题 -->
-      <div class="kb-header text-center mb-10">
-        <h1 class="text-h3 font-weight-bold gradient-text mb-2">知识库</h1>
-        <p class="text-subtitle-1 text-medium-emphasis">整理的各类技术笔记、教程和解决方案</p>
-        
-        <!-- 搜索框 -->
-        <v-text-field
-          v-model="searchQuery"
-          prepend-inner-icon="mdi-magnify"
-          placeholder="搜索知识库内容..."
-          variant="outlined"
-          hide-details
-          density="comfortable"
-          class="search-input mt-6 mx-auto"
-          @keyup.enter="searchKnowledge"
-          bg-color="surface"
-          style="max-width: 600px;"
-        ></v-text-field>
-      </div>
-      
+    <div class="hero-banner" ref="heroBanner">
+      <v-container class="py-8">
+        <!-- 页面标题 -->
+        <div class="kb-header text-center">
+          <h1 class="hero-title">
+            <span class="gradient-text" ref="gradientText">知识库</span>
+          </h1>
+          <p class="hero-subtitle" ref="subtitle">整理的各类技术笔记、教程和解决方案</p>
+          
+          <!-- 搜索框 -->
+          <v-text-field
+            v-model="searchQuery"
+            prepend-inner-icon="mdi-magnify"
+            placeholder="搜索知识库内容..."
+            variant="outlined"
+            hide-details
+            density="comfortable"
+            class="search-input mt-6 mx-auto"
+            @keyup.enter="searchKnowledge"
+            bg-color="surface"
+            style="max-width: 600px;"
+            ref="searchInput"
+          >
+            <template v-slot:append>
+              <v-btn
+                v-if="searchQuery"
+                icon="mdi-close"
+                variant="text"
+                @click="searchQuery = ''"
+              ></v-btn>
+            </template>
+          </v-text-field>
+        </div>
+      </v-container>
+    </div>
+
+    <v-container class="main-content">
       <v-row>
         <!-- 左侧导航 -->
         <v-col cols="12" md="3">
-          <v-card class="navigation-card mb-6" variant="elevated" elevation="2">
-            <v-list bg-color="transparent">
-              <v-list-subheader>目录</v-list-subheader>
-              
-              <v-list-item
-                v-for="(category, index) in categories"
-                :key="index"
-                :value="category.id"
-                @click="selectedCategory = category.id"
-                :active="selectedCategory === category.id"
-                :prepend-icon="category.icon"
-                :title="category.name"
-                :subtitle="`${category.count} 篇文章`"
-                rounded="lg"
-                class="mb-1"
-              ></v-list-item>
-            </v-list>
-          </v-card>
-          
-          <!-- 标签云 -->
-          <v-card class="tag-cloud-card" variant="elevated" elevation="2">
-            <v-card-title class="d-flex align-center">
-              <v-icon icon="mdi-tag-multiple" class="me-2"></v-icon>
-              标签云
-            </v-card-title>
-            <v-card-text>
-              <div class="tag-cloud">
-                <v-chip
-                  v-for="(tag, index) in tags"
-                  :key="index"
-                  :color="tag.color"
-                  :variant="selectedTags.includes(tag.id) ? 'elevated' : 'outlined'"
-                  class="ma-1 tag-chip"
-                  closable
-                  :close-icon="selectedTags.includes(tag.id) ? 'mdi-close' : ''"
-                  @click="toggleTag(tag.id)"
-                >
-                  {{ tag.name }} ({{ tag.count }})
-                </v-chip>
+          <!-- 可折叠目录树 -->
+          <v-card class="navigation-card" variant="elevated" elevation="2">
+            <v-card-title class="d-flex align-center justify-space-between pa-4">
+              <div class="d-flex align-center">
+                <v-icon icon="mdi-folder-multiple" class="me-2"></v-icon>
+                目录
               </div>
-            </v-card-text>
+              <v-btn
+                icon="mdi-chevron-left"
+                variant="text"
+                density="comfortable"
+                :class="{ 'rotate-180': !isNavCollapsed }"
+                @click="isNavCollapsed = !isNavCollapsed"
+              ></v-btn>
+            </v-card-title>
+            <v-divider></v-divider>
+            
+            <v-expand-transition>
+              <div v-show="!isNavCollapsed">
+                <v-list bg-color="transparent" class="pa-2">
+                  <v-list-item
+                    value="all"
+                    :active="selectedCategory === 'all'"
+                    @click="selectedCategory = 'all'"
+                    prepend-icon="mdi-book-open-page-variant"
+                    title="全部内容"
+                    :subtitle="`${getTotalArticleCount()} 篇文章`"
+                    rounded="lg"
+                    class="mb-2"
+                  >
+                    <template v-slot:append>
+                      <v-chip
+                        size="x-small"
+                        color="primary"
+                        variant="flat"
+                      >
+                        {{ getTotalArticleCount() }}
+                      </v-chip>
+                    </template>
+                  </v-list-item>
+                  
+                  <v-list-group
+                    v-for="(category, index) in categoriesWithoutAll"
+                    :key="index"
+                    :value="category.id"
+                  >
+                    <template v-slot:activator="{ props }">
+                      <v-list-item
+                        v-bind="props"
+                        :prepend-icon="category.icon"
+                        :title="category.name"
+                        :active="selectedCategory === category.id"
+                        @click="selectedCategory = category.id"
+                        rounded="lg"
+                        class="mb-1"
+                      >
+                        <template v-slot:append>
+                          <v-chip
+                            size="x-small"
+                            color="primary"
+                            variant="flat"
+                          >
+                            {{ category.count }}
+                          </v-chip>
+                        </template>
+                      </v-list-item>
+                    </template>
+                    
+                    <v-list-item
+                      v-for="subcategory in category.subcategories"
+                      :key="subcategory.id"
+                      :title="subcategory.name"
+                      :subtitle="`${subcategory.count} 篇文章`"
+                      :prepend-icon="subcategory.icon || 'mdi-file-document-outline'"
+                      :active="selectedSubcategory === subcategory.id"
+                      density="compact"
+                      rounded="lg"
+                      class="ms-4 mb-1"
+                      @click="selectSubcategory(category.id, subcategory.id)"
+                    ></v-list-item>
+                  </v-list-group>
+                </v-list>
+              </div>
+            </v-expand-transition>
           </v-card>
         </v-col>
         
         <!-- 右侧内容 -->
         <v-col cols="12" md="9">
           <!-- 筛选栏 -->
-          <div class="filter-bar d-flex align-center justify-space-between mb-4 px-3 py-2 rounded">
-            <div class="d-flex align-center">
-              <span class="text-caption text-medium-emphasis me-3">已找到 {{ filteredArticles.length }} 条结果</span>
+          <v-card class="filter-bar mb-4" variant="flat" color="surface">
+            <v-card-text class="d-flex align-center justify-space-between py-2">
+              <div class="d-flex align-center">
+                <span class="text-body-2 text-medium-emphasis me-3">
+                  已找到 {{ filteredArticles.length }} 条结果
+                </span>
+                
+                <v-chip-group v-model="sortOption" class="ms-3" mandatory>
+                  <v-chip
+                    v-for="option in sortOptions"
+                    :key="option.value"
+                    :value="option.value"
+                    size="small"
+                    variant="flat"
+                    :prepend-icon="option.icon"
+                  >
+                    {{ option.label }}
+                  </v-chip>
+                </v-chip-group>
+              </div>
               
-              <v-chip-group v-model="sortOption" class="ms-3">
-                <v-chip value="latest" size="small" variant="flat">最新</v-chip>
-                <v-chip value="popular" size="small" variant="flat">最热</v-chip>
-                <v-chip value="alpha" size="small" variant="flat">字母序</v-chip>
-              </v-chip-group>
-            </div>
-            
-            <div>
-              <v-btn-toggle v-model="viewMode" mandatory density="compact" color="primary">
-                <v-btn value="card" icon="mdi-view-grid"></v-btn>
-                <v-btn value="list" icon="mdi-view-list"></v-btn>
-              </v-btn-toggle>
-            </div>
-          </div>
-          
-          <!-- 加载状态 -->
-          <div v-if="loading" class="text-center py-10">
-            <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-            <p class="mt-4 text-medium-emphasis">加载中...</p>
-          </div>
-          
-          <!-- 无匹配结果 -->
-          <v-card v-else-if="filteredArticles.length === 0" class="empty-state text-center pa-10">
-            <v-icon icon="mdi-book-search" size="64" color="grey-lighten-1" class="mb-4"></v-icon>
-            <h3 class="text-h5 mb-2">没有找到匹配的内容</h3>
-            <p class="text-body-1 mb-6">尝试调整搜索条件或删除筛选器</p>
-            <v-btn @click="resetFilters" color="primary" prepend-icon="mdi-refresh">重置筛选条件</v-btn>
+              <div class="d-flex align-center">
+                <v-btn-toggle v-model="viewMode" mandatory density="comfortable" color="primary">
+                  <v-btn value="card" variant="text">
+                    <v-icon>mdi-view-grid</v-icon>
+                  </v-btn>
+                  <v-btn value="list" variant="text">
+                    <v-icon>mdi-view-list</v-icon>
+                  </v-btn>
+                </v-btn-toggle>
+              </div>
+            </v-card-text>
           </v-card>
           
-          <!-- 列表视图 -->
-          <template v-else-if="viewMode === 'list'">
-            <v-list class="article-list">
-              <v-list-item
-                v-for="article in filteredArticles"
-                :key="article.id"
-                :title="article.title"
-                :subtitle="article.summary"
-                :prepend-icon="getCategoryIcon(article.category_id)"
-                rounded="lg"
-                class="mb-3 article-list-item"
-                @click="viewArticle(article.id)"
-              >
-                <template v-slot:append>
-                  <div class="d-flex flex-column align-end text-caption">
-                    <div class="mb-1">
-                      <v-icon icon="mdi-eye" size="small" class="me-1"></v-icon>
-                      {{ article.views }}
-                    </div>
-                    <div class="text-medium-emphasis">{{ formatDate(article.created_at) }}</div>
-                  </div>
-                </template>
-              </v-list-item>
-            </v-list>
-          </template>
-          
-          <!-- 卡片视图 -->
-          <template v-else>
-            <v-row>
-              <v-col
-                v-for="article in filteredArticles"
-                :key="article.id"
-                cols="12"
-                sm="6"
-                lg="4"
-                class="article-card-col"
-              >
-                <v-card
-                  class="article-card h-100"
-                  @click="viewArticle(article.id)"
-                  :ripple="false"
-                  hover
-                >
-                  <div class="card-category-indicator" :class="`bg-${getCategoryColor(article.category_id)}`"></div>
-                  <v-card-title class="text-h6">{{ article.title }}</v-card-title>
-                  <v-card-text>
-                    <p class="text-caption text-medium-emphasis mb-2">
-                      <v-icon icon="mdi-calendar" size="x-small" class="me-1"></v-icon>
-                      {{ formatDate(article.created_at) }}
-                      <v-icon icon="mdi-eye" size="x-small" class="ms-2 me-1"></v-icon>
-                      {{ article.views }}
-                    </p>
-                    <p class="summary-text">{{ article.summary }}</p>
-                    
-                    <div class="mt-3 d-flex flex-wrap">
-                      <v-chip
-                        v-for="tagId in article.tag_ids"
-                        :key="tagId"
-                        size="x-small"
-                        class="me-1 mb-1"
-                        :color="getTagColor(tagId)"
-                        variant="flat"
-                        density="compact"
-                      >
-                        {{ getTagName(tagId) }}
-                      </v-chip>
-                    </div>
-                  </v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
-          </template>
-          
-          <!-- 分页 -->
-          <div v-if="filteredArticles.length > 0" class="text-center mt-8">
-            <v-pagination
-              v-model="currentPage"
-              :length="totalPages"
-              :total-visible="7"
-              rounded
-            ></v-pagination>
+          <!-- 活动筛选器 -->
+          <div v-if="hasActiveFilters" class="active-filters mb-4">
+            <v-chip
+              v-if="searchQuery"
+              size="small"
+              closable
+              @click:close="searchQuery = ''"
+              prepend-icon="mdi-magnify"
+              class="me-2"
+            >
+              搜索: {{ searchQuery }}
+            </v-chip>
+            
+            <v-chip
+              v-if="selectedCategory !== 'all'"
+              size="small"
+              closable
+              @click:close="selectedCategory = 'all'"
+              :prepend-icon="getCategoryIcon(selectedCategory)"
+              class="me-2"
+            >
+              {{ getCategoryName(selectedCategory) }}
+            </v-chip>
+            
+            <v-chip
+              v-for="tagId in selectedTags"
+              :key="tagId"
+              size="small"
+              closable
+              @click:close="toggleTag(tagId)"
+              :color="getTagColor(tagId)"
+              class="me-2"
+            >
+              {{ getTagName(tagId) }}
+            </v-chip>
+            
+            <v-btn
+              v-if="hasActiveFilters"
+              size="small"
+              variant="text"
+              prepend-icon="mdi-refresh"
+              @click="resetFilters"
+              class="ms-2"
+            >
+              重置筛选
+            </v-btn>
           </div>
+          
+          <!-- 文章列表 -->
+          <template v-if="loading">
+            <v-sheet class="pa-3 mb-3" v-for="n in 6" :key="n">
+              <v-skeleton-loader type="article"></v-skeleton-loader>
+            </v-sheet>
+          </template>
+          
+          <template v-else-if="filteredArticles.length === 0">
+            <v-card class="empty-state text-center pa-10">
+              <v-icon icon="mdi-book-search" size="64" color="grey-lighten-1" class="mb-4"></v-icon>
+              <h3 class="text-h5 mb-2">没有找到匹配的内容</h3>
+              <p class="text-body-1 mb-6">尝试调整搜索条件或删除筛选器</p>
+              <v-btn @click="resetFilters" color="primary" prepend-icon="mdi-refresh">重置筛选条件</v-btn>
+            </v-card>
+          </template>
+          
+          <template v-else>
+            <!-- 列表视图 -->
+            <template v-if="viewMode === 'list'">
+              <v-list class="article-list">
+                <v-list-item
+                  v-for="article in paginatedArticles"
+                  :key="article.id"
+                  :title="article.title"
+                  :subtitle="article.summary"
+                  :prepend-icon="getCategoryIcon(article.category_id)"
+                  rounded="lg"
+                  class="mb-3 article-list-item"
+                  @click="viewArticle(article.id)"
+                >
+                  <template v-slot:prepend>
+                    <div class="category-indicator" :class="`bg-${getCategoryColor(article.category_id)}`"></div>
+                  </template>
+                  
+                  <template v-slot:append>
+                    <div class="d-flex flex-column align-end">
+                      <div class="d-flex align-center mb-1">
+                        <v-icon icon="mdi-eye" size="small" class="me-1"></v-icon>
+                        <span class="text-caption">{{ article.views }}</span>
+                        <v-icon icon="mdi-thumb-up" size="small" class="ms-2 me-1"></v-icon>
+                        <span class="text-caption">{{ article.likes || 0 }}</span>
+                      </div>
+                      <span class="text-caption text-medium-emphasis">{{ formatDate(article.created_at) }}</span>
+                    </div>
+                  </template>
+                </v-list-item>
+              </v-list>
+            </template>
+            
+            <!-- 卡片视图 -->
+            <template v-else>
+              <v-row>
+                <v-col
+                  v-for="article in paginatedArticles"
+                  :key="article.id"
+                  cols="12"
+                  sm="6"
+                  lg="4"
+                  class="article-card-col"
+                >
+                  <v-card
+                    class="article-card h-100"
+                    @click="viewArticle(article.id)"
+                    :ripple="false"
+                    hover
+                  >
+                    <div class="card-category-indicator" :class="`bg-${getCategoryColor(article.category_id)}`"></div>
+                    
+                    <v-card-title class="text-h6 text-truncate">
+                      {{ article.title }}
+                    </v-card-title>
+                    
+                    <v-card-subtitle class="pt-2">
+                      <v-icon :icon="getCategoryIcon(article.category_id)" size="small" class="me-1"></v-icon>
+                      {{ getCategoryName(article.category_id) }}
+                    </v-card-subtitle>
+                    
+                    <v-card-text>
+                      <p class="summary-text mb-3">{{ article.summary }}</p>
+                      
+                      <div class="mb-3 d-flex flex-wrap">
+                        <v-chip
+                          v-for="tagId in article.tag_ids"
+                          :key="tagId"
+                          size="x-small"
+                          class="me-1 mb-1"
+                          :color="getTagColor(tagId)"
+                          variant="flat"
+                          density="compact"
+                        >
+                          {{ getTagName(tagId) }}
+                        </v-chip>
+                      </div>
+                      
+                      <div class="d-flex justify-space-between align-center text-caption text-medium-emphasis">
+                        <span>
+                          <v-icon icon="mdi-calendar" size="x-small" class="me-1"></v-icon>
+                          {{ formatDate(article.created_at) }}
+                        </span>
+                        <span>
+                          <v-icon icon="mdi-eye" size="x-small" class="me-1"></v-icon>
+                          {{ article.views }}
+                          <v-icon icon="mdi-thumb-up" size="x-small" class="ms-2 me-1"></v-icon>
+                          {{ article.likes || 0 }}
+                        </span>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </template>
+            
+            <!-- 分页 -->
+            <div v-if="totalPages > 1" class="text-center mt-8">
+              <v-pagination
+                v-model="currentPage"
+                :length="totalPages"
+                :total-visible="7"
+                rounded
+                class="pagination-bar"
+              ></v-pagination>
+            </div>
+          </template>
         </v-col>
       </v-row>
     </v-container>
@@ -193,7 +342,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { getArticles } from '../api'
 
@@ -208,6 +357,8 @@ const viewMode = ref('card')
 const currentPage = ref(1)
 const itemsPerPage = 9
 const totalArticles = ref(0)
+const isNavCollapsed = ref(false)
+const selectedSubcategory = ref(null)
 
 // 目录分类
 const categories = [
@@ -237,9 +388,25 @@ const tags = [
   { id: 12, name: '安全', count: 3, color: 'red-darken-3' },
 ]
 
+// 获取除"全部内容"外的分类
+const categoriesWithoutAll = computed(() => {
+  return categories.filter(c => c.id !== 'all')
+})
+
+// 获取文章总数
+const getTotalArticleCount = () => {
+  return articles.value.length
+}
+
+// 选择子分类
+const selectSubcategory = (categoryId, subcategoryId) => {
+  selectedCategory.value = categoryId
+  selectedSubcategory.value = subcategoryId
+  currentPage.value = 1
+}
+
 // 根据分类和标签筛选文章
 const filteredArticles = computed(() => {
-  // 首先根据搜索词过滤
   let result = [...articles.value]
   
   if (searchQuery.value.trim()) {
@@ -250,9 +417,15 @@ const filteredArticles = computed(() => {
     )
   }
   
-  // 根据分类过滤
+  // 根据分类和子分类过滤
   if (selectedCategory.value && selectedCategory.value !== 'all') {
-    result = result.filter(article => article.category_id === selectedCategory.value)
+    result = result.filter(article => {
+      if (selectedSubcategory.value) {
+        return article.category_id === selectedCategory.value && 
+               article.subcategory_id === selectedSubcategory.value
+      }
+      return article.category_id === selectedCategory.value
+    })
   }
   
   // 根据标签过滤
@@ -298,6 +471,7 @@ const searchKnowledge = () => {
 const resetFilters = () => {
   searchQuery.value = ''
   selectedCategory.value = 'all'
+  selectedSubcategory.value = null
   selectedTags.value = []
   sortOption.value = 'latest'
   currentPage.value = 1
@@ -410,9 +584,27 @@ const viewArticle = (id) => {
   router.push(`/article/${id}`)
 }
 
-// 当筛选条件变化时，重置页码
-watch([selectedCategory, selectedTags, searchQuery, sortOption], () => {
-  currentPage.value = 1
+// 获取分类名称
+const getCategoryName = (categoryId) => {
+  const category = categories.find(c => c.id === categoryId)
+  return category ? category.name : '未分类'
+}
+
+// 标签排序（按使用次数）
+const sortedTags = computed(() => {
+  return [...tags].sort((a, b) => b.count - a.count)
+})
+
+// 是否有活动的筛选条件
+const hasActiveFilters = computed(() => {
+  return searchQuery.value || 
+         selectedCategory.value !== 'all' || 
+         selectedTags.value.length > 0
+})
+
+// 监听路由变化时重置导航折叠状态
+watch(() => router.currentRoute.value.path, () => {
+  isNavCollapsed.value = false
 })
 
 // 获取文章列表和更新分类计数
@@ -452,6 +644,37 @@ const fetchArticles = async () => {
   }
 }
 
+// 排序选项
+const sortOptions = [
+  { value: 'latest', label: '最新', icon: 'mdi-clock-outline' },
+  { value: 'popular', label: '最热', icon: 'mdi-fire' },
+  { value: 'alpha', label: '字母序', icon: 'mdi-sort-alphabetical-ascending' }
+]
+
+// 子分类数据
+const subcategories = {
+  frontend: [
+    { id: 'html-css', name: 'HTML/CSS', icon: 'mdi-language-html5', count: 5 },
+    { id: 'javascript', name: 'JavaScript', icon: 'mdi-language-javascript', count: 8 },
+    { id: 'framework', name: '前端框架', icon: 'mdi-view-grid-plus', count: 6 }
+  ],
+  backend: [
+    { id: 'python', name: 'Python', icon: 'mdi-language-python', count: 7 },
+    { id: 'nodejs', name: 'Node.js', icon: 'mdi-nodejs', count: 4 },
+    { id: 'java', name: 'Java', icon: 'mdi-language-java', count: 3 }
+  ],
+  // ... 其他分类的子分类
+}
+
+// 为每个分类添加子分类
+categories.forEach(category => {
+  if (subcategories[category.id]) {
+    category.subcategories = subcategories[category.id]
+  } else {
+    category.subcategories = []
+  }
+})
+
 onMounted(() => {
   fetchArticles()
 })
@@ -459,103 +682,251 @@ onMounted(() => {
 
 <style scoped>
 .knowledge-base {
-  min-height: calc(100vh - 200px);
-  background: radial-gradient(circle at 30% 30%, rgba(var(--primary-blue), 0.03), transparent 400px),
-              radial-gradient(circle at 70% 70%, rgba(var(--accent-orange), 0.03), transparent 400px);
+  min-height: 100vh;
+  opacity: 1 !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.hero-banner {
+  background: radial-gradient(circle at 30% 30%, rgba(var(--primary-blue), 0.05), transparent 400px),
+              radial-gradient(circle at 70% 70%, rgba(var(--accent-orange), 0.05), transparent 400px);
+  padding: 140px 0 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+  background-position: 50% 0%;
+  margin-top: -56px;
+  height: 400px;
+}
+
+.hero-banner .v-container {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease-out 0.2s forwards;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.hero-subtitle:hover {
+  opacity: 1;
+  transform: scale(1.02) translateZ(0);
+  text-shadow: 0 0 8px rgba(0,0,0,0.1);
 }
 
 .gradient-text {
-  background: var(--neon-gradient);
-  -webkit-background-clip: text;
+  font-size: 3rem;
+  font-weight: 700;
+  background-image: linear-gradient(135deg,rgb(170, 133, 255),rgb(124, 142, 215) 45%,rgb(255, 163, 238) 55%,rgb(255, 163, 164),rgb(255, 174, 174));
+  background-size: 300% 300%;
   background-clip: text;
+  -webkit-background-clip: text;
   color: transparent;
+  display: inline-block;
+  animation: gradient-shift 15s ease infinite;
+  will-change: background-position;
 }
 
-.navigation-card, 
-.tag-cloud-card {
-  background: rgba(var(--v-theme-surface), 0.9);
-  backdrop-filter: blur(8px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid rgba(var(--primary-blue), 0.1);
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.filter-bar {
-  background: rgba(var(--v-theme-surface), 0.8);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(var(--primary-blue), 0.05);
+.search-input {
+  max-width: 600px;
+  margin: 0 auto;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease-out 0.4s forwards;
 }
 
-.article-card {
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
   position: relative;
-  border-radius: var(--border-radius);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
+  z-index: 1;
+}
+
+/* 卡片样式统一 */
+.v-card {
+  transition: all 0.3s ease;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
   overflow: hidden;
-  backdrop-filter: blur(8px);
+  border: none !important;
+}
+
+.v-theme--dark .v-card {
+  background: rgba(33, 33, 33, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.08) !important;
+}
+
+.v-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 列表项样式 */
+.v-list-item {
+  transition: all 0.2s ease;
+  border-radius: 12px !important;
+}
+
+.v-list-item:hover {
+  background: rgba(var(--v-theme-primary), 0.05);
+}
+
+/* 筛选栏样式 */
+.filter-bar {
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.v-theme--dark .filter-bar {
+  background: rgba(33, 33, 33, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.08) !important;
+}
+
+.filter-bar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.v-theme--dark .filter-bar:hover {
+  box-shadow: 0 6px 16px rgba(255, 255, 255, 0.12) !important;
+}
+
+/* 分类标签样式 */
+.category-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  padding: 8px;
+}
+
+.category-chip {
+  margin: 0 4px;
+  transition: transform 0.3s ease;
+}
+
+.category-chip:hover {
+  transform: translateY(-3px);
+}
+
+/* 分页样式 */
+.pagination-bar {
+  display: inline-flex;
   background: rgba(var(--v-theme-surface), 0.8);
+  border-radius: 12px !important;
+  padding: 4px;
 }
 
-.article-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--hover-shadow);
+/* 空状态样式 */
+.empty-state {
+  border-radius: 12px !important;
+  background: rgba(var(--v-theme-surface), 0.8) !important;
 }
 
-.card-category-indicator {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
+/* 文章卡片样式 */
+.article-card {
+  border-radius: 12px !important;
+  background: rgba(var(--v-theme-surface), 0.8) !important;
 }
 
 .article-list-item {
-  background: rgba(var(--v-theme-surface), 0.8);
-  backdrop-filter: blur(8px);
-  border: 0px solid rgba(var(--primary-blue), 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 12px !important;
+  background: rgba(var(--v-theme-surface), 0.8) !important;
+  margin-bottom: 8px;
 }
 
-.article-list-item:hover {
-  transform: translateX(5px);
-  box-shadow: var(--hover-shadow);
+/* 标签样式 */
+.v-chip {
+  border-radius: 6px !important;
 }
 
-.summary-text {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* 按钮样式 */
+.v-btn {
+  border-radius: 8px !important;
 }
 
-.tag-cloud-card .v-card-title {
-  border-bottom: 1px solid rgba(var(--primary-blue), 0.1);
+/* 搜索框样式 */
+.v-text-field {
+  border-radius: 8px !important;
 }
-
-.tag-chip {
-  transition: transform 0.2s ease;
-}
-
-.tag-chip:hover {
-  transform: scale(1.05);
-}
-
-.bg-blue { background-color: rgb(var(--blue)); }
-.bg-green { background-color: rgb(var(--green)); }
-.bg-orange { background-color: rgb(var(--orange)); }
-.bg-purple { background-color: rgb(var(--purple)); }
-.bg-red { background-color: rgb(var(--red)); }
-.bg-cyan { background-color: rgb(var(--cyan)); }
-.bg-amber { background-color: rgb(var(--amber)); }
-.bg-grey { background-color: rgb(var(--grey)); }
 
 @media (max-width: 768px) {
-  .kb-header {
-    margin-bottom: 2rem !important;
+  .hero-title {
+    font-size: 2.5rem;
   }
   
-  .navigation-card {
-    margin-bottom: 1rem !important;
+  .hero-banner {
+    padding: 100px 0 30px;
+  }
+  
+  .gradient-text {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .gradient-text {
+    font-size: 2rem;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
   }
 }
 </style> 
