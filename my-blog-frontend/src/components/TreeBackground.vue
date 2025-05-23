@@ -129,7 +129,7 @@ onMounted(async () => {
       () => step(randomMiddle() * size.width, -5, r90),
       () => step(randomMiddle() * size.width, props.height + 5, -r90),
       () => step(-5, randomMiddle() * props.height, 0),
-      () => step(size.width + 5, randomMiddle() * props.height, r180),
+      () => step(size.width + 2, randomMiddle() * props.height, r180),
     ]
     if (size.width < 500)
       steps = steps.slice(0, 2)
