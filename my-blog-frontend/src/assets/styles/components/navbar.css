@@ -1,106 +1,132 @@
-/* Navbar 组件样式 */
+/* === 现代玻璃拟态导航栏 === */
 .nav-bar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100; 
-  transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1); 
-  border-bottom: 0.5px solid transparent;
+  z-index: 1000;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   transform-origin: top;
-  will-change: transform, opacity;
+  will-change: transform, opacity, backdrop-filter;
 }
 
 .v-app-bar.v-toolbar {
   background-color: transparent !important;
+  border: none !important;
 }
 
+/* 透明状态 - 顶部时的玻璃效果 */
 .nav-bar.transparent .v-app-bar.v-toolbar {
-  background: rgba(255, 255, 255, 0.9) !important; 
-  border-bottom: 1px solid rgba(var(--primary-blue), 0.1);
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0.5) 100%) !important;
+  backdrop-filter: var(--blur-lg) saturate(180%);
+  -webkit-backdrop-filter: var(--blur-lg) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06) !important;
 }
 
-.v-theme--dark .nav-bar.transparent .v-app-bar.v-toolbar {
-  background: rgba(255, 255, 255, 0) !important; /* 暗色模式统一背景色 */
-  border-bottom: 0px solid rgba(0, 0, 0, 0);
-}
-
+/* 滚动状态 - 增强的玻璃效果 */
 .nav-bar.scrolled .v-app-bar.v-toolbar {
-  background: rgba(255, 255, 255, 0.9) !important;
-  backdrop-filter: blur(20px) saturate(200%);
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.75) 100%) !important;
+  backdrop-filter: var(--blur-xl) saturate(200%);
+  -webkit-backdrop-filter: var(--blur-xl) saturate(200%);
+  border-bottom: 1px solid rgba(var(--primary-blue), 0.15) !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* 暗色模式适配 */
+.v-theme--dark .nav-bar.transparent .v-app-bar.v-toolbar {
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.4) 100%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2) !important;
 }
 
 .v-theme--dark .nav-bar.scrolled .v-app-bar.v-toolbar {
-  background: rgba(18, 18, 18, 0.8) !important;
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.7) 100%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
+/* 导航容器 */
 .nav-container {
   width: 100%;
   height: 100%;
-  max-width: 2000px;
-  margin: 0 4px 0px 4px;
-  padding: 0 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
 }
 
-.nav-bar.transparent {
-  background: rgba(255, 255, 255, 0.9); /* 与appbar背景色保持一致 */
-
-}
-
-.nav-bar.transparent .nav-link {
-  color: rgba(var(--text-primary), 1);
-  font-weight: 500;
-  text-shadow: none; 
-}
-
-.nav-bar.scrolled {
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(20px) saturate(200%);
-  border-bottom: 1px solid rgba(var(--primary-blue), 0.1);
-}
-
-.nav-bar.scrolled .nav-link {
-  text-shadow: none;
-}
-
+/* 隐藏状态 - 流畅的消失动画 */
 .nav-bar.hidden {
-  transform: translateY(-100%);
+  transform: translateY(-100%) scale(0.95);
   opacity: 0;
   box-shadow: none;
   pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); /* MD3标准过渡曲线 */
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.v-theme--dark .nav-bar.transparent {
-  background: rgba(18, 18, 18, 0.8); /* 与appbar背景色保持一致 */
+/* 导航栏装饰效果 */
+.nav-bar::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(var(--primary-blue), 0.3) 50%,
+    transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.v-theme--dark .nav-bar.transparent .nav-link {
-  color: rgba(255, 255, 255, 0.95);
+.nav-bar.scrolled::after {
+  opacity: 1;
 }
 
-.v-theme--dark .nav-bar.scrolled {
-  background: rgba(18, 18, 18, 0.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Logo 样式 */
+/* === Logo 玻璃拟态样式 === */
 .logo-wrapper {
   display: flex;
   align-items: center;
   position: relative;
   height: 100%;
-  transition: all 0.3s ease;
+  padding: 8px 16px;
+  border-radius: var(--radius-organic-sm);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background: transparent;
 }
 
 .logo-wrapper:hover {
-  transform: scale(1.02);
+  background: var(--glass-gradient);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  transform: scale(1.05) translateY(-1px);
+  box-shadow: var(--shadow-glass-sm);
 }
 
 .logo-container {
   position: relative;
   margin-right: 16px;
+  filter: drop-shadow(0 2px 8px rgba(var(--primary-blue), 0.2));
+  transition: filter 0.3s ease;
+}
+
+.logo-wrapper:hover .logo-container {
+  filter: drop-shadow(0 4px 12px rgba(var(--primary-blue), 0.3));
 }
 
 .logo-svg {
@@ -141,48 +167,103 @@
   flex-direction: column;
 }
 
+/* 站点标题 - 玻璃拟态渐变 */
 .site-title {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  background: var(--neon-gradient);
+  background: linear-gradient(135deg,
+    rgb(var(--primary-blue)) 0%,
+    rgb(var(--secondary-purple)) 50%,
+    rgb(var(--accent-orange)) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   line-height: 1.1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
-/* 导航链接 */
+.logo-wrapper:hover .site-title {
+  background: linear-gradient(135deg,
+    rgb(var(--primary-blue)) 0%,
+    rgb(var(--accent-pink)) 50%,
+    rgb(var(--accent-orange)) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+}
+
+/* === 导航链接玻璃拟态 === */
 .desktop-nav {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .nav-link {
   position: relative;
   display: inline-flex;
   align-items: center;
-  padding: 0 16px;
-  height: 36px;
+  padding: 10px 18px;
+  height: 40px;
   text-decoration: none;
   color: var(--text-primary);
-  font-size: 0.94rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  transition: all 0.3s ease;
-  border-radius: 8px;
-  position: relative;
-  margin: 0 4px;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border-radius: var(--radius-organic-sm);
+  margin: 0 2px;
+  background: transparent;
+  overflow: hidden;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--glass-gradient);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
 }
 
 .nav-link:hover {
-  background: rgba(var(--primary-blue), 0.05);
-  transform: translateY(-1px);
+  color: rgb(var(--primary-indigo));
+  transform: translateY(-2px);
+  box-shadow:
+    var(--shadow-glass-sm),
+    0 0 15px rgba(var(--primary-indigo), 0.2);
+}
+
+.nav-link:hover::before {
+  opacity: 1;
 }
 
 .nav-link.active {
-  color: rgb(var(--primary-blue));
-  background: rgba(var(--primary-blue), 0.05);
+  color: rgb(var(--primary-indigo));
+  background: var(--cosmic-gradient);
+  box-shadow:
+    var(--shadow-glass-sm),
+    0 0 20px rgba(var(--primary-indigo), 0.3);
+  font-weight: 600;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: linear-gradient(90deg,
+    rgb(var(--accent-cyan)),
+    rgb(var(--accent-emerald)));
+  border-radius: 1px;
+  box-shadow: 0 0 8px rgba(var(--accent-cyan), 0.5);
 }
 
 .nav-link::after {
@@ -212,14 +293,35 @@
   opacity: 0.9;
 }
 
-/* 主题切换按钮 */
+/* === 主题切换按钮玻璃拟态 === */
 .theme-toggle-btn {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   overflow: hidden;
+  background: transparent;
+  margin: 0 8px;
+}
+
+.theme-toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--glass-gradient);
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.theme-toggle-btn:hover::before {
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 .theme-icon-container {
@@ -229,28 +331,87 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1;
 }
 
 .theme-toggle-btn:hover .theme-icon-container {
-  transform: rotate(30deg);
+  transform: rotate(180deg) scale(1.1);
 }
 
-.theme-toggle-btn::before {
+.theme-toggle-btn:hover {
+  box-shadow:
+    var(--shadow-glass-md),
+    0 0 20px rgba(var(--primary-indigo), 0.3);
+  transform: translateY(-2px);
+}
+
+/* === 用户菜单玻璃拟态 === */
+.user-menu-trigger {
+  background: transparent !important;
+  border-radius: var(--radius-organic-sm) !important;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  padding: 8px 12px !important;
+  margin: 0 4px !important;
+}
+
+.user-menu-trigger::before {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: rgba(var(--primary-blue), 0.1);
-  transition: transform 0.3s ease;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--glass-gradient);
+  border-radius: var(--radius-organic-sm);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
 }
 
-.theme-toggle-btn:hover::before {
-  transform: translate(-50%, -50%) scale(1);
+.user-menu-trigger:hover::before {
+  opacity: 1;
+}
+
+.user-menu-trigger:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glass-sm);
+}
+
+.user-avatar {
+  border: 2px solid rgba(var(--primary-blue), 0.2);
+  transition: all 0.3s ease;
+}
+
+.user-menu-trigger:hover .user-avatar {
+  border-color: rgba(var(--primary-blue), 0.4);
+  transform: scale(1.05);
+}
+
+/* 菜单卡片 */
+.menu-card {
+  background: var(--glass-gradient) !important;
+  backdrop-filter: var(--blur-lg) !important;
+  -webkit-backdrop-filter: var(--blur-lg) !important;
+  box-shadow: var(--shadow-glass-xl) !important;
+  border-radius: var(--radius-organic-md) !important;
+  margin-top: 8px !important;
+}
+
+.user-menu-list {
+  background: transparent !important;
+  padding: 8px !important;
+}
+
+.menu-item {
+  border-radius: var(--radius-organic-sm) !important;
+  margin: 2px 0 !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.menu-item:hover {
+  background: rgba(var(--primary-blue), 0.1) !important;
+  transform: translateX(4px) !important;
 }
 
 /* 移动端菜单 - 优化MD3风格 */
@@ -500,7 +661,7 @@
 /* 用户信息项样式 */
 .user-info-item {
   background-color: rgba(var(--primary-blue), 0.04) !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 3px !important;
 }
 
 .user-info-item .v-avatar {

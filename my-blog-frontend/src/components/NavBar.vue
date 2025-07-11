@@ -125,6 +125,13 @@
                     rounded="lg"
                   />
                   <v-list-item
+                    to="/images"
+                    prepend-icon="mdi-image-multiple"
+                    title="图片管理"
+                    class="menu-item"
+                    rounded="lg"
+                  />
+                  <v-list-item
                     v-if="isAdmin"
                     to="/admin"
                     prepend-icon="mdi-view-dashboard"

@@ -226,7 +226,7 @@ export default defineConfig(({ command, mode }) => {
             if (isLowMemoryEnv) {
               return null; // 不分包
             }
-            
+
             // 普通环境下简单分包
             if (id.includes('node_modules')) {
               return 'vendor'; // 所有第三方库

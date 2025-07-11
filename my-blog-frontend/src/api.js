@@ -268,6 +268,66 @@ export const getAdminArticleDetail = async (articleId) => {
   }
 };
 
+// 图片上传相关API
+export const uploadImage = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await apiClient.post('/api/upload/image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    console.log('API响应:', response);
+    return response;
+  } catch (error) {
+    console.error('API调用失败:', error);
+    throw error;
+  }
+};
+
+export const uploadMultipleImages = async (files) => {
+  try {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    return await apiClient.post('/api/upload/images', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  } catch (error) {
+    return handleApiError(error, () => uploadMultipleImages(files));
+  }
+};
+
+export const getImageList = async (page = 1, limit = 20) => {
+  try {
+    const response = await apiClient.get('/api/upload/images', {
+      params: { page, limit }
+    });
+    console.log('获取图片列表响应:', response);
+    return response;
+  } catch (error) {
+    console.error('获取图片列表失败:', error);
+    throw error;
+  }
+};
+
+export const deleteImage = async (filePath) => {
+  try {
+    return await apiClient.delete('/api/upload/image', {
+      params: { file_path: filePath }
+    });
+  } catch (error) {
+    return handleApiError(error, () => deleteImage(filePath));
+  }
+};
+
 // 更新审核状态
 export const updateArticleStatus = async (articleId, status) => {
   return await apiClient.put(`/api/admin/articles/${articleId}/status?status=${status}`);

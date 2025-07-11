@@ -37,7 +37,8 @@ export const SECURITY_CONFIG = {
 if (SECURITY_CONFIG.CONTENT_SECURITY_POLICY && typeof document !== 'undefined') {
   const meta = document.createElement('meta');
   meta.httpEquiv = 'Content-Security-Policy';
-  meta.content = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http: https: *;";
+  // 允许从CDN加载图片：jsdelivr, statically, githack, 以及GitHub原始链接
+  meta.content = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://cdn.jsdelivr.net https://cdn.statically.io https://raw.githack.com https://raw.githubusercontent.com; connect-src 'self' http: https: *;";
   document.head.appendChild(meta);
 }
 

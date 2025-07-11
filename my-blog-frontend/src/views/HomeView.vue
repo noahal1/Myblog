@@ -1,46 +1,62 @@
 <template>
   <div class="home-view">
-    <div class="hero-banner" ref="heroBanner">
+    <section class="hero-banner" ref="heroBanner" role="banner" aria-labelledby="hero-title">
       <tree-background :height="400" />
       <v-container>
-        <h1 class="hero-title">
+        <h1 id="hero-title" class="hero-title">
           <span class="tagline-prefix" ref="tagline">抒情与逻辑之间的</span>
           <span class="gradient-text" ref="gradientText">自留地</span>
         </h1>
         <p class="hero-subtitle" ref="subtitle">在这里，未编译的诗歌，以及持续生长的胡思乱想</p>
         
-        <v-text-field
-          v-model="searchQuery"
-          prepend-inner-icon="mdi-magnify"
-          placeholder="搜索文章、标签或关键词..."
-          variant="outlined"
-          hide-details
-          density="comfortable"
-          class="search-input mt-8"
-          @keyup.enter="searchArticles"
-          bg-color="surface"
-          ref="searchInput"
-        ></v-text-field>
+        <div class="glass-search-container">
+          <div class="search-wrapper hover-lift-subtle focus-ring">
+            <v-icon icon="mdi-magnify" class="search-icon" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="搜索文章、标签或关键词..."
+              class="glass-search-input focus-ring"
+              @keyup.enter="searchArticles"
+              @focus="onSearchFocus"
+              @blur="onSearchBlur"
+              ref="searchInput"
+              :aria-label="'搜索文章'"
+            />
+            <div class="search-glow"></div>
+            <div v-if="isSearching" class="search-loading">
+              <div class="loading-pulse"></div>
+            </div>
+          </div>
+        </div>
       </v-container>
-    </div>
+    </section>
     
     <v-container class="main-content py-4 pb-0">
       <!-- 分类标签 -->
-      <div class="category-tags mb-6" ref="categories">
-        <v-chip-group v-model="selectedCategory">
-          <v-chip 
-            v-for="(category, index) in availableCategories" 
-            :key="category.id"
-            filter
-            :value="category.id"
-            variant="elevated"
-            class="category-chip"
-            color="primary"
-          >
-            {{ category.name }}
-          </v-chip>
-        </v-chip-group>
-      </div>
+      <section class="glass-category-section mb-6" ref="categories" role="region" aria-labelledby="category-heading">
+        <div class="category-container">
+          <h2 id="category-heading" class="category-label">
+            <v-icon icon="mdi-tag-multiple-outline" class="mr-2" aria-hidden="true" />
+            <span>分类筛选</span>
+          </h2>
+          <div class="glass-chip-group" role="group" aria-labelledby="category-heading">
+            <button
+              v-for="category in availableCategories"
+              :key="category.id"
+              :class="['glass-chip', 'button-magnetic', 'click-feedback', 'focus-ring', { 'active': selectedCategory === category.id }]"
+              @click="handleCategorySelect(category.id)"
+              tabindex="0"
+              :aria-label="`筛选${category.name}分类`"
+              :aria-pressed="selectedCategory === category.id"
+              role="button"
+            >
+              <span>{{ category.name }}</span>
+              <div class="chip-glow" aria-hidden="true"></div>
+            </button>
+          </div>
+        </div>
+      </section>
     
       <!-- 内容区域：包含加载状态、文章列表和分页 -->
       <div class="content-area">
@@ -69,57 +85,99 @@
           </div>
           
           <!-- 文章网格 -->
-          <div v-else>
-            <div class="article-grid" ref="articleGrid">
+          <section v-else role="main" aria-labelledby="articles-heading">
+            <h2 id="articles-heading" class="sr-only">文章列表</h2>
+
+            <!-- 加载状态 -->
+            <div v-if="isLoading" class="article-grid" aria-live="polite" aria-label="正在加载文章">
+              <SkeletonLoader
+                v-for="n in itemsPerPage"
+                :key="`skeleton-${n}`"
+                type="article-card"
+                class="mb-4 article-item gpu-accelerated"
+                :aria-label="`加载中 ${n}`"
+              />
+            </div>
+
+            <!-- 文章内容 -->
+            <div
+              v-else
+              class="article-grid"
+              ref="articleGrid"
+              role="feed"
+              :aria-label="`共${filteredArticles.length}篇文章，当前显示第${currentPage}页`"
+            >
               <article-card
                 v-for="(article, index) in paginatedArticles"
                 :key="article.id"
                 :article="article"
                 @click="viewArticle(article.id)"
-                class="mb-4 article-item"
+                class="mb-4 article-item gpu-accelerated"
                 :class="{'animate-item': true}"
-                :style="{ 
+                :style="{
                   '--animation-delay': `${index * 0.1}s`,
                   'animation-play-state': isAnimating ? 'running' : 'paused'
                 }"
+                role="article"
+                :aria-label="`文章：${article.title}`"
               />
             </div>
             
-            <!-- 分页控件 - 调整底部边距 -->
-            <div class="pagination-wrapper text-center mb-0 pb-0" ref="pagination">
-              <v-pagination
-                v-model="currentPage"
-                :length="totalPages"
-                :total-visible="5"
-                rounded
-                class="my-3 d-inline-flex pagination-component"
-                @update:model-value="handlePageChange"
-                prev-icon="mdi-chevron-left"
-                next-icon="mdi-chevron-right"
-                elevation="0"
-                active-color="primary"
-                density="comfortable"
-              ></v-pagination>
-              
-              <div class="text-caption text-medium-emphasis page-info">
-                共 {{ filteredArticles.length }} 篇
+            <!-- 玻璃拟态分页控件 -->
+            <div class="glass-pagination-wrapper" ref="pagination">
+              <div class="pagination-container hover-lift-subtle">
+                <button
+                  v-if="currentPage > 1"
+                  @click="handlePageChange(currentPage - 1)"
+                  class="glass-pagination-btn prev-btn button-magnetic click-feedback focus-ring"
+                  :aria-label="'上一页'"
+                >
+                  <v-icon icon="mdi-chevron-left" size="20" />
+                </button>
+
+                <div class="pagination-numbers">
+                  <button
+                    v-for="page in visiblePages"
+                    :key="page"
+                    @click="handlePageChange(page)"
+                    :class="['glass-pagination-number', 'button-magnetic', 'click-feedback', 'focus-ring', { 'active': page === currentPage }]"
+                    :aria-label="`第${page}页`"
+                    :aria-current="page === currentPage ? 'page' : undefined"
+                  >
+                    {{ page }}
+                  </button>
+                </div>
+
+                <button
+                  v-if="currentPage < totalPages"
+                  @click="handlePageChange(currentPage + 1)"
+                  class="glass-pagination-btn next-btn button-magnetic click-feedback focus-ring"
+                  :aria-label="'下一页'"
+                >
+                  <v-icon icon="mdi-chevron-right" size="20" />
+                </button>
+              </div>
+
+              <div class="pagination-info">
+                <span class="info-text">共 {{ filteredArticles.length }} 篇文章</span>
               </div>
             </div>
-          </div>
+          </section>
+          
         </div>
       </div>
     </v-container>
-    <!-- 返回顶部按钮 -->
-    <v-btn
+    <!-- 玻璃拟态返回顶部按钮 -->
+    <button
       v-show="showBackToTop"
-      icon
-      color="primary"
-      size="large"
-      class="back-to-top"
+      class="glass-back-to-top organic-pulse button-magnetic click-feedback focus-ring"
       @click="scrollToTop"
+      :aria-label="'返回顶部'"
+      tabindex="0"
     >
-      <v-icon>mdi-arrow-up</v-icon>
-    </v-btn>
+      <v-icon icon="mdi-arrow-up" size="24" />
+      <div class="button-glow"></div>
+    </button>
   </div>
 </template>
 
@@ -127,6 +185,7 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import ArticleCard from '../components/ArticleCard.vue';
+import SkeletonLoader from '../components/SkeletonLoader.vue';
 import TreeBackground from '../components/TreeBackground.vue';
 import { getArticles } from '../api';
 
@@ -142,6 +201,8 @@ const searchQuery = ref('');
 const selectedCategory = ref('all');
 const showBackToTop = ref(false);
 const isAnimating = ref(false);
+const isSearching = ref(false);
+const isLoading = ref(true);
 const itemsPerPage = 6; // 每页显示的文章数量
 
 // DOM引用
@@ -216,12 +277,36 @@ const paginatedArticles = computed(() => {
   if (validCurrentPage !== currentPage.value) {
     currentPage.value = validCurrentPage;
   }
-  
+
   // 计算切片范围
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
-  
+
   return filteredArticles.value.slice(start, end);
+});
+
+// 可见的分页页码
+const visiblePages = computed(() => {
+  const total = totalPages.value;
+  const current = currentPage.value;
+  const visible = [];
+
+  if (total <= 7) {
+    // 如果总页数小于等于7，显示所有页码
+    for (let i = 1; i <= total; i++) {
+      visible.push(i);
+    }
+  } else {
+    // 否则显示当前页前后各2页
+    const start = Math.max(1, current - 2);
+    const end = Math.min(total, current + 2);
+
+    for (let i = start; i <= end; i++) {
+      visible.push(i);
+    }
+  }
+
+  return visible;
 });
 
 // 分页信息
@@ -235,11 +320,12 @@ const paginationInfo = computed(() => {
 
 const fetchArticles = async () => {
   loading.value = true;
-  
+  isLoading.value = true;
+
   try {
     // 设置knowledge_base=false参数，只获取非知识库文章
     const response = await getArticles(1, 100, false);
-    
+
     // 处理响应
     if (response && response.data) {
       if (Array.isArray(response.data)) {
@@ -253,7 +339,7 @@ const fetchArticles = async () => {
     } else {
       articles.value = [];
     }
-    
+
     console.log(`获取到 ${articles.value.length} 篇文章`);
     
     // 更新总页数
@@ -263,12 +349,17 @@ const fetchArticles = async () => {
     articles.value = [];
   } finally {
     loading.value = false;
-    
-    // 加载完成后应用动画效果
-    nextTick(() => {
-      isAnimating.value = true;
-      setupHeroAnimation();
-    });
+
+    // 模拟加载时间以展示骨架屏效果
+    setTimeout(() => {
+      isLoading.value = false;
+
+      // 加载完成后应用动画效果
+      nextTick(() => {
+        isAnimating.value = true;
+        setupHeroAnimation();
+      });
+    }, 800);
   }
 };
 
@@ -298,8 +389,28 @@ const handlePageChange = (page) => {
 
 // 搜索文章
 const searchArticles = () => {
+  isSearching.value = true;
+  setTimeout(() => {
+    currentPage.value = 1;
+    updateTotalPages();
+    isSearching.value = false;
+  }, 300);
+};
+
+// 处理分类选择
+const handleCategorySelect = (categoryId) => {
+  selectedCategory.value = categoryId;
   currentPage.value = 1;
   updateTotalPages();
+};
+
+// 搜索框焦点事件
+const onSearchFocus = () => {
+  console.log('搜索框获得焦点');
+};
+
+const onSearchBlur = () => {
+  console.log('搜索框失去焦点');
 };
 
 // 重置筛选器
@@ -442,12 +553,11 @@ const getLatestUpdateDate = () => {
 </script>
 
 <style scoped>
-/* 文章项动画 */
 .animate-item {
   opacity: 0;
   transform: translateY(20px);
-  animation: fadeInUp 0.5s forwards;
-  animation-delay: var(--animation-delay, 0s);
+  animation: fadeInUp 2s forwards;
+  animation-delay: var(--animation-delay, 1s);
 }
 
 @keyframes fadeInUp {
@@ -477,15 +587,13 @@ const getLatestUpdateDate = () => {
   }
 }
 
-/* 文章网格布局优化 */
 .article-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
+  gap: 20px;
   margin-bottom: 2rem;
 }
 
-/* 响应式调整 */
 @media (max-width: 600px) {
   .article-grid {
     grid-template-columns: 1fr;

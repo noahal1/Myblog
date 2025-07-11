@@ -15,8 +15,11 @@ export default {
 
 <template>
   <v-app>
+    <!-- 无障碍跳转链接 -->
+    <a href="#main-content" class="skip-link">跳转到主要内容</a>
+
     <nav-bar @toggle-theme="toggleTheme" :current-theme="currentTheme" />
-    <v-main>
+    <v-main id="main-content" role="main">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <keep-alive :include="['HomeView', 'ArchiveView']">
@@ -31,6 +34,13 @@ export default {
 
 <style>
 @import './assets/styles.css';
+@import './assets/styles/glassmorphism.css';
+@import './assets/styles/microinteractions.css';
+@import './assets/styles/performance.css';
+@import './assets/styles/views/article.css';
+@import './assets/styles/views/about.css';
+@import './assets/styles/views/knowledge.css';
+@import './assets/styles/views/admin.css';
 
 
 /* 全局样式 */
@@ -122,7 +132,7 @@ body, .v-application {
 </style>
 
 <script setup>
-import { ref, provide, onMounted, watch, nextTick } from 'vue'
+import { ref, provide, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import NavBar from './components/NavBar.vue'
 import AppFooter from './components/AppFooter.vue'

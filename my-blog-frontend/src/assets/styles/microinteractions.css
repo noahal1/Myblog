@@ -1,0 +1,315 @@
+/*======================
+  微交互动画系统
+  精致的用户体验细节
+======================*/
+
+/* === 点击反馈动画 === */
+.click-feedback {
+  position: relative;
+  overflow: hidden;
+}
+
+.click-feedback::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, 
+    rgba(var(--primary-blue), 0.3) 0%, 
+    rgba(var(--primary-blue), 0.1) 70%, 
+    transparent 100%);
+  transform: translate(-50%, -50%);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.click-feedback:active::after {
+  width: 200px;
+  height: 200px;
+  transition: all 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* === 悬浮状态微动画 === */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.hover-lift-subtle {
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.hover-lift-subtle:hover {
+  transform: translateY(-1px) scale(1.01);
+}
+
+/* === 加载动画 === */
+.loading-shimmer {
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.1) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.loading-pulse {
+  animation: loadingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* === 焦点指示器 === */
+.focus-ring {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 
+    0 0 0 3px rgba(var(--primary-blue), 0.2),
+    0 0 0 1px rgba(var(--primary-blue), 0.4);
+}
+
+.focus-ring:focus::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid rgba(var(--primary-blue), 0.5);
+  border-radius: inherit;
+  animation: focusRing 0.3s ease-out;
+}
+
+@keyframes focusRing {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* === 状态变化动画 === */
+.state-transition {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.state-success {
+  background: linear-gradient(135deg, 
+    rgba(var(--accent-green), 0.2) 0%,
+    rgba(var(--accent-green), 0.1) 100%);
+  border-color: rgba(var(--accent-green), 0.3);
+  animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.state-error {
+  background: linear-gradient(135deg, 
+    rgba(var(--accent-pink), 0.2) 0%,
+    rgba(var(--accent-pink), 0.1) 100%);
+  border-color: rgba(var(--accent-pink), 0.3);
+  animation: errorShake 0.5s ease-out;
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* === 进度指示器 === */
+.progress-bar {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  height: 4px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg,
+    rgb(var(--primary-blue)) 0%,
+    rgb(var(--secondary-purple)) 50%,
+    rgb(var(--accent-orange)) 100%);
+  border-radius: inherit;
+  transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%);
+  animation: progressShine 2s ease-in-out infinite;
+}
+
+@keyframes progressShine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* === 通知动画 === */
+.notification-enter {
+  animation: notificationSlideIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.notification-exit {
+  animation: notificationSlideOut 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes notificationSlideIn {
+  0% {
+    transform: translateX(100%) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes notificationSlideOut {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* === 工具提示动画 === */
+.tooltip-fade {
+  animation: tooltipFadeIn 0.2s ease-out;
+}
+
+@keyframes tooltipFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* === 按钮特效 === */
+.button-magnetic {
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.button-magnetic:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(var(--primary-blue), 0.2);
+}
+
+.button-magnetic:active {
+  transform: translateY(0);
+  transition: all 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* === 卡片翻转效果 === */
+.card-flip {
+  perspective: 1000px;
+}
+
+.card-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transform-style: preserve-3d;
+}
+
+.card-flip:hover .card-flip-inner {
+  transform: rotateY(5deg) rotateX(2deg);
+}
+
+/* === 文本打字机效果 === */
+.typewriter {
+  overflow: hidden;
+  border-right: 2px solid rgba(var(--primary-blue), 0.7);
+  white-space: nowrap;
+  animation: 
+    typing 3s steps(40, end),
+    blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50% { border-color: rgba(var(--primary-blue), 0.7); }
+}
+
+/* === 响应式微交互 === */
+@media (max-width: 768px) {
+  .hover-lift:hover,
+  .hover-lift-subtle:hover {
+    transform: none; /* 移动端禁用悬浮效果 */
+  }
+  
+  .click-feedback:active::after {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+/* === 减少动画偏好 === */
+@media (prefers-reduced-motion: reduce) {
+  .loading-shimmer,
+  .loading-pulse,
+  .organic-float,
+  .organic-pulse,
+  .typewriter {
+    animation: none;
+  }
+  
+  .hover-lift,
+  .hover-lift-subtle,
+  .button-magnetic,
+  .state-transition {
+    transition: none;
+  }
+}

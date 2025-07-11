@@ -1,61 +1,65 @@
 <template>
   <div class="knowledge-base">
-    <div class="hero-banner" ref="heroBanner">
+    <section class="glass-kb-hero" ref="heroBanner" role="banner">
       <v-container class="py-8">
         <!-- 页面标题 -->
-        <div class="kb-header text-center">
-          <h1 class="hero-title">
-            <span class="gradient-text" ref="gradientText">知识库</span>
+        <header class="kb-header">
+          <h1 class="kb-main-title">
+            <span class="kb-title-text" ref="gradientText">知识库</span>
           </h1>
-          <p class="hero-subtitle" ref="subtitle">整理的各类技术笔记、教程和解决方案</p>
-          
-          <!-- 搜索框 -->
-          <v-text-field
-            v-model="searchQuery"
-            prepend-inner-icon="mdi-magnify"
-            placeholder="搜索知识库内容..."
-            variant="outlined"
-            hide-details
-            density="comfortable"
-            class="search-input mt-6 mx-auto"
-            @keyup.enter="searchKnowledge"
-            bg-color="surface"
-            style="max-width: 600px;"
-            ref="searchInput"
-          >
-            <template v-slot:append>
-              <v-btn
+          <p class="kb-subtitle" ref="subtitle">整理的各类技术笔记、教程和解决方案</p>
+
+          <!-- 玻璃拟态搜索框 -->
+          <div class="glass-kb-search-container">
+            <div class="kb-search-wrapper hover-lift-subtle focus-ring">
+              <v-icon icon="mdi-magnify" class="kb-search-icon" />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="搜索知识库内容..."
+                class="glass-kb-search-input focus-ring"
+                @keyup.enter="searchKnowledge"
+                @focus="onSearchFocus"
+                @blur="onSearchBlur"
+                ref="searchInput"
+                aria-label="搜索知识库"
+              />
+              <button
                 v-if="searchQuery"
-                icon="mdi-close"
-                variant="text"
                 @click="searchQuery = ''"
-              ></v-btn>
-            </template>
-          </v-text-field>
-        </div>
+                class="kb-clear-btn button-magnetic"
+                aria-label="清除搜索"
+              >
+                <v-icon icon="mdi-close" size="20" />
+              </button>
+              <div class="kb-search-glow"></div>
+            </div>
+          </div>
+        </header>
       </v-container>
-    </div>
+    </section>
 
     <v-container class="main-content">
-      <v-row>
+      <div class="kb-content-grid">
         <!-- 左侧导航 -->
-        <v-col cols="12" md="3">
-          <!-- 可折叠目录树 -->
-          <v-card class="navigation-card" variant="elevated" elevation="2">
-            <v-card-title class="d-flex align-center justify-space-between pa-4">
-              <div class="d-flex align-center">
-                <v-icon icon="mdi-folder-multiple" class="me-2"></v-icon>
-                目录
+        <aside class="kb-sidebar">
+          <!-- 玻璃拟态导航卡片 -->
+          <nav class="glass-kb-nav" role="navigation" aria-label="知识库导航">
+            <header class="kb-nav-header">
+              <div class="nav-title-section">
+                <v-icon icon="mdi-folder-multiple" class="nav-icon" aria-hidden="true"></v-icon>
+                <h2 class="nav-title">目录</h2>
               </div>
-              <v-btn
-                icon="mdi-chevron-left"
-                variant="text"
-                density="comfortable"
-                :class="{ 'rotate-180': !isNavCollapsed }"
+              <button
+                class="nav-toggle-btn button-magnetic click-feedback"
+                :class="{ 'rotated': !isNavCollapsed }"
                 @click="isNavCollapsed = !isNavCollapsed"
-              ></v-btn>
-            </v-card-title>
-            <v-divider></v-divider>
+                :aria-label="isNavCollapsed ? '展开导航' : '收起导航'"
+              >
+                <v-icon icon="mdi-chevron-left" size="20" />
+              </button>
+            </header>
+            <div class="nav-divider"></div>
             
             <v-expand-transition>
               <div v-show="!isNavCollapsed">
@@ -124,8 +128,8 @@
                 </v-list>
               </div>
             </v-expand-transition>
-          </v-card>
-        </v-col>
+          </nav>
+        </aside>
         
         <!-- 右侧内容 -->
         <v-col cols="12" md="9">
@@ -336,7 +340,7 @@
             </div>
           </template>
         </v-col>
-      </v-row>
+      </div>
     </v-container>
   </div>
 </template>

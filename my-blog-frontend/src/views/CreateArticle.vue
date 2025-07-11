@@ -7,7 +7,19 @@
           <p class="text-subtitle-1 text-medium-emphasis">在这里分享您的想法和知识</p>
         </div>
         
-        <v-form @submit.prevent="submitArticle" v-model="isFormValid" class="pa-6">
+        <v-form ref="formRef" @submit.prevent="submitArticle" v-model="isFormValid" class="pa-6">
+          <!-- 错误提示 -->
+          <v-alert
+            v-if="error"
+            type="error"
+            variant="tonal"
+            closable
+            class="mb-6"
+            @click:close="error = null"
+          >
+            {{ error }}
+          </v-alert>
+
           <v-text-field
             v-model="article.title"
             label="文章标题"
@@ -19,50 +31,30 @@
             placeholder="输入一个吸引人的标题"
           ></v-text-field>
           
-          <!-- 图片上传 -->
-          <div class="mb-6 animated fadeIn" style="animation-delay:0.1s;">
-            <label class="text-subtitle-1 mb-2 d-block">文章封面</label>
-            <div class="d-flex align-center cover-upload">
-              <v-img
-                v-if="coverImagePreview"
-                :src="coverImagePreview"
-                height="150"
-                width="280"
-                cover
-                class="rounded me-4 animated bounceIn"
-              ></v-img>
-              <div v-else class="image-placeholder d-flex justify-center align-center rounded me-4 animated fadeIn">
-                <v-icon size="40" color="grey-lighten-1">mdi-image</v-icon>
-              </div>
-              
-              <div>
-                <v-file-input
-                  v-model="coverImage"
-                  accept="image/*"
-                  label="选择封面图片"
-                  variant="outlined"
-                  density="compact"
-                  prepend-icon="mdi-camera"
-                  @update:model-value="handleImageUpload"
-                  hide-details
-                  class="animated fadeIn"
-                ></v-file-input>
-                <p class="text-caption mt-2 text-grey">
-                  建议尺寸: 1200x600，支持 JPG、PNG、WebP 格式
-                </p>
-              </div>
-            </div>
-          </div>
           
           <!-- Markdown 编辑器 -->
           <div class="mb-6 animated fadeIn" style="animation-delay:0.2s;">
             <label class="text-subtitle-1 mb-2 d-block">文章内容</label>
+
+            <!-- 图片操作按钮 -->
+            <div class="mb-3">
+              <ImagePicker @select="insertSelectedImages" />
+              <v-btn
+                variant="outlined"
+                prepend-icon="mdi-upload"
+                @click="triggerImageUpload"
+              >
+                上传新图片
+              </v-btn>
+            </div>
+
             <MdEditor
               v-model="article.content"
               :theme="editorTheme"
               previewTheme="github"
               :autoFocus="false"
               @onChange="checkFormValidity"
+              @onUploadImg="handleMarkdownImageUpload"
               style="height: 500px"
               codeTheme="github"
               :toolbars="['bold','underline','italic','strikeThrough','title','sub','sup','quote','unorderedList','orderedList','task','codeRow','code','link','image','table','mermaid','katex','revoke','next','save','prettier','pageFullscreen','fullscreen','preview','htmlPreview','catalog']"
@@ -180,8 +172,9 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { getTags, createArticle, createTag } from '../api'
+import { getTags, createArticle, createTag, uploadImage } from '../api'
 import { MdEditor } from 'md-editor-v3'
+import ImagePicker from '../components/ImagePicker.vue'
 import { useTheme } from 'vuetify'
 import 'md-editor-v3/lib/style.css'
 import '@mdi/font/css/materialdesignicons.min.css'
@@ -194,6 +187,7 @@ const router = useRouter()
 const loading = ref(false)
 const savingDraft = ref(false)
 const isFormValid = ref(false)
+const formRef = ref(null)
 const error = ref(null)
 const theme = useTheme()
 
@@ -204,7 +198,12 @@ const uploadingImage = ref(false)
 
 // 编辑器主题
 const editorTheme = computed(() => {
-  return theme.global.current.value.dark ? 'dark' : 'light'
+  try {
+    return theme.global.current.value?.dark ? 'dark' : 'light'
+  } catch (e) {
+    console.warn('无法获取主题状态:', e)
+    return 'light'
+  }
 })
 
 const article = ref({
@@ -223,8 +222,8 @@ const tagsError = ref(null)
 const newTagName = ref('')
 const creatingTag = ref(false)
 
-// 图片上传处理
-const handleImageUpload = async () => {
+// 封面图片上传处理
+const handleCoverImageUpload = async () => {
   if (!coverImage.value || coverImage.value.length === 0) {
     coverImagePreview.value = null
     article.value.cover_image = ''
@@ -250,6 +249,58 @@ const handleImageUpload = async () => {
   } finally {
     uploadingImage.value = false
   }
+}
+
+// Markdown编辑器图片上传处理
+const handleMarkdownImageUpload = async (files, callback) => {
+  try {
+    const uploadPromises = files.map(async (file) => {
+      try {
+        console.log('开始上传图片:', file.name)
+        const response = await uploadImage(file)
+        console.log('图片上传响应:', response)
+
+        if (response && response.data && response.data.success) {
+          return {
+            url: response.data.data.url,
+            alt: response.data.data.original_name || file.name,
+            title: response.data.data.original_name || file.name
+          }
+        } else {
+          console.error('上传响应格式错误:', response)
+          throw new Error(response?.data?.message || '上传失败')
+        }
+      } catch (error) {
+        console.error('图片上传失败:', error)
+        throw error
+      }
+    })
+
+    const results = await Promise.all(uploadPromises)
+    console.log('所有图片上传完成:', results)
+    callback(results)
+  } catch (error) {
+    console.error('批量上传图片失败:', error)
+    // 如果上传失败，传递空数组给回调
+    callback([])
+  }
+}
+
+// 插入选择的图片
+const insertSelectedImages = (images) => {
+  const markdownImages = images.map(image =>
+    `![${image.alt}](${image.url})`
+  ).join('\n\n')
+
+  // 在当前光标位置插入图片
+  const currentContent = article.value.content
+  article.value.content = currentContent + '\n\n' + markdownImages + '\n\n'
+}
+
+// 触发图片上传（可以用于打开文件选择器）
+const triggerImageUpload = () => {
+  // 这个功能可以通过MdEditor的工具栏实现，这里只是一个占位符
+  console.log('触发图片上传')
 }
 
 // 获取标签列表
@@ -303,19 +354,24 @@ const checkFormValidity = () => {
 // 保存为草稿
 const saveAsDraft = async () => {
   savingDraft.value = true
+  error.value = null
   try {
     // 设置为草稿状态
     const draftData = { ...article.value, is_published: false }
     const response = await createArticle(draftData)
-    
+
     // 显示成功消息
     alert('草稿保存成功!')
-    
+
     // 可选：跳转到草稿管理页面
     // router.push('/drafts')
   } catch (err) {
     console.error('保存草稿失败:', err)
     error.value = '保存草稿失败，请重试'
+    // 重置表单验证状态，允许用户重新输入
+    if (formRef.value) {
+      formRef.value.resetValidation()
+    }
   } finally {
     savingDraft.value = false
   }
@@ -325,19 +381,30 @@ const saveAsDraft = async () => {
 const submitArticle = async () => {
   if (!isFormValid.value) {
     error.value = '请填写所有必填字段'
+    // 重置表单验证状态，允许用户重新输入
+    if (formRef.value) {
+      formRef.value.resetValidation()
+    }
     return
   }
-  
+
   loading.value = true
+  error.value = null
   try {
     // 确保发布状态为true
     article.value.is_published = true
-    
+
     const response = await createArticle(article.value)
+    // 清除草稿
+    localStorage.removeItem('article_draft')
     router.push(`/article/${response.data.id}`)
   } catch (err) {
     console.error('发布文章失败:', err)
     error.value = '发布文章失败，请重试'
+    // 重置表单验证状态，允许用户重新输入
+    if (formRef.value) {
+      formRef.value.resetValidation()
+    }
   } finally {
     loading.value = false
   }

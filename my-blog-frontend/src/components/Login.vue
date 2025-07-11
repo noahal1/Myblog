@@ -21,11 +21,10 @@
           {{ isLogin ? '登录您的账号畅所欲言' : '创建一个新的Noah\'s Blog账号' }}
         </p>
       </div>
-      
       <!-- 表单 -->
-      <v-form 
-        ref="form"
-        @submit.prevent="handleSubmit" 
+      <v-form
+        ref="formRef"
+        @submit.prevent="handleSubmit"
         class="login-form px-6 py-4"
         v-model="isFormValid"
       >
@@ -159,7 +158,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import LogoIcon from './icons/LogoIcon.vue'
@@ -199,6 +198,10 @@ const rules = {
 const switchMode = () => {
   isLogin.value = !isLogin.value
   errorMessage.value = ''
+  // 重置表单验证状态
+  if (formRef.value) {
+    formRef.value.resetValidation()
+  }
 }
 
 // 处理表单提交
@@ -268,13 +271,16 @@ const handleSubmit = async () => {
     console.error('操作失败:', error);
     errorMessage.value = error.response?.data?.detail || error.message || '操作失败';
     alertType.value = 'error';
+    // 重置表单验证状态，允许用户重新输入
+    if (formRef.value) {
+      formRef.value.resetValidation()
+    }
   } finally {
     loading.value = false;
   }
 };
 
-// 计算属性：表单标题
-const formTitle = computed(() => isLogin.value ? '登录' : '注册')
+
 </script>
 
 <style scoped>

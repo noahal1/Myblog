@@ -1,0 +1,235 @@
+/*======================
+  管理页面玻璃拟态样式
+======================*/
+
+/* === 管理页面头部 === */
+.glass-admin-header {
+  background: var(--glass-gradient);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border: 1px solid var(--glass-border-light);
+  border-radius: var(--radius-organic-lg);
+  box-shadow: var(--shadow-glass-md);
+  padding: 24px 32px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.admin-main-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  background: linear-gradient(135deg, 
+    rgb(var(--primary-blue)) 0%,
+    rgb(var(--secondary-purple)) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* === 标签页样式 === */
+.glass-admin-tabs {
+  background: var(--glass-gradient);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border: 1px solid var(--glass-border-light);
+  border-radius: var(--radius-organic-md);
+  box-shadow: var(--shadow-glass-sm);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.glass-tabs {
+  background: transparent !important;
+}
+
+.glass-tab {
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  font-weight: 500 !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.glass-tab:hover {
+  background: rgba(var(--primary-blue), 0.08) !important;
+  color: rgb(var(--primary-blue)) !important;
+}
+
+.glass-tab.v-tab--selected {
+  background: rgba(var(--primary-blue), 0.12) !important;
+  color: rgb(var(--primary-blue)) !important;
+  font-weight: 600 !important;
+}
+
+/* === 统计卡片 === */
+.v-card {
+  background: var(--glass-gradient) !important;
+  backdrop-filter: var(--blur-md) !important;
+  -webkit-backdrop-filter: var(--blur-md) !important;
+  border: 1px solid var(--glass-border-light) !important;
+  border-radius: var(--radius-organic-md) !important;
+  box-shadow: var(--shadow-glass-md) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.v-card:hover {
+  box-shadow: var(--shadow-glass-lg) !important;
+  transform: translateY(-2px) !important;
+}
+
+.v-card-title {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+.v-card-text {
+  color: var(--text-secondary) !important;
+}
+
+/* === 数据表格 === */
+.v-data-table {
+  background: var(--glass-gradient) !important;
+  backdrop-filter: var(--blur-md) !important;
+  -webkit-backdrop-filter: var(--blur-md) !important;
+  border: 1px solid var(--glass-border-light) !important;
+  border-radius: var(--radius-organic-md) !important;
+  box-shadow: var(--shadow-glass-md) !important;
+}
+
+.v-data-table-header {
+  background: linear-gradient(135deg, 
+    rgba(var(--primary-blue), 0.05) 0%,
+    rgba(var(--secondary-purple), 0.03) 100%) !important;
+}
+
+.v-data-table-header th {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+.v-data-table tbody tr:hover {
+  background: rgba(var(--primary-blue), 0.05) !important;
+}
+
+/* === 按钮样式 === */
+.v-btn {
+  background: var(--glass-gradient) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  -webkit-backdrop-filter: var(--blur-sm) !important;
+  border: 1px solid rgba(var(--primary-blue), 0.2) !important;
+  border-radius: var(--radius-organic-sm) !important;
+  box-shadow: var(--shadow-glass-sm) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.v-btn:hover {
+  background: rgba(var(--primary-blue), 0.1) !important;
+  border-color: rgba(var(--primary-blue), 0.4) !important;
+  box-shadow: var(--shadow-glass-md) !important;
+  transform: translateY(-1px) !important;
+}
+
+.v-btn--variant-elevated {
+  background: linear-gradient(135deg, 
+    rgba(var(--primary-blue), 0.8) 0%,
+    rgba(var(--primary-blue), 0.6) 100%) !important;
+  color: white !important;
+  border-color: rgba(var(--primary-blue), 0.3) !important;
+}
+
+.v-btn--variant-elevated:hover {
+  background: linear-gradient(135deg, 
+    rgba(var(--primary-blue), 0.9) 0%,
+    rgba(var(--primary-blue), 0.7) 100%) !important;
+}
+
+/* === 响应式设计 === */
+@media (max-width: 768px) {
+  .glass-admin-header {
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  
+  .admin-main-title {
+    font-size: 2rem;
+  }
+  
+  .glass-admin-tabs {
+    margin-bottom: 20px;
+  }
+}
+
+/* === 暗色模式适配 === */
+.v-theme--dark .admin-main-title {
+  background: linear-gradient(135deg, 
+    rgba(var(--primary-blue), 0.9) 0%,
+    rgba(var(--secondary-purple), 0.8) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.v-theme--dark .glass-admin-header {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 100%);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.v-theme--dark .glass-admin-tabs {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 100%);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.v-theme--dark .glass-tab {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.v-theme--dark .glass-tab:hover {
+  background: rgba(var(--primary-blue), 0.15) !important;
+  color: rgba(var(--primary-blue), 0.9) !important;
+}
+
+.v-theme--dark .glass-tab.v-tab--selected {
+  background: rgba(var(--primary-blue), 0.2) !important;
+  color: rgba(var(--primary-blue), 1) !important;
+}
+
+.v-theme--dark .v-card {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.v-theme--dark .v-card-title {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.v-theme--dark .v-card-text {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.v-theme--dark .v-data-table {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.v-theme--dark .v-data-table-header {
+  background: linear-gradient(135deg, 
+    rgba(var(--primary-blue), 0.08) 0%,
+    rgba(var(--secondary-purple), 0.05) 100%) !important;
+}
+
+.v-theme--dark .v-data-table-header th {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.v-theme--dark .v-data-table tbody tr:hover {
+  background: rgba(var(--primary-blue), 0.1) !important;
+}

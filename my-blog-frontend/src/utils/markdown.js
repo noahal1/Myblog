@@ -35,8 +35,26 @@ md.use(anchor, {
   permalinkSymbol: '#'
 })
 
+// 自定义图片渲染规则
+md.renderer.rules.image = function (tokens, idx, options, env) {
+  const token = tokens[idx]
+  const src = token.attrGet('src')
+  const alt = token.attrGet('alt') || ''
+  const title = token.attrGet('title') || ''
+
+  // 确保图片有正确的属性
+  return `<img src="${src}" alt="${alt}" title="${title}" style="max-width: 100%; height: auto; border-radius: 4px; margin: 1em 0;" loading="lazy" />`
+}
+
 // 导出 markdown 渲染函数
 export function renderMarkdown(content) {
   if (!content) return ''
-  return md.render(content)
-} 
+  try {
+    const rendered = md.render(content)
+    console.log('Markdown rendered:', rendered) // 调试日志
+    return rendered
+  } catch (error) {
+    console.error('Markdown rendering error:', error)
+    return content
+  }
+}

@@ -380,7 +380,12 @@ const avatarUrl = ref('/images/avatar.jpg')
 // 主题相关
 const theme = useTheme()
 const logoColor = computed(() => {
-  return theme.global.current.value.dark ? '#ffffff' : '#3F51B5'
+  try {
+    return theme.global.current.value?.dark ? '#ffffff' : '#3F51B5'
+  } catch (e) {
+    console.warn('无法获取主题状态:', e)
+    return '#3F51B5'
+  }
 })
 
 // 快速链接

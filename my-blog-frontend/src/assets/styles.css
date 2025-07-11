@@ -1,39 +1,146 @@
 :root {
-  /* 主题色彩变量 */
-  --primary-blue: 63, 81, 181;    /* #3F51B5 */
-  --secondary-purple: 156, 39, 176; /* #9C27B0 */
-  --accent-orange: 255, 152, 0;   /* #FF9800 */
-  
-  /* 亮色主题变量 */
-  --primary: #3F51B5;
-  --secondary: #9C27B0;
-  --accent: #FF9800;
-  --error: #F44336;
-  --background: #f5f5f5;
-  --surface: #ffffff;
+  /* === 现代玻璃拟态设计系统 === */
+
+  /* === 深空渐变高级配色方案 === */
+  --primary-indigo: 99, 102, 241;        /* 深邃靛蓝 #6366F1 */
+  --secondary-violet: 139, 92, 246;      /* 神秘紫罗兰 #8B5CF6 */
+  --accent-cyan: 6, 182, 212;            /* 科技青色 #06B6D4 */
+  --accent-emerald: 16, 185, 129;        /* 翡翠绿 #10B981 */
+  --accent-rose: 244, 63, 94;            /* 玫瑰红 #F43F5E */
+  --accent-amber: 245, 158, 11;          /* 琥珀金 #F59E0B */
+  --accent-slate: 100, 116, 139;         /* 石板灰 #64748B */
+
+  /* 渐变色组合 */
+  --gradient-cosmic: 99, 102, 241, 139, 92, 246;     /* 宇宙渐变 */
+  --gradient-ocean: 6, 182, 212, 16, 185, 129;       /* 海洋渐变 */
+  --gradient-sunset: 244, 63, 94, 245, 158, 11;      /* 日落渐变 */
+  --gradient-aurora: 139, 92, 246, 6, 182, 212;      /* 极光渐变 */
+
+  --glass-bg-light: rgba(255, 255, 255, 0.25);
+  --glass-bg-dark: rgba(0, 0, 0, 0.15);
+  --glass-border-light: rgba(255, 255, 255, 0.18);
+  --glass-border-dark: rgba(255, 255, 255, 0.1);
+  --glass-shadow-light: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --glass-shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* 模糊效果 */
+  --blur-sm: blur(8px);
+  --blur-md: blur(16px);
+  --blur-lg: blur(24px);
+  --blur-xl: blur(40px);
+
+  /* 非均匀化圆角 */
+  --radius-organic-sm: 8px 12px 10px 14px;
+  --radius-organic-md: 16px 20px 18px 22px;
+  --radius-organic-lg: 24px 28px 26px 30px;
+  --radius-organic-xl: 32px 36px 34px 38px;
+
+  /* 高级配色主题 */
+  --primary: rgb(var(--primary-indigo));
+  --secondary: rgb(var(--secondary-violet));
+  --accent: rgb(var(--accent-cyan));
+  --success: rgb(var(--accent-emerald));
+  --error: rgb(var(--accent-rose));
+  --warning: rgb(var(--accent-amber));
+  --info: rgb(var(--accent-cyan));
+  --background: #f8f9fa;
+  --surface: var(--glass-bg-light);
   --text-primary: rgba(0, 0, 0, 0.87);
   --text-secondary: rgba(0, 0, 0, 0.6);
-  
-  /* 渐变和阴影 */
-  --gradient-angle: 135deg;
-  --neon-gradient: linear-gradient(var(--gradient-angle), var(--primary), var(--secondary));
-  --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --text-tertiary: rgba(0, 0, 0, 0.38);
+
+  /* 高级玻璃拟态渐变 */
+  --glass-gradient: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(var(--primary-indigo), 0.05) 50%,
+    rgba(255, 255, 255, 0.1) 100%);
+  --glass-gradient-hover: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(var(--primary-indigo), 0.08) 50%,
+    rgba(255, 255, 255, 0.15) 100%);
+
+  /* 特殊渐变效果 */
+  --cosmic-gradient: linear-gradient(135deg,
+    rgba(var(--primary-indigo), 0.8) 0%,
+    rgba(var(--secondary-violet), 0.6) 100%);
+  --aurora-gradient: linear-gradient(135deg,
+    rgba(var(--secondary-violet), 0.6) 0%,
+    rgba(var(--accent-cyan), 0.4) 100%);
+  --ocean-gradient: linear-gradient(135deg,
+    rgba(var(--accent-cyan), 0.6) 0%,
+    rgba(var(--accent-emerald), 0.4) 100%);
+
+  /* 动态阴影系统 */
+  --shadow-glass-sm: 0 4px 16px rgba(0, 0, 0, 0.08),
+                     0 1px 4px rgba(0, 0, 0, 0.04);
+  --shadow-glass-md: 0 8px 32px rgba(0, 0, 0, 0.12),
+                     0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-glass-lg: 0 16px 64px rgba(0, 0, 0, 0.16),
+                     0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-glass-xl: 0 24px 96px rgba(0, 0, 0, 0.2),
+                     0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
-/* 手动设置暗色模式 */
+/* 高级暗色模式 */
 @media (prefers-color-scheme: dark) {
   :root {
-    --primary: #5C6BC0;
-    --secondary: #BA68C8;
-    --accent: #FFB74D;
-    --error: #EF5350;
-    --background: #121212;
-    --surface: #212121;
-    --text-primary: rgba(255, 255, 255, 0.87);
-    --text-secondary: rgba(255, 255, 255, 0.6);
-    --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --primary: rgb(var(--primary-indigo));
+    --secondary: rgb(var(--secondary-violet));
+    --accent: rgb(var(--accent-cyan));
+    --success: rgb(var(--accent-emerald));
+    --error: rgb(var(--accent-rose));
+    --warning: rgb(var(--accent-amber));
+    --info: rgb(var(--accent-cyan));
+    --background: #0f0f23;  /* 深空背景 */
+    --surface: var(--glass-bg-dark);
+    --text-primary: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-tertiary: rgba(255, 255, 255, 0.5);
+
+    /* 暗色模式高级玻璃渐变 */
+    --glass-gradient: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.12) 0%,
+      rgba(var(--primary-indigo), 0.08) 50%,
+      rgba(255, 255, 255, 0.04) 100%);
+    --glass-gradient-hover: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(var(--primary-indigo), 0.12) 50%,
+      rgba(255, 255, 255, 0.08) 100%);
+
+    /* 暗色模式特殊渐变 */
+    --cosmic-gradient: linear-gradient(135deg,
+      rgba(var(--primary-indigo), 0.9) 0%,
+      rgba(var(--secondary-violet), 0.7) 100%);
+    --aurora-gradient: linear-gradient(135deg,
+      rgba(var(--secondary-violet), 0.7) 0%,
+      rgba(var(--accent-cyan), 0.5) 100%);
+    --ocean-gradient: linear-gradient(135deg,
+      rgba(var(--accent-cyan), 0.7) 0%,
+      rgba(var(--accent-emerald), 0.5) 100%);
   }
 }
+
+/* 玻璃拟态基础类 */
+.glass-effect {
+  background: var(--glass-gradient);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border: 1px solid var(--glass-border-light);
+  box-shadow: var(--shadow-glass-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-effect:hover {
+  background: var(--glass-gradient-hover);
+  box-shadow: var(--shadow-glass-lg);
+  transform: translateY(-2px);
+}
+
+/* 有机形状类 */
+.organic-shape-sm { border-radius: var(--radius-organic-sm); }
+.organic-shape-md { border-radius: var(--radius-organic-md); }
+.organic-shape-lg { border-radius: var(--radius-organic-lg); }
+.organic-shape-xl { border-radius: var(--radius-organic-xl); }
 
 .theme-minimal-transition * {
   transition-duration: 0.1s !important;

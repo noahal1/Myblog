@@ -4,46 +4,45 @@
       <v-row>
         <!-- 文章目录 - 仅在知识库文章时显示 -->
         <v-col v-if="article && article.is_knowledge_base" cols="12" md="3" class="d-none d-md-block">
-          <v-card class="article-toc sticky-toc" elevation="2">
-            <v-card-title class="text-h6 font-weight-bold pa-4">
-              <v-icon start icon="mdi-format-list-bulleted" class="me-2"></v-icon>
-              目录
-            </v-card-title>
-            <v-divider></v-divider>
-            <v-card-text class="pa-0">
-              <v-list density="compact" nav class="toc-list">
-                <template v-for="(item, index) in tocItems" :key="index">
-                  <v-list-item
-                    :value="item"
-                    :title="item.text"
-                    :class="['toc-item-level-' + item.level, { 'active': activeTocItem === item.id }]"
-                    :style="{ paddingLeft: (item.level - 1) * 16 + 'px' }"
-                    @click="scrollToHeading(item.id)"
-                  >
-                    <template v-slot:prepend>
-                      <v-icon size="small" :icon="getTocIcon(item.level)"></v-icon>
-                    </template>
-                  </v-list-item>
-                </template>
-              </v-list>
-            </v-card-text>
-          </v-card>
+          <div class="glass-toc-container sticky-toc">
+            <div class="glass-card glass-toc">
+              <div class="toc-header">
+                <v-icon icon="mdi-format-list-bulleted" class="me-2" aria-hidden="true"></v-icon>
+                <h2 class="toc-title">目录</h2>
+              </div>
+              <div class="toc-divider"></div>
+              <nav class="toc-nav" role="navigation" aria-label="文章目录">
+                <ul class="toc-list">
+                  <li v-for="(item, index) in tocItems" :key="index" class="toc-item">
+                    <button
+                      :class="['toc-link', 'toc-level-' + item.level, { 'active': activeTocItem === item.id }]"
+                      :style="{ paddingLeft: (item.level - 1) * 16 + 'px' }"
+                      @click="scrollToHeading(item.id)"
+                      :aria-label="`跳转到${item.text}`"
+                    >
+                      <v-icon size="small" :icon="getTocIcon(item.level)" class="toc-icon" aria-hidden="true"></v-icon>
+                      <span class="toc-text">{{ item.text }}</span>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
         </v-col>
 
         <!-- 文章内容 -->
         <v-col :cols="article?.is_knowledge_base ? 12 : 12" :md="article?.is_knowledge_base ? 9 : 12">
           <!-- 加载状态 -->
-          <v-skeleton-loader
-            v-if="loading"
-            type="article, image, paragraph, paragraph"
-            class="mx-auto"
-          />
-          
+          <div v-if="loading" class="glass-card">
+            <SkeletonLoader type="article-card" />
+          </div>
+
           <!-- 文章内容 -->
           <template v-else-if="article">
-            <div class="article-header mb-6">
-              <h1 class="text-h3 mb-3">{{ article.title }}</h1>
-              <div class="d-flex flex-wrap align-center mb-4">
+            <article class="glass-article-container">
+              <header class="glass-article-header">
+                <h1 class="article-main-title">{{ article.title }}</h1>
+                <div class="article-meta-section">
                 <!-- 分类标签 -->
                 <v-chip
                   v-if="article.category"
@@ -54,6 +53,7 @@
                 >
                   {{ article.category }}
                 </v-chip>
+                </div>
                 
                 <!-- 文章标签 - 数组格式 -->
                 <template v-if="article.tags && Array.isArray(article.tags) && article.tags.length > 0">
@@ -95,7 +95,7 @@
                   {{ formatDate(article.published_at || article.created_at || article.publish_date || new Date()) }} 
                   <span v-if="article.read_time">· {{ article.read_time }} 分钟阅读</span>
                 </div>
-              </div>
+              </header>
               
               <!-- 文章统计信息 -->
               <div class="d-flex align-center mb-4">
@@ -128,7 +128,7 @@
                   {{ article.comments_count || 0 }} 评论
                 </v-chip>
               </div>
-            </div>
+            </article>
             
             <v-img
               v-if="article.cover_image"
@@ -205,6 +205,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { fetchArticle as fetchMockArticle } from '../utils/mock-api'
 import { renderMarkdown } from '../utils/markdown'  // 导入 markdown 渲染函数
 import CommentSection from '../components/CommentSection.vue'
+import SkeletonLoader from '../components/SkeletonLoader.vue'
 import { getArticle, likeArticle } from '../api'
 
 const route = useRoute()
@@ -298,10 +299,12 @@ const fetchArticle = async () => {
     
     // 将Markdown转换为HTML
     if (article.value.content) {
+      console.log('Original content:', article.value.content) // 调试日志
       if (isHTML(article.value.content)) {
         article.value.renderedContent = article.value.content
       } else {
         article.value.renderedContent = renderMarkdown(article.value.content)
+        console.log('Rendered content:', article.value.renderedContent) // 调试日志
       }
     }
     

@@ -1,13 +1,17 @@
 <template>
   <div class="admin-view">
     <v-container v-if="hasPermission">
-      <h1 class="text-h4 mb-4">管理控制台</h1>
-      
-      <v-tabs v-model="activeTab" class="mb-4" @update:model-value="handleTabChange">
-        <v-tab value="stats">访问统计</v-tab>
-        <v-tab value="logs">访问记录</v-tab>
-        <v-tab value="articles">文章管理</v-tab>
-      </v-tabs>
+      <header class="glass-admin-header">
+        <h1 class="admin-main-title">管理控制台</h1>
+      </header>
+
+      <nav class="glass-admin-tabs" @update:model-value="handleTabChange">
+        <v-tabs v-model="activeTab" class="glass-tabs">
+          <v-tab value="stats" class="glass-tab">访问统计</v-tab>
+          <v-tab value="logs" class="glass-tab">访问记录</v-tab>
+          <v-tab value="articles" class="glass-tab">文章管理</v-tab>
+        </v-tabs>
+      </nav>
       
       <v-window v-model="activeTab">
         <!-- 统计信息视图 -->
@@ -355,7 +359,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { getVisitorLogs, getVisitorStats, getAdminArticles, getArticlesToProcess } from '../api'
 import ArticleForm from '../components/ArticleForm.vue'
-import { getArticleDetail, updateArticleDetail, getAdminArticleDetail } from '../api'
+import { getArticleDetail, updateArticleDetail } from '../api'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { updateArticleStatus } from '../api'

@@ -1,50 +1,51 @@
 <template>
   <div class="about-page">
-    <!-- 移除粒子背景，添加渐变波浪背景 -->
-    <div class="gradient-wave-background">
-      <div class="wave wave1"></div>
-      <div class="wave wave2"></div>
-      <div class="wave wave3"></div>
+    <!-- 玻璃拟态背景 -->
+    <div class="glass-background">
+      <div class="glass-orb glass-orb-1"></div>
+      <div class="glass-orb glass-orb-2"></div>
+      <div class="glass-orb glass-orb-3"></div>
     </div>
-    
+
     <!-- 鼠标跟随效果 -->
     <div class="follower" ref="follower"></div>
     <div class="parallax-container" ref="parallaxContainer">
       <v-container class="py-8">
-        <v-card class="about-card mx-auto mb-8 tilt-card" max-width="900" elevation="4" ref="profileCard">
-          <div class="card-header pa-6">
-            <h1 class="text-h4 font-weight-bold gradient-text mb-2" data-aos="fade-up">关于我</h1>
-            <p class="text-subtitle-1 text-medium-emphasis" data-aos="fade-up" data-aos-delay="100">探索技术与思想的旅程</p>
-          </div>
+        <div class="glass-about-card mx-auto mb-8 hover-lift" max-width="900" ref="profileCard">
+          <header class="glass-card-header">
+            <h1 class="about-main-title" data-aos="fade-up">关于我</h1>
+            <p class="about-subtitle" data-aos="fade-up" data-aos-delay="100">探索技术与思想的旅程</p>
+          </header>
           
-          <v-row class="pa-6">
-            <v-col cols="12" md="4" class="text-center">
-              <v-avatar size="180" class="profile-avatar mb-4" data-aos="zoom-in">
-                <v-img src="/profile-image.jpg" alt="个人头像">
-                  <template v-slot:placeholder>
+          <div class="glass-profile-content">
+            <div class="glass-profile-left">
+              <div class="glass-avatar-container" data-aos="zoom-in">
+                <div class="glass-avatar-wrapper">
+                  <!--<img src="/" alt="个人头像" class="glass-avatar"/>-->
+                  <div class="avatar-placeholder">
                     <v-icon size="120" icon="mdi-account-circle"></v-icon>
-                  </template>
-                </v-img>
-              </v-avatar>
-              
+                  </div>
+                </div>
+              </div>
+
               <div class="typing-container">
-                <span class="text-h5 font-weight-bold mb-2 typing-text" ref="typingName"></span>
+                <h2 class="glass-name typing-text" ref="typingName"></h2>
               </div>
-              
-              <p class="text-body-1 text-medium-emphasis mb-4 fade-in-text" data-aos="fade-up" data-aos-delay="200">全栈开发者 & MES工程师</p>
-              
-              <div class="social-links d-flex justify-center" data-aos="fade-up" data-aos-delay="300">
-                <v-btn icon variant="text" color="primary" class="mx-1 floating-icon"href="https://github.com/noahal1">
+
+              <p class="glass-role fade-in-text" data-aos="fade-up" data-aos-delay="200">全栈开发者 & MES工程师</p>
+
+              <div class="glass-social-links" data-aos="fade-up" data-aos-delay="300">
+                <a href="https://github.com/noahal1" class="glass-social-btn button-magnetic click-feedback" aria-label="GitHub">
                   <v-icon>mdi-github</v-icon>
-                </v-btn>
-                <v-btn icon variant="text" color="info" class="mx-1 floating-icon">
+                </a>
+                <a href="#" class="glass-social-btn button-magnetic click-feedback" aria-label="Twitter">
                   <v-icon>mdi-twitter</v-icon>
-                </v-btn>
-                <v-btn icon variant="text" color="error" class="mx-1 floating-icon">
+                </a>
+                <a href="#" class="glass-social-btn button-magnetic click-feedback" aria-label="Email">
                   <v-icon>mdi-email</v-icon>
-                </v-btn>
+                </a>
               </div>
-            </v-col>
+            </div>
             
             <v-col cols="12" md="8">
               <div class="bio-section" data-aos="fade-left" data-aos-duration="800">
@@ -63,8 +64,8 @@
                 </p>
               </div>
             </v-col>
-          </v-row>
-        </v-card>
+          </div>
+        </div>
         
         <!-- 技能卡片 -->
         <v-card class="about-card mx-auto mb-8 tilt-card" max-width="900" elevation="4" ref="skillsCard">

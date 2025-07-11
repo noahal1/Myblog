@@ -6,6 +6,10 @@ import About from '@/views/About.vue'
 import CreateArticle from '../views/CreateArticle.vue'
 import KnowledgeBase from '../views/KnowledgeBase.vue'
 import AdminView from '../views/AdminView.vue'
+import ImageManager from '../views/ImageManager.vue'
+import TestUpload from '../views/TestUpload.vue'
+import TestImageList from '../views/TestImageList.vue'
+import ImageTest from '../views/ImageTest.vue'
 import { useUserStore } from '../stores/user'
 
 const routes = [
@@ -45,6 +49,29 @@ const routes = [
     name: 'admin',
     component: AdminView,
     meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/images',
+    name: 'images',
+    component: ImageManager,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/test-upload',
+    name: 'test-upload',
+    component: TestUpload,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/test-image-list',
+    name: 'test-image-list',
+    component: TestImageList,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/image-test',
+    name: 'image-test',
+    component: ImageTest
   }
 ]
 
@@ -62,7 +89,6 @@ const router = createRouter({
 
 // 导航守卫，验证用户身份
 router.beforeEach(async (to, from, next) => {
-  // 初始化用户状态
   const userStore = useUserStore();
   
   // 如果用户有token但未登录，则尝试验证
@@ -77,9 +103,7 @@ router.beforeEach(async (to, from, next) => {
   
   // 如果页面需要认证
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    // 检查用户是否已登录
     if (!userStore.isAuthenticated) {
-      // 未登录，重定向到登录页
       next({ 
         path: '/login',
         query: { redirect: to.fullPath } // 保存原目标路径
@@ -97,7 +121,6 @@ router.beforeEach(async (to, from, next) => {
       next();
     }
   } else {
-    // 页面不需要认证，继续
     next();
   }
 });

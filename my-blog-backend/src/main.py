@@ -33,6 +33,9 @@ from starlette.datastructures import State
 from cachetools import TTLCache
 from functools import wraps
 
+# 导入API路由
+from src.api.upload import router as upload_router
+
 load_dotenv(dotenv_path='./.env')
 
 # 创建FastAPI应用
@@ -48,6 +51,9 @@ app.add_middleware(
 )
 
 app.add_middleware(LoggingMiddleware, db_session_maker=SessionLocal)
+
+# 注册API路由
+app.include_router(upload_router, prefix="/api", tags=["upload"])
 
 # 添加速率限制中间件
 class RateLimitMiddleware:
@@ -268,7 +274,7 @@ def health_check():
 @cache(expire=300)  # 缓存5分钟
 async def get_articles(skip: int = 0, limit: int = 10, knowledge_base: Optional[bool] = None, db: Session = Depends(get_db)):
     """获取文章列表，仅返回已发布的文章
-    
+
     参数:
     - skip: 分页起始位置
     - limit: 每页显示数量
@@ -276,7 +282,7 @@ async def get_articles(skip: int = 0, limit: int = 10, knowledge_base: Optional[
     """
     # 构建基础查询
     query = db.query(models.Article).filter(models.Article.status == "published")
-    
+
     # 如果指定了知识库标志，则添加过滤条件
     if knowledge_base is not None:
         query = query.filter(models.Article.is_knowledge_base == knowledge_base)

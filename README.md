@@ -92,6 +92,20 @@ uvicorn src.main:app --host 0.0.0.0 --port 8000
 - `.env.production`: 生产环境配置
 
 后端的环境变量在`.env`文件中配置。
+```env
+# GitHub图床配置
+GITHUB_TOKEN=your_github_token_here
+GITHUB_REPO=your_username/your_repo_name
+GITHUB_BRANCH=main
+GITHUB_PATH=images
+# 数据库配置
+- DB_USER - 数据库用户名
+- DB_PASSWORD - 数据库密码
+- DB_HOST - 数据库主机地址
+- DB_PORT - 数据库端口
+- DB_NAME - 数据库名称
+- ADMIN_USERNAME - 管理员用户名
+```
 
 ## 性能优化
 

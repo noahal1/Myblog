@@ -1,0 +1,340 @@
+/*======================
+  关于页面玻璃拟态样式
+======================*/
+
+/* === 页面背景 === */
+.about-page {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: linear-gradient(135deg, 
+    rgba(var(--primary-blue), 0.03) 0%,
+    rgba(var(--secondary-purple), 0.02) 50%,
+    rgba(var(--accent-orange), 0.01) 100%);
+}
+
+.glass-orb {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, 
+    rgba(var(--primary-blue), 0.1) 0%,
+    rgba(var(--primary-blue), 0.05) 50%,
+    transparent 100%);
+  animation: orbFloat 20s ease-in-out infinite;
+}
+
+.glass-orb-1 {
+  width: 300px;
+  height: 300px;
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+  background: radial-gradient(circle,
+    rgba(var(--primary-indigo), 0.12) 0%,
+    rgba(var(--primary-indigo), 0.06) 50%,
+    transparent 100%);
+}
+
+.glass-orb-2 {
+  width: 200px;
+  height: 200px;
+  top: 60%;
+  right: 15%;
+  animation-delay: -7s;
+  background: radial-gradient(circle,
+    rgba(var(--secondary-violet), 0.1) 0%,
+    rgba(var(--secondary-violet), 0.05) 50%,
+    transparent 100%);
+}
+
+.glass-orb-3 {
+  width: 150px;
+  height: 150px;
+  bottom: 20%;
+  left: 60%;
+  animation-delay: -14s;
+  background: radial-gradient(circle,
+    rgba(var(--accent-cyan), 0.08) 0%,
+    rgba(var(--accent-cyan), 0.04) 50%,
+    transparent 100%);
+}
+
+@keyframes orbFloat {
+  0%, 100% { 
+    transform: translateY(0) translateX(0) scale(1); 
+    opacity: 0.5;
+  }
+  25% { 
+    transform: translateY(-20px) translateX(10px) scale(1.1); 
+    opacity: 0.7;
+  }
+  50% { 
+    transform: translateY(-10px) translateX(-15px) scale(0.9); 
+    opacity: 0.6;
+  }
+  75% { 
+    transform: translateY(15px) translateX(5px) scale(1.05); 
+    opacity: 0.8;
+  }
+}
+
+/* === 主卡片 === */
+.glass-about-card {
+  background: var(--glass-gradient);
+  backdrop-filter: var(--blur-lg);
+  -webkit-backdrop-filter: var(--blur-lg);
+  border: 1px solid var(--glass-border-light);
+  border-radius: var(--radius-organic-xl);
+  box-shadow: var(--shadow-glass-xl);
+  padding: 0;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.glass-about-card:hover {
+  box-shadow: 
+    0 32px 128px rgba(0, 0, 0, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* === 卡片头部 === */
+.glass-card-header {
+  padding: 32px;
+  text-align: center;
+  background: linear-gradient(135deg, 
+    rgba(var(--primary-blue), 0.05) 0%,
+    rgba(var(--secondary-purple), 0.03) 100%);
+  border-bottom: 1px solid rgba(var(--primary-blue), 0.1);
+  position: relative;
+}
+
+.glass-card-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    rgb(var(--primary-blue)), 
+    rgb(var(--secondary-purple)));
+  border-radius: 1px;
+}
+
+.about-main-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.about-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  opacity: 0.8;
+  margin: 0;
+}
+
+/* === 个人资料内容 === */
+.glass-profile-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 32px;
+  padding: 32px;
+  align-items: start;
+}
+
+.glass-profile-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* === 头像样式 === */
+.glass-avatar-container {
+  margin-bottom: 24px;
+}
+
+.glass-avatar-wrapper {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: var(--glass-gradient);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border: 2px solid rgba(var(--primary-blue), 0.2);
+  box-shadow: var(--shadow-glass-lg);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.glass-avatar-wrapper:hover {
+  transform: scale(1.05) rotate(2deg);
+  border-color: rgba(var(--primary-blue), 0.4);
+  box-shadow: var(--shadow-glass-xl);
+}
+
+.glass-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-gradient);
+  color: var(--text-secondary);
+}
+
+/* === 姓名和角色 === */
+.glass-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.glass-role {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  opacity: 0.8;
+}
+
+/* === 社交链接 === */
+.glass-social-links {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.glass-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--glass-gradient);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  border: 1px solid rgba(var(--primary-blue), 0.2);
+  border-radius: 50%;
+  color: rgb(var(--primary-blue));
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: var(--shadow-glass-sm);
+}
+
+.glass-social-btn:hover {
+  background: rgba(var(--primary-blue), 0.1);
+  border-color: rgba(var(--primary-blue), 0.4);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: var(--shadow-glass-md);
+}
+
+/* === 响应式设计 === */
+@media (max-width: 768px) {
+  .glass-about-card {
+    margin: 16px;
+    border-radius: var(--radius-organic-lg);
+  }
+  
+  .glass-card-header {
+    padding: 24px 20px;
+  }
+  
+  .about-main-title {
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
+  }
+  
+  .about-subtitle {
+    font-size: 1rem;
+  }
+  
+  .glass-profile-content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px 20px;
+    text-align: center;
+  }
+  
+  .glass-avatar-wrapper {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .glass-name {
+    font-size: 1.5rem;
+  }
+  
+  .glass-social-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* === 暗色模式适配 === */
+.v-theme--dark .glass-about-card {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 100%);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.v-theme--dark .glass-card-header {
+  background: linear-gradient(135deg, 
+    rgba(var(--primary-blue), 0.08) 0%,
+    rgba(var(--secondary-purple), 0.05) 100%);
+}
+
+.v-theme--dark .about-main-title {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.v-theme--dark .about-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.v-theme--dark .glass-name {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.v-theme--dark .glass-role {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.v-theme--dark .glass-social-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(var(--primary-blue), 0.9);
+}
+
+.v-theme--dark .glass-social-btn:hover {
+  background: rgba(var(--primary-blue), 0.15);
+  border-color: rgba(var(--primary-blue), 0.4);
+}

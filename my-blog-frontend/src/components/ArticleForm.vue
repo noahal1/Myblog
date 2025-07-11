@@ -1,5 +1,5 @@
 <template>
-  <v-form @submit.prevent="onSubmit" v-model="isFormValid" class="pa-6">
+  <v-form ref="formRef" @submit.prevent="onSubmit" v-model="isFormValid" class="pa-6">
     <v-text-field
       v-model="form.title"
       label="文章标题"
@@ -24,6 +24,7 @@
       style="height: 400px"
       codeTheme="github"
       class="mb-4"
+      @onUploadImg="handleImageUpload"
     />
     <v-autocomplete
       v-model="form.tags"
@@ -49,7 +50,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
-import { getTags } from '../api'
+import { getTags, uploadImage } from '../api'
 import { MdEditor } from 'md-editor-v3'
 import { useTheme } from 'vuetify'
 import 'md-editor-v3/lib/style.css'
@@ -64,9 +65,17 @@ const props = defineProps({
 const emit = defineEmits(['submit'])
 
 const theme = useTheme()
-const editorTheme = computed(() => theme.global.current.value.dark ? 'dark' : 'light')
+const editorTheme = computed(() => {
+  try {
+    return theme.global.current.value?.dark ? 'dark' : 'light'
+  } catch (e) {
+    console.warn('无法获取主题状态:', e)
+    return 'light'
+  }
+})
 
 const isFormValid = ref(false)
+const formRef = ref(null)
 const loadingTags = ref(false)
 const availableTags = ref([])
 
@@ -102,7 +111,61 @@ const fetchTags = async () => {
 
 onMounted(fetchTags)
 
+// Markdown编辑器图片上传处理
+const handleImageUpload = async (files, callback) => {
+  try {
+    const uploadPromises = files.map(async (file) => {
+      try {
+        console.log('开始上传图片:', file.name)
+        const response = await uploadImage(file)
+        console.log('图片上传响应:', response)
+
+        if (response && response.data && response.data.success) {
+          return {
+            url: response.data.data.url,
+            alt: response.data.data.original_name || file.name,
+            title: response.data.data.original_name || file.name
+          }
+        } else {
+          console.error('上传响应格式错误:', response)
+          throw new Error(response?.data?.message || '上传失败')
+        }
+      } catch (error) {
+        console.error('图片上传失败:', error)
+        throw error
+      }
+    })
+
+    const results = await Promise.all(uploadPromises)
+    console.log('所有图片上传完成:', results)
+    callback(results)
+  } catch (error) {
+    console.error('批量上传图片失败:', error)
+    // 如果上传失败，传递空数组给回调
+    callback([])
+  }
+}
+
 const onSubmit = () => {
+  if (!isFormValid.value) {
+    // 重置表单验证状态，允许用户重新输入
+    if (formRef.value) {
+      formRef.value.resetValidation()
+    }
+    return
+  }
   emit('submit', { ...form.value })
 }
+
+// 暴露重置验证方法给父组件
+const resetValidation = () => {
+  if (formRef.value) {
+    formRef.value.resetValidation()
+  }
+}
+
+// 暴露方法给父组件
+defineExpose({
+  resetValidation
+})
 </script>
