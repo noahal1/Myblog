@@ -105,8 +105,8 @@
 .nav-bar.scrolled {
   background: rgba(255, 255, 255, 0);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(20px) saturate(200%);
-  border-bottom: 1px solid rgba(var(--primary-blue), 0.1);
+	
+  border-bottom: 0.1px solid rgba(var(--primary-blue), 0.1);
 }
 
 .nav-bar.hidden {

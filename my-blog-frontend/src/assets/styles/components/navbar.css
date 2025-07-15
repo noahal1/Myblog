@@ -1,4 +1,3 @@
-/* === 现代玻璃拟态导航栏 === */
 .nav-bar {
   position: fixed;
   top: 0;
@@ -15,47 +14,41 @@
   border: none !important;
 }
 
-/* 透明状态 - 顶部时的玻璃效果 */
+/* 透明状态 - 顶部时完全透明 */
 .nav-bar.transparent .v-app-bar.v-toolbar {
-  background: linear-gradient(180deg,
-    rgba(255, 255, 255, 0.7) 0%,
-    rgba(255, 255, 255, 0.5) 100%) !important;
-  backdrop-filter: var(--blur-lg) saturate(180%);
-  -webkit-backdrop-filter: var(--blur-lg) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06) !important;
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 
-/* 滚动状态 - 增强的玻璃效果 */
 .nav-bar.scrolled .v-app-bar.v-toolbar {
   background: linear-gradient(180deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 255, 255, 0.75) 100%) !important;
+    rgba(var(--mist-gray), 0.95) 0%,
+    rgba(var(--pearl-white), 0.9) 50%,
+    rgba(var(--mist-gray-light), 0.85) 100%) !important;
   backdrop-filter: var(--blur-xl) saturate(200%);
   -webkit-backdrop-filter: var(--blur-xl) saturate(200%);
-  border-bottom: 1px solid rgba(var(--primary-blue), 0.15) !important;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  border-bottom: 1px solid rgba(var(--prussian-blue), 0.3) !important;
+  box-shadow: var(--shadow-contrast-lg) !important;
 }
 
 /* 暗色模式适配 */
 .v-theme--dark .nav-bar.transparent .v-app-bar.v-toolbar {
-  background: linear-gradient(180deg,
-    rgba(0, 0, 0, 0.6) 0%,
-    rgba(0, 0, 0, 0.4) 100%) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2) !important;
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 
 .v-theme--dark .nav-bar.scrolled .v-app-bar.v-toolbar {
   background: linear-gradient(180deg,
-    rgba(0, 0, 0, 0.8) 0%,
-    rgba(0, 0, 0, 0.7) 100%) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    rgba(var(--charcoal), 0.9) 0%,
+    rgba(var(--prussian-blue), 0.8) 100%) !important;
+  border-bottom: 1px solid rgba(var(--mist-gray), 0.2) !important;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    0 8px 32px rgba(var(--charcoal), 0.4),
+    0 2px 8px rgba(var(--prussian-blue), 0.2) !important;
 }
 
 /* 导航容器 */
@@ -88,7 +81,7 @@
   height: 1px;
   background: linear-gradient(90deg,
     transparent 0%,
-    rgba(var(--primary-blue), 0.3) 50%,
+    rgba(var(--prussian-blue), 0.4) 50%,
     transparent 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -106,27 +99,27 @@
   height: 100%;
   padding: 8px 16px;
   border-radius: var(--radius-organic-sm);
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   background: transparent;
+  text-decoration: none;
 }
 
 .logo-wrapper:hover {
-  background: var(--glass-gradient);
-  backdrop-filter: var(--blur-sm);
-  -webkit-backdrop-filter: var(--blur-sm);
-  transform: scale(1.05) translateY(-1px);
-  box-shadow: var(--shadow-glass-sm);
+  background: var(--mist-gradient);
+  transform: translateY(-1px);
+  border: 1px solid rgba(var(--prussian-blue), 0.2);
+  box-shadow: var(--shadow-contrast-sm);
 }
 
 .logo-container {
   position: relative;
   margin-right: 16px;
-  filter: drop-shadow(0 2px 8px rgba(var(--primary-blue), 0.2));
+  filter: drop-shadow(0 2px 8px rgba(var(--prussian-blue), 0.15));
   transition: filter 0.3s ease;
 }
 
 .logo-wrapper:hover .logo-container {
-  filter: drop-shadow(0 4px 12px rgba(var(--primary-blue), 0.3));
+  filter: drop-shadow(0 3px 10px rgba(var(--prussian-blue), 0.25));
 }
 
 .logo-svg {
@@ -136,7 +129,7 @@
 }
 
 .logo-wrapper:hover .logo-svg {
-  transform: rotate(10deg) scale(1.1);
+  transform: rotate(5deg) scale(1.05);
 }
 
 .logo-glow {
@@ -149,7 +142,8 @@
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(var(--primary-blue), 0.3) 0%,
+    rgba(var(--prussian-blue), 0.2) 0%,
+    rgba(var(--sage-green), 0.1) 50%,
     transparent 70%
   );
   opacity: 0;
@@ -158,8 +152,8 @@
 }
 
 .logo-wrapper:hover .logo-glow {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1.5);
+  opacity: 0.8;
+  transform: translate(-50%, -50%) scale(1.3);
 }
 
 .brand-text {
@@ -167,30 +161,32 @@
   flex-direction: column;
 }
 
-/* 站点标题 - 玻璃拟态渐变 */
+/* 站点标题 - 撞色渐变设计 */
 .site-title {
   font-size: 1.3rem;
   font-weight: 700;
   background: linear-gradient(135deg,
-    rgb(var(--primary-blue)) 0%,
-    rgb(var(--secondary-purple)) 50%,
-    rgb(var(--accent-orange)) 100%);
+    rgb(var(--prussian-blue)) 0%,
+    rgb(var(--mist-gray-dark)) 30%,
+    rgb(var(--prussian-blue)) 70%,
+    rgb(var(--mist-gray)) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   line-height: 1.1;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 1px 2px rgba(var(--prussian-blue), 0.15));
 }
 
 .logo-wrapper:hover .site-title {
   background: linear-gradient(135deg,
-    rgb(var(--primary-blue)) 0%,
-    rgb(var(--accent-pink)) 50%,
-    rgb(var(--accent-orange)) 100%);
+    rgb(var(--mist-gray)) 0%,
+    rgb(var(--prussian-blue)) 30%,
+    rgb(var(--mist-gray-dark)) 70%,
+    rgb(var(--prussian-blue)) 100%);
   -webkit-background-clip: text;
   background-clip: text;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+  filter: drop-shadow(0 2px 4px rgba(var(--prussian-blue), 0.25));
 }
 
 /* === 导航链接玻璃拟态 === */
@@ -224,18 +220,17 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--glass-gradient);
+  background: var(--mist-gradient);
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: -1;
 }
 
 .nav-link:hover {
-  color: rgb(var(--primary-indigo));
+  color: rgb(var(--prussian-blue));
   transform: translateY(-2px);
-  box-shadow:
-    var(--shadow-glass-sm),
-    0 0 15px rgba(var(--primary-indigo), 0.2);
+  box-shadow: var(--shadow-contrast-sm);
+  border: 1px solid rgba(var(--prussian-blue), 0.2);
 }
 
 .nav-link:hover::before {
@@ -243,12 +238,11 @@
 }
 
 .nav-link.active {
-  color: rgb(var(--primary-indigo));
-  background: var(--cosmic-gradient);
-  box-shadow:
-    var(--shadow-glass-sm),
-    0 0 20px rgba(var(--primary-indigo), 0.3);
+  color: rgb(var(--prussian-blue));
+  background: var(--contrast-gradient-primary);
+  box-shadow: var(--shadow-contrast-md);
   font-weight: 600;
+  border: 1px solid rgba(var(--prussian-blue), 0.4);
 }
 
 .nav-link.active::after {
@@ -342,7 +336,7 @@
 .theme-toggle-btn:hover {
   box-shadow:
     var(--shadow-glass-md),
-    0 0 20px rgba(var(--primary-indigo), 0.3);
+    0 0 20px rgba(var(--prussian-blue), 0.2);
   transform: translateY(-2px);
 }
 
@@ -353,6 +347,9 @@
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
   padding: 8px 12px !important;
   margin: 0 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .user-menu-trigger::before {
@@ -384,7 +381,7 @@
 }
 
 .user-menu-trigger:hover .user-avatar {
-  border-color: rgba(var(--primary-blue), 0.4);
+  border-color: rgba(var(--prussian-blue), 0.4);
   transform: scale(1.05);
 }
 
@@ -410,7 +407,7 @@
 }
 
 .menu-item:hover {
-  background: rgba(var(--primary-blue), 0.1) !important;
+  background: rgba(var(--prussian-blue), 0.08) !important;
   transform: translateX(4px) !important;
 }
 
@@ -450,8 +447,13 @@
 }
 
 .v-theme--dark .mobile-menu-container {
-  background: rgba(0, 0, 0, 0.15);
-  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal-light), 0.9) 100%);
+  border: 1px solid rgba(var(--mist-gray-dark), 0.2);
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.4);
+  backdrop-filter: var(--blur-lg);
+  -webkit-backdrop-filter: var(--blur-lg);
 }
 
 .mobile-menu.open .mobile-menu-container {
@@ -468,7 +470,7 @@
   opacity: 0;
   transition: opacity 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
   z-index: 9; /* 与mobile-menu一致 */
-  backdrop-filter: blur(4px); /* 轻微模糊效果 */
+  backdrop-filter: blur(2px);
 }
 
 .mobile-menu.open .mobile-menu-backdrop {
@@ -494,12 +496,12 @@
 
 .mobile-nav-link:hover,
 .mobile-nav-link:active {
-  background: rgba(var(--primary-blue), 0.08);
+  background: rgba(var(--prussian-blue), 0.08);
 }
 
 .v-theme--dark .mobile-nav-link:hover,
 .v-theme--dark .mobile-nav-link:active {
-  background: rgba(var(--primary-blue), 0.15);
+  background: rgba(var(--prussian-blue), 0.15);
 }
 
 /* 用户菜单样式 - MD3设计规范 */
@@ -528,11 +530,11 @@
 }
 
 .menu-item:hover {
-  background-color: rgba(var(--primary-blue), 0.08) !important;
+  background-color: rgba(var(--prussian-blue), 0.08) !important;
 }
 
 .menu-item:active {
-  background-color: rgba(var(--primary-blue), 0.12) !important;
+  background-color: rgba(var(--prussian-blue), 0.12) !important;
 }
 
 .user-avatar {
@@ -545,12 +547,16 @@
   border-radius: 32px !important;
   padding: 6px 12px;
   transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-  height: 40px;
+  height: auto !important;
+  min-height: 40px !important;
   background-color: transparent !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .user-menu-trigger:hover {
-  background-color: rgba(var(--primary-blue), 0.05) !important;
+  background-color: rgba(var(--prussian-blue), 0.05) !important;
 }
 
 .user-menu-trigger:hover .user-avatar {
@@ -563,6 +569,25 @@
   font-weight: 500;
   transition: letter-spacing 0.3s ease;
   margin: 0 4px;
+}
+
+/* 修复用户头像按钮居中问题 */
+.user-menu-trigger.v-btn {
+  height: auto !important;
+  min-height: 40px !important;
+}
+
+.user-menu-trigger.v-btn .v-btn__content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+}
+
+/* 覆盖 Vuetify 默认按钮密度样式 */
+.user-menu-trigger.v-btn.v-btn--density-default {
+  height: auto !important;
+  min-height: 40px !important;
 }
 
 /* 汉堡菜单图标 - 符合MD3设计规范 */
@@ -601,12 +626,11 @@
   transform: rotate(-45deg);
 }
 
-/* 为移动端菜单按钮添加涟漪效果 */
 .mobile-menu-btn {
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  min-width: 40px !important; /* 覆盖Vuetify默认按钮宽度 */
+  min-width: 40px !important; 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -680,4 +704,73 @@
   opacity: 0.1;
   margin-left: 8px;
   margin-right: 8px;
-} 
+}
+
+/* === 增强暗色模式适配 === */
+.v-theme--dark .nav-link {
+  color: rgba(var(--text-primary), 0.9);
+}
+
+.v-theme--dark .nav-link:hover {
+  color: rgba(var(--prussian-blue), 1);
+  background: rgba(var(--prussian-blue), 0.1);
+}
+
+.v-theme--dark .nav-link.active {
+  color: rgba(var(--prussian-blue), 1);
+  background: rgba(var(--prussian-blue), 0.15);
+}
+
+.v-theme--dark .theme-toggle-btn {
+  color: rgba(var(--text-primary), 0.8);
+}
+
+.v-theme--dark .theme-toggle-btn:hover {
+  color: rgba(var(--prussian-blue), 1);
+  background: rgba(var(--prussian-blue), 0.1);
+}
+
+.v-theme--dark .user-menu-trigger {
+  color: rgba(var(--text-primary), 0.9);
+}
+
+.v-theme--dark .user-menu-trigger:hover {
+  background-color: rgba(var(--prussian-blue), 0.1) !important;
+}
+
+.v-theme--dark .user-name {
+  color: rgba(var(--text-primary), 0.9);
+}
+
+.v-theme--dark .menu-card {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal-light), 0.9) 100%) !important;
+  border: 1px solid rgba(var(--mist-gray-dark), 0.2) !important;
+  backdrop-filter: var(--blur-lg) !important;
+  -webkit-backdrop-filter: var(--blur-lg) !important;
+  box-shadow: var(--shadow-glass-xl) !important;
+}
+
+.v-theme--dark .menu-item {
+  color: rgba(var(--text-primary), 0.8);
+}
+
+.v-theme--dark .menu-item:hover {
+  background-color: rgba(var(--prussian-blue), 0.15) !important;
+  color: rgba(var(--text-primary), 1);
+}
+
+.v-theme--dark .user-info-item {
+  background-color: rgba(var(--prussian-blue), 0.08) !important;
+  color: rgba(var(--text-primary), 0.9);
+}
+
+.v-theme--dark .mobile-menu-backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.v-theme--dark .hamburger span {
+  background: rgba(var(--text-primary), 0.9);
+}

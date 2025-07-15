@@ -1,0 +1,609 @@
+.v-card {
+  border-radius: 12px !important;
+  box-shadow: 
+    0 4px 20px rgba(26, 32, 44, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(26, 32, 44, 0.06) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  background: #FFFFFF !important;
+}
+
+.v-card:hover {
+  box-shadow: 
+    0 20px 40px rgba(26, 32, 44, 0.12),
+    0 8px 16px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-4px) !important;
+}
+
+.v-card-title {
+  font-weight: 600 !important;
+  font-size: 1.25rem !important;
+  color: #1A202C !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.3 !important;
+}
+
+.v-card-subtitle {
+  color: #4A5568 !important;
+  font-weight: 400 !important;
+  margin-top: 4px !important;
+  font-size: 0.875rem !important;
+}
+
+.v-card-text {
+  color: #2D3748 !important;
+  line-height: 1.6 !important;
+  font-size: 0.95rem !important;
+}
+
+/* 数据表格优化 - 高端专业风格 */
+.v-data-table {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 
+    0 4px 20px rgba(26, 32, 44, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.v-data-table-header {
+  background: linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 100%) !important;
+  border-bottom: 1px solid rgba(26, 32, 44, 0.08) !important;
+}
+
+.v-data-table-header th {
+  color: #1A202C !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  text-transform: none !important;
+  letter-spacing: 0.025em !important;
+  padding: 16px !important;
+  border-bottom: none !important;
+}
+
+.v-data-table tbody tr:hover {
+  background: rgba(49, 130, 206, 0.04) !important;
+}
+
+.v-data-table tbody tr td {
+  border-bottom: 1px solid rgba(26, 32, 44, 0.04) !important;
+  padding: 16px !important;
+  color: #2D3748 !important;
+}
+
+/* 芯片组件 - 精致标签系统 */
+.v-chip {
+  border-radius: 20px !important;
+  font-weight: 500 !important;
+  font-size: 0.75rem !important;
+  text-transform: none !important;
+  letter-spacing: 0.025em !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.v-chip.v-chip--color-success {
+  background: linear-gradient(135deg, #38A169 0%, #2F855A 100%) !important;
+  color: white !important;
+}
+
+.v-chip.v-chip--color-warning {
+  background: linear-gradient(135deg, #DD6B20 0%, #C05621 100%) !important;
+  color: white !important;
+}
+
+.v-chip.v-chip--color-error {
+  background: linear-gradient(135deg, #E53E3E 0%, #C53030 100%) !important;
+  color: white !important;
+}
+
+.v-chip.v-chip--color-info {
+  background: linear-gradient(135deg, #3182CE 0%, #2C5282 100%) !important;
+  color: white !important;
+}
+
+.v-chip.v-chip--color-primary {
+  background: linear-gradient(135deg, #1A202C 0%, #2D3748 100%) !important;
+  color: white !important;
+}
+
+/* 标签页优化 - 现代简约风格 */
+.v-tabs {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(26, 32, 44, 0.08) !important;
+}
+
+.v-tab {
+  text-transform: none !important;
+  font-weight: 500 !important;
+  color: #4A5568 !important;
+  border-radius: 8px 8px 0 0 !important;
+  margin-right: 8px !important;
+  transition: all 0.3s ease !important;
+  font-size: 0.9rem !important;
+  letter-spacing: 0.025em !important;
+}
+
+.v-tab.v-tab--selected {
+  color: #1A202C !important;
+  background: rgba(26, 32, 44, 0.04) !important;
+  font-weight: 600 !important;
+}
+
+.v-tab:hover {
+  color: #2D3748 !important;
+  background: rgba(26, 32, 44, 0.02) !important;
+}
+
+/* 表单输入框优化 - 精致输入体验 */
+.v-text-field .v-field {
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(26, 32, 44, 0.1) !important;
+  background: #FFFFFF !important;
+}
+
+.v-text-field .v-field:hover {
+  border-color: rgba(26, 32, 44, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.v-text-field .v-field--focused {
+  border-color: #3182CE !important;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1) !important;
+}
+
+.v-text-field .v-field-label {
+  color: #4A5568 !important;
+  font-weight: 500 !important;
+}
+
+.v-text-field .v-field-label--focused {
+  color: #3182CE !important;
+}
+
+.v-text-field .v-field__input {
+  color: #1A202C !important;
+  font-weight: 400 !important;
+}
+
+/* 选择框优化 */
+.v-select .v-field {
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(26, 32, 44, 0.1) !important;
+  background: #FFFFFF !important;
+}
+
+.v-select .v-field:hover {
+  border-color: rgba(26, 32, 44, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.v-select .v-field--focused {
+  border-color: #3182CE !important;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1) !important;
+}
+
+.v-select .v-field-label {
+  color: #4A5568 !important;
+  font-weight: 500 !important;
+}
+
+.v-select .v-field-label--focused {
+  color: #3182CE !important;
+}
+
+/* 分页组件 - 优雅翻页 */
+.v-pagination {
+  justify-content: center !important;
+}
+
+.v-pagination .v-pagination__item {
+  border-radius: 8px !important;
+  margin: 0 4px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  color: #4A5568 !important;
+  border: 1px solid rgba(26, 32, 44, 0.1) !important;
+}
+
+.v-pagination .v-pagination__item:hover {
+  background: rgba(49, 130, 206, 0.04) !important;
+  color: #3182CE !important;
+  border-color: rgba(49, 130, 206, 0.2) !important;
+  box-shadow: 0 2px 8px rgba(49, 130, 206, 0.1) !important;
+}
+
+.v-pagination .v-pagination__item--is-active {
+  background: linear-gradient(135deg, #1A202C 0%, #2D3748 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(26, 32, 44, 0.2) !important;
+  border-color: transparent !important;
+}
+
+/* 对话框优化 - 高端弹窗体验 */
+.v-dialog .v-card {
+  border-radius: 16px !important;
+  box-shadow: 
+    0 25px 80px rgba(26, 32, 44, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(26, 32, 44, 0.06) !important;
+  overflow: hidden !important;
+}
+
+.v-dialog .v-card-title {
+  background: linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 100%) !important;
+  border-bottom: 1px solid rgba(26, 32, 44, 0.08) !important;
+  padding: 24px !important;
+  border-radius: 16px 16px 0 0 !important;
+  color: #1A202C !important;
+  font-weight: 600 !important;
+  font-size: 1.25rem !important;
+}
+
+.v-dialog .v-card-text {
+  padding: 24px !important;
+  color: #2D3748 !important;
+  line-height: 1.6 !important;
+}
+
+.v-dialog .v-card-actions {
+  padding: 16px 24px 24px !important;
+  border-top: 1px solid rgba(26, 32, 44, 0.06) !important;
+  background: rgba(247, 250, 252, 0.5) !important;
+}
+
+/* 提示条优化 - 优雅通知系统 */
+.v-snackbar .v-snackbar__wrapper {
+  border-radius: 12px !important;
+  box-shadow: 
+    0 12px 40px rgba(26, 32, 44, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.v-snackbar.v-snackbar--color-success .v-snackbar__wrapper {
+  background: linear-gradient(135deg, rgba(56, 161, 105, 0.95) 0%, rgba(47, 133, 90, 0.95) 100%) !important;
+  color: white !important;
+}
+
+.v-snackbar.v-snackbar--color-error .v-snackbar__wrapper {
+  background: linear-gradient(135deg, rgba(229, 62, 62, 0.95) 0%, rgba(197, 48, 48, 0.95) 100%) !important;
+  color: white !important;
+}
+
+.v-snackbar.v-snackbar--color-warning .v-snackbar__wrapper {
+  background: linear-gradient(135deg, rgba(221, 107, 32, 0.95) 0%, rgba(192, 86, 33, 0.95) 100%) !important;
+  color: white !important;
+}
+
+.v-snackbar.v-snackbar--color-info .v-snackbar__wrapper {
+  background: linear-gradient(135deg, rgba(49, 130, 206, 0.95) 0%, rgba(44, 82, 130, 0.95) 100%) !important;
+  color: white !important;
+}
+
+/* 警告框优化 - 精致提醒系统 */
+.v-alert {
+  border-radius: 12px !important;
+  border-left-width: 4px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(26, 32, 44, 0.06) !important;
+  font-weight: 400 !important;
+}
+
+.v-alert.v-alert--color-success {
+  background: linear-gradient(135deg, rgba(56, 161, 105, 0.08) 0%, rgba(47, 133, 90, 0.04) 100%) !important;
+  border-left-color: #38A169 !important;
+  color: #1A202C !important;
+  border-color: rgba(56, 161, 105, 0.2) !important;
+}
+
+.v-alert.v-alert--color-error {
+  background: linear-gradient(135deg, rgba(229, 62, 62, 0.08) 0%, rgba(197, 48, 48, 0.04) 100%) !important;
+  border-left-color: #E53E3E !important;
+  color: #1A202C !important;
+  border-color: rgba(229, 62, 62, 0.2) !important;
+}
+
+.v-alert.v-alert--color-warning {
+  background: linear-gradient(135deg, rgba(221, 107, 32, 0.08) 0%, rgba(192, 86, 33, 0.04) 100%) !important;
+  border-left-color: #DD6B20 !important;
+  color: #1A202C !important;
+  border-color: rgba(221, 107, 32, 0.2) !important;
+}
+
+.v-alert.v-alert--color-info {
+  background: linear-gradient(135deg, rgba(49, 130, 206, 0.08) 0%, rgba(44, 82, 130, 0.04) 100%) !important;
+  border-left-color: #3182CE !important;
+  color: #1A202C !important;
+  border-color: rgba(49, 130, 206, 0.2) !important;
+}
+
+/* 工具栏优化 - 专业顶栏设计 */
+.v-toolbar {
+  box-shadow: 
+    0 4px 20px rgba(26, 32, 44, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  background: #FFFFFF !important;
+}
+
+.v-toolbar-title {
+  font-weight: 600 !important;
+  color: #1A202C !important;
+  font-size: 1.125rem !important;
+  letter-spacing: -0.025em !important;
+}
+
+/* 应用栏优化 */
+.v-app-bar {
+  box-shadow: 
+    0 4px 20px rgba(26, 32, 44, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  border-bottom: 1px solid rgba(26, 32, 44, 0.06) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* 加载状态 - 优雅进度指示 */
+.v-progress-circular {
+  color: #3182CE !important;
+}
+
+.v-progress-linear {
+  border-radius: 4px !important;
+  overflow: hidden !important;
+}
+
+.v-progress-linear .v-progress-linear__background {
+  background: rgba(26, 32, 44, 0.1) !important;
+}
+
+.v-progress-linear .v-progress-linear__buffer {
+  background: linear-gradient(90deg, #3182CE 0%, #2C5282 100%) !important;
+}
+
+.v-menu .v-list {
+  border-radius: 12px !important;
+  box-shadow: 
+    0 12px 40px rgba(26, 32, 44, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+}
+
+.v-list-item {
+  transition: all 0.2s ease !important;
+  border-radius: 0 !important;
+}
+
+.v-list-item:hover {
+  background: rgba(49, 130, 206, 0.04) !important;
+}
+
+.v-list-item--active {
+  background: rgba(26, 32, 44, 0.06) !important;
+  color: #1A202C !important;
+}
+
+/* 开关组件优化 */
+.v-switch .v-switch__track {
+  background: rgba(26, 32, 44, 0.2) !important;
+}
+
+.v-switch--inset .v-switch__track {
+  border-color: rgba(26, 32, 44, 0.2) !important;
+}
+
+.v-switch .v-switch__thumb {
+  background: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.v-switch--model-value .v-switch__track {
+  background: #3182CE !important;
+}
+
+/* 滑块组件优化 */
+.v-slider .v-slider-track__background {
+  background: rgba(26, 32, 44, 0.1) !important;
+}
+
+.v-slider .v-slider-track__fill {
+  background: #3182CE !important;
+}
+
+.v-slider .v-slider-thumb {
+  background: #3182CE !important;
+  box-shadow: 0 2px 8px rgba(49, 130, 206, 0.3) !important;
+}
+
+/* 响应式优化 */
+@media (max-width: 600px) {
+  .v-card {
+    border-radius: 8px !important;
+    margin: 4px !important;
+  }
+  
+  .v-dialog .v-card {
+    border-radius: 12px !important;
+    margin: 8px !important;
+  }
+  
+  .v-card-title {
+    font-size: 1.125rem !important;
+  }
+  
+  .v-data-table tbody tr td {
+    padding: 12px 8px !important;
+  }
+  
+  .v-dialog .v-card-title {
+    padding: 16px !important;
+    font-size: 1.125rem !important;
+  }
+  
+  .v-dialog .v-card-text {
+    padding: 16px !important;
+  }
+  
+  .v-dialog .v-card-actions {
+    padding: 12px 16px 16px !important;
+  }
+}
+
+/* === 暗色模式适配 - 使用 Vuetify 主题类 === */
+.v-theme--dark .v-card {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal-light), 0.9) 100%) !important;
+  border: 1px solid rgba(var(--mist-gray-dark), 0.2) !important;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 1px 3px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: var(--blur-sm) !important;
+  -webkit-backdrop-filter: var(--blur-sm) !important;
+}
+
+.v-theme--dark .v-card:hover {
+  border-color: rgba(var(--prussian-blue), 0.4) !important;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    0 8px 16px rgba(var(--prussian-blue), 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+.v-theme--dark .v-card-title {
+  color: rgba(var(--text-primary), 0.95) !important;
+  font-weight: 600 !important;
+}
+
+.v-theme--dark .v-card-subtitle {
+  color: rgba(var(--text-secondary), 0.8) !important;
+}
+
+.v-theme--dark .v-card-text {
+  color: rgba(var(--text-primary), 0.85) !important;
+  line-height: 1.6 !important;
+}
+
+.v-theme--dark .v-data-table-header {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.9) 0%,
+    rgba(var(--charcoal-light), 0.8) 100%) !important;
+  border-bottom: 1px solid rgba(var(--mist-gray-dark), 0.3) !important;
+}
+
+.v-theme--dark .v-data-table-header th {
+  color: rgba(var(--text-primary), 0.9) !important;
+  font-weight: 500 !important;
+}
+
+.v-theme--dark .v-data-table tbody tr {
+  border-bottom: 1px solid rgba(var(--mist-gray-dark), 0.1) !important;
+}
+
+.v-theme--dark .v-data-table tbody tr:hover {
+  background: rgba(var(--prussian-blue), 0.05) !important;
+}
+
+.v-theme--dark .v-data-table tbody tr td {
+  color: rgba(var(--text-primary), 0.8) !important;
+}
+
+/* === 旧的暗色模式样式 - 需要重构 === */
+/* 这些样式应该被上面的 .v-theme--dark 规则替代，但暂时保留以确保兼容性 */
+.legacy-dark-styles .v-data-table tbody tr td {
+  border-bottom-color: rgba(226, 232, 240, 0.1) !important;
+  color: #CBD5E0 !important;
+}
+
+.legacy-dark-styles .v-data-table tbody tr:hover {
+  background: rgba(99, 179, 237, 0.08) !important;
+}
+
+.legacy-dark-styles .v-tabs {
+  border-bottom-color: rgba(226, 232, 240, 0.1) !important;
+}
+
+.legacy-dark-styles .v-tab {
+  color: #A0AEC0 !important;
+}
+
+.legacy-dark-styles .v-tab.v-tab--selected {
+  color: #E2E8F0 !important;
+  background: rgba(226, 232, 240, 0.08) !important;
+}
+
+.legacy-dark-styles .v-tab:hover {
+  color: #CBD5E0 !important;
+  background: rgba(226, 232, 240, 0.04) !important;
+}
+
+.legacy-dark-styles .v-text-field .v-field,
+.legacy-dark-styles .v-select .v-field {
+  background: #2D3748 !important;
+  border-color: rgba(226, 232, 240, 0.2) !important;
+}
+
+.legacy-dark-styles .v-text-field .v-field:hover,
+.legacy-dark-styles .v-select .v-field:hover {
+  border-color: rgba(226, 232, 240, 0.3) !important;
+}
+
+.legacy-dark-styles .v-text-field .v-field--focused,
+.legacy-dark-styles .v-select .v-field--focused {
+  border-color: #63B3ED !important;
+  box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.1) !important;
+}
+
+.legacy-dark-styles .v-text-field .v-field-label,
+.legacy-dark-styles .v-select .v-field-label {
+  color: #A0AEC0 !important;
+}
+
+.legacy-dark-styles .v-text-field .v-field-label--focused,
+.legacy-dark-styles .v-select .v-field-label--focused {
+  color: #63B3ED !important;
+}
+
+.legacy-dark-styles .v-text-field .v-field__input {
+  color: #E2E8F0 !important;
+}
+
+.legacy-dark-styles .v-dialog .v-card-title {
+  background: linear-gradient(135deg, #2D3748 0%, #4A5568 100%) !important;
+  border-bottom-color: rgba(226, 232, 240, 0.1) !important;
+  color: #E2E8F0 !important;
+}
+
+.legacy-dark-styles .v-dialog .v-card-actions {
+  background: rgba(45, 55, 72, 0.5) !important;
+  border-top-color: rgba(226, 232, 240, 0.1) !important;
+}
+
+/* === 输入框暗色模式 === */
+.v-theme--dark .v-text-field .v-field {
+  background: rgba(var(--charcoal-light), 0.8) !important;
+  border-color: rgba(var(--mist-gray-dark), 0.3) !important;
+}
+
+.v-theme--dark .v-text-field .v-field:hover {
+  border-color: rgba(var(--prussian-blue), 0.5) !important;
+}
+
+.v-theme--dark .v-text-field .v-field.v-field--focused {
+  border-color: rgba(var(--prussian-blue), 0.8) !important;
+  box-shadow: 0 0 0 2px rgba(var(--prussian-blue), 0.2) !important;
+}
+
+.v-theme--dark .v-text-field input {
+  color: rgba(var(--text-primary), 0.9) !important;
+}
+
+.v-theme--dark .v-text-field .v-label {
+  color: rgba(var(--text-secondary), 0.8) !important;
+}
+
+.v-theme--dark .v-text-field .v-label.v-label--active {
+  color: rgba(var(--prussian-blue), 1) !important;
+}

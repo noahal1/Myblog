@@ -1,126 +1,127 @@
 :root {
-  /* === 现代玻璃拟态设计系统 === */
+  --prussian-blue: 0, 49, 83;          
+  --prussian-blue-light: 25, 74, 108;  
+  --mist-gray: 229, 221, 215;           
+  --mist-gray-light: 207, 216, 220;    
+  --mist-gray-dark: 120, 144, 156;      
 
-  /* === 深空渐变高级配色方案 === */
-  --primary-indigo: 99, 102, 241;        /* 深邃靛蓝 #6366F1 */
-  --secondary-violet: 139, 92, 246;      /* 神秘紫罗兰 #8B5CF6 */
-  --accent-cyan: 6, 182, 212;            /* 科技青色 #06B6D4 */
-  --accent-emerald: 16, 185, 129;        /* 翡翠绿 #10B981 */
-  --accent-rose: 244, 63, 94;            /* 玫瑰红 #F43F5E */
-  --accent-amber: 245, 158, 11;          /* 琥珀金 #F59E0B */
-  --accent-slate: 100, 116, 139;         /* 石板灰 #64748B */
+  /* 高级辅助色彩 */
+  --sage-green: 129, 178, 154;        
+  --warm-beige: 242, 233, 216;        
+  --charcoal: 55, 71, 79;              
+  --pearl-white: 250, 250, 250; 
+  --accent-gold: 212, 175, 55;         
+  --soft-lavender: 159, 168, 218;   
 
   /* 渐变色组合 */
-  --gradient-cosmic: 99, 102, 241, 139, 92, 246;     /* 宇宙渐变 */
-  --gradient-ocean: 6, 182, 212, 16, 185, 129;       /* 海洋渐变 */
-  --gradient-sunset: 244, 63, 94, 245, 158, 11;      /* 日落渐变 */
-  --gradient-aurora: 139, 92, 246, 6, 182, 212;      /* 极光渐变 */
+  --gradient-prussian: 0, 49, 83, 25, 74, 108;
+  --gradient-mist: 229, 221, 215, 207, 216, 220;
+  --gradient-sage: 129, 178, 154, 229, 221, 215;
+  --gradient-elegant: 0, 49, 83, 159, 168, 218;
 
-  --glass-bg-light: rgba(255, 255, 255, 0.25);
-  --glass-bg-dark: rgba(0, 0, 0, 0.15);
-  --glass-border-light: rgba(255, 255, 255, 0.18);
-  --glass-border-dark: rgba(255, 255, 255, 0.1);
-  --glass-shadow-light: 0 8px 32px rgba(0, 0, 0, 0.1);
-  --glass-shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.3);
+  /* 高级玻璃拟态效果 */
+  --glass-bg-light: rgba(var(--pearl-white), 0.85);
+  --glass-bg-dark: rgba(var(--charcoal), 0.15);
+  --glass-border-light: rgba(var(--mist-gray), 0.3);
+  --glass-border-dark: rgba(var(--mist-gray-light), 0.2);
+  --glass-shadow-light: 0 8px 32px rgba(var(--prussian-blue), 0.08);
+  --glass-shadow-dark: 0 8px 32px rgba(var(--charcoal), 0.25);
 
-  /* 模糊效果 */
+  /* 精致模糊效果 */
   --blur-sm: blur(8px);
   --blur-md: blur(16px);
   --blur-lg: blur(24px);
   --blur-xl: blur(40px);
 
-  /* 非均匀化圆角 */
+  /* 优雅圆角设计 */
   --radius-organic-sm: 8px 12px 10px 14px;
   --radius-organic-md: 16px 20px 18px 22px;
   --radius-organic-lg: 24px 28px 26px 30px;
   --radius-organic-xl: 32px 36px 34px 38px;
 
   /* 高级配色主题 */
-  --primary: rgb(var(--primary-indigo));
-  --secondary: rgb(var(--secondary-violet));
-  --accent: rgb(var(--accent-cyan));
-  --success: rgb(var(--accent-emerald));
-  --error: rgb(var(--accent-rose));
-  --warning: rgb(var(--accent-amber));
-  --info: rgb(var(--accent-cyan));
-  --background: #f8f9fa;
+  --primary: rgb(var(--prussian-blue));
+  --secondary: rgb(var(--prussian-blue-light));
+  --accent: rgb(var(--sage-green));
+  --success: rgb(var(--sage-green));
+  --error: #E57373;
+  --warning: rgb(var(--accent-gold));
+  --info: rgb(var(--soft-lavender));
+  --background: rgb(var(--pearl-white));
   --surface: var(--glass-bg-light);
-  --text-primary: rgba(0, 0, 0, 0.87);
-  --text-secondary: rgba(0, 0, 0, 0.6);
-  --text-tertiary: rgba(0, 0, 0, 0.38);
+  --text-primary: rgb(var(--charcoal));
+  --text-secondary: rgb(var(--mist-gray-dark));
+  --text-tertiary: rgb(var(--mist-gray));
 
   /* 高级玻璃拟态渐变 */
   --glass-gradient: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.25) 0%,
-    rgba(var(--primary-indigo), 0.05) 50%,
-    rgba(255, 255, 255, 0.1) 100%);
+    rgba(var(--pearl-white), 0.9) 0%,
+    rgba(var(--mist-gray-light), 0.6) 50%,
+    rgba(var(--pearl-white), 0.8) 100%);
   --glass-gradient-hover: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(var(--primary-indigo), 0.08) 50%,
-    rgba(255, 255, 255, 0.15) 100%);
+    rgba(var(--pearl-white), 0.95) 0%,
+    rgba(var(--mist-gray-light), 0.7) 50%,
+    rgba(var(--pearl-white), 0.85) 100%);
 
-  /* 特殊渐变效果 */
-  --cosmic-gradient: linear-gradient(135deg,
-    rgba(var(--primary-indigo), 0.8) 0%,
-    rgba(var(--secondary-violet), 0.6) 100%);
-  --aurora-gradient: linear-gradient(135deg,
-    rgba(var(--secondary-violet), 0.6) 0%,
-    rgba(var(--accent-cyan), 0.4) 100%);
-  --ocean-gradient: linear-gradient(135deg,
-    rgba(var(--accent-cyan), 0.6) 0%,
-    rgba(var(--accent-emerald), 0.4) 100%);
+  /* 优雅渐变效果 */
+  --prussian-gradient: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.9) 0%,
+    rgba(var(--prussian-blue-light), 0.7) 100%);
+  --sage-gradient: linear-gradient(135deg,
+    rgba(var(--sage-green), 0.8) 0%,
+    rgba(var(--mist-gray), 0.6) 100%);
+  --elegant-gradient: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.8) 0%,
+    rgba(var(--soft-lavender), 0.6) 100%);
 
-  /* 动态阴影系统 */
-  --shadow-glass-sm: 0 4px 16px rgba(0, 0, 0, 0.08),
-                     0 1px 4px rgba(0, 0, 0, 0.04);
-  --shadow-glass-md: 0 8px 32px rgba(0, 0, 0, 0.12),
-                     0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-glass-lg: 0 16px 64px rgba(0, 0, 0, 0.16),
-                     0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-glass-xl: 0 24px 96px rgba(0, 0, 0, 0.2),
-                     0 8px 32px rgba(0, 0, 0, 0.12);
+  /* 精致阴影系统 */
+  --shadow-glass-sm: 0 4px 16px rgba(var(--prussian-blue), 0.06),
+                     0 1px 4px rgba(var(--mist-gray-dark), 0.04);
+  --shadow-glass-md: 0 8px 32px rgba(var(--prussian-blue), 0.1),
+                     0 2px 8px rgba(var(--mist-gray-dark), 0.06);
+  --shadow-glass-lg: 0 16px 64px rgba(var(--prussian-blue), 0.12),
+                     0 4px 16px rgba(var(--mist-gray-dark), 0.08);
+  --shadow-glass-xl: 0 24px 96px rgba(var(--prussian-blue), 0.15),
+                     0 8px 32px rgba(var(--mist-gray-dark), 0.1);
 }
 
-/* 高级暗色模式 */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --primary: rgb(var(--primary-indigo));
-    --secondary: rgb(var(--secondary-violet));
-    --accent: rgb(var(--accent-cyan));
-    --success: rgb(var(--accent-emerald));
-    --error: rgb(var(--accent-rose));
-    --warning: rgb(var(--accent-amber));
-    --info: rgb(var(--accent-cyan));
-    --background: #0f0f23;  /* 深空背景 */
-    --surface: var(--glass-bg-dark);
-    --text-primary: rgba(255, 255, 255, 0.95);
-    --text-secondary: rgba(255, 255, 255, 0.7);
-    --text-tertiary: rgba(255, 255, 255, 0.5);
+/* === 高级暗色模式 - 使用 Vuetify 主题类 === */
+.v-theme--dark :root {
+  --primary: rgb(var(--prussian-blue-light));
+  --secondary: rgb(var(--mist-gray));
+  --accent: rgb(var(--sage-green));
+  --success: rgb(var(--sage-green));
+  --error: #E57373;
+  --warning: rgb(var(--accent-gold));
+  --info: rgb(var(--soft-lavender));
+  --background: rgb(var(--charcoal));
+  --surface: var(--glass-bg-dark);
+  --text-primary: rgb(var(--pearl-white));
+  --text-secondary: rgb(var(--mist-gray));
+  --text-tertiary: rgb(var(--mist-gray-dark));
 
-    /* 暗色模式高级玻璃渐变 */
-    --glass-gradient: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.12) 0%,
-      rgba(var(--primary-indigo), 0.08) 50%,
-      rgba(255, 255, 255, 0.04) 100%);
-    --glass-gradient-hover: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.18) 0%,
-      rgba(var(--primary-indigo), 0.12) 50%,
-      rgba(255, 255, 255, 0.08) 100%);
+  /* 暗色模式高级玻璃渐变 */
+  --glass-gradient: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.8) 0%,
+    rgba(var(--prussian-blue), 0.3) 50%,
+    rgba(var(--charcoal), 0.6) 100%);
+  --glass-gradient-hover: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.9) 0%,
+    rgba(var(--prussian-blue), 0.4) 50%,
+    rgba(var(--charcoal), 0.7) 100%);
 
-    /* 暗色模式特殊渐变 */
-    --cosmic-gradient: linear-gradient(135deg,
-      rgba(var(--primary-indigo), 0.9) 0%,
-      rgba(var(--secondary-violet), 0.7) 100%);
-    --aurora-gradient: linear-gradient(135deg,
-      rgba(var(--secondary-violet), 0.7) 0%,
-      rgba(var(--accent-cyan), 0.5) 100%);
-    --ocean-gradient: linear-gradient(135deg,
-      rgba(var(--accent-cyan), 0.7) 0%,
-      rgba(var(--accent-emerald), 0.5) 100%);
-  }
+  /* 暗色模式优雅渐变 */
+  --prussian-gradient: linear-gradient(135deg,
+    rgba(var(--prussian-blue-light), 0.8) 0%,
+    rgba(var(--mist-gray), 0.6) 100%);
+  --sage-gradient: linear-gradient(135deg,
+    rgba(var(--sage-green), 0.7) 0%,
+    rgba(var(--mist-gray-dark), 0.5) 100%);
+  --elegant-gradient: linear-gradient(135deg,
+    rgba(var(--prussian-blue-light), 0.7) 0%,
+    rgba(var(--soft-lavender), 0.5) 100%);
 }
 
-/* 玻璃拟态基础类 */
 .glass-effect {
   background: var(--glass-gradient);
   backdrop-filter: var(--blur-md);

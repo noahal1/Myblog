@@ -1,49 +1,9 @@
 <template>
   <div class="knowledge-base">
-    <section class="glass-kb-hero" ref="heroBanner" role="banner">
-      <v-container class="py-8">
-        <!-- 页面标题 -->
-        <header class="kb-header">
-          <h1 class="kb-main-title">
-            <span class="kb-title-text" ref="gradientText">知识库</span>
-          </h1>
-          <p class="kb-subtitle" ref="subtitle">整理的各类技术笔记、教程和解决方案</p>
-
-          <!-- 玻璃拟态搜索框 -->
-          <div class="glass-kb-search-container">
-            <div class="kb-search-wrapper hover-lift-subtle focus-ring">
-              <v-icon icon="mdi-magnify" class="kb-search-icon" />
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="搜索知识库内容..."
-                class="glass-kb-search-input focus-ring"
-                @keyup.enter="searchKnowledge"
-                @focus="onSearchFocus"
-                @blur="onSearchBlur"
-                ref="searchInput"
-                aria-label="搜索知识库"
-              />
-              <button
-                v-if="searchQuery"
-                @click="searchQuery = ''"
-                class="kb-clear-btn button-magnetic"
-                aria-label="清除搜索"
-              >
-                <v-icon icon="mdi-close" size="20" />
-              </button>
-              <div class="kb-search-glow"></div>
-            </div>
-          </div>
-        </header>
-      </v-container>
-    </section>
-
     <v-container class="main-content">
       <div class="kb-content-grid">
         <!-- 左侧导航 -->
         <aside class="kb-sidebar">
-          <!-- 玻璃拟态导航卡片 -->
           <nav class="glass-kb-nav" role="navigation" aria-label="知识库导航">
             <header class="kb-nav-header">
               <div class="nav-title-section">
@@ -132,16 +92,19 @@
         </aside>
         
         <!-- 右侧内容 -->
-        <v-col cols="12" md="9">
+        <main class="kb-main-content">
           <!-- 筛选栏 -->
-          <v-card class="filter-bar mb-4" variant="flat" color="surface">
-            <v-card-text class="d-flex align-center justify-space-between py-2">
-              <div class="d-flex align-center">
-                <span class="text-body-2 text-medium-emphasis me-3">
-                  已找到 {{ filteredArticles.length }} 条结果
+          <div class="glass-filter-bar mb-6">
+            <div class="filter-section">
+              <div class="filter-info">
+                <v-icon icon="mdi-filter-variant" class="filter-icon" />
+                <span class="filter-text">
+                  已找到 <strong>{{ filteredArticles.length }}</strong> 条结果
                 </span>
-                
-                <v-chip-group v-model="sortOption" class="ms-3" mandatory>
+              </div>
+
+              <div class="filter-controls">
+                <v-chip-group v-model="sortOption" class="sort-chips" mandatory>
                   <v-chip
                     v-for="option in sortOptions"
                     :key="option.value"
@@ -149,24 +112,27 @@
                     size="small"
                     variant="flat"
                     :prepend-icon="option.icon"
+                    class="glass-chip"
                   >
                     {{ option.label }}
                   </v-chip>
                 </v-chip-group>
+
+                <div class="view-toggle">
+                  <v-btn-toggle v-model="viewMode" mandatory density="comfortable" color="primary" class="glass-toggle">
+                    <v-btn value="card" variant="text" class="toggle-btn">
+                      <v-icon>mdi-view-grid</v-icon>
+                      <v-tooltip activator="parent" location="top">卡片视图</v-tooltip>
+                    </v-btn>
+                    <v-btn value="list" variant="text" class="toggle-btn">
+                      <v-icon>mdi-view-list</v-icon>
+                      <v-tooltip activator="parent" location="top">列表视图</v-tooltip>
+                    </v-btn>
+                  </v-btn-toggle>
+                </div>
               </div>
-              
-              <div class="d-flex align-center">
-                <v-btn-toggle v-model="viewMode" mandatory density="comfortable" color="primary">
-                  <v-btn value="card" variant="text">
-                    <v-icon>mdi-view-grid</v-icon>
-                  </v-btn>
-                  <v-btn value="list" variant="text">
-                    <v-icon>mdi-view-list</v-icon>
-                  </v-btn>
-                </v-btn-toggle>
-              </div>
-            </v-card-text>
-          </v-card>
+            </div>
+          </div>
           
           <!-- 活动筛选器 -->
           <div v-if="hasActiveFilters" class="active-filters mb-4">
@@ -235,97 +201,136 @@
           <template v-else>
             <!-- 列表视图 -->
             <template v-if="viewMode === 'list'">
-              <v-list class="article-list">
-                <v-list-item
+              <div class="articles-list">
+                <article
                   v-for="article in paginatedArticles"
                   :key="article.id"
-                  :title="article.title"
-                  :subtitle="article.summary"
-                  :prepend-icon="getCategoryIcon(article.category_id)"
-                  rounded="lg"
-                  class="mb-3 article-list-item"
+                  class="glass-article-list-item"
                   @click="viewArticle(article.id)"
+                  tabindex="0"
+                  role="button"
+                  :aria-label="`阅读文章: ${article.title}`"
                 >
-                  <template v-slot:prepend>
-                    <div class="category-indicator" :class="`bg-${getCategoryColor(article.category_id)}`"></div>
-                  </template>
-                  
-                  <template v-slot:append>
-                    <div class="d-flex flex-column align-end">
-                      <div class="d-flex align-center mb-1">
-                        <v-icon icon="mdi-eye" size="small" class="me-1"></v-icon>
-                        <span class="text-caption">{{ article.views }}</span>
-                        <v-icon icon="mdi-thumb-up" size="small" class="ms-2 me-1"></v-icon>
-                        <span class="text-caption">{{ article.likes || 0 }}</span>
+                  <!-- 左侧分类图标 -->
+                  <div class="list-category-icon" :class="`category-${getCategoryColor(article.category_id)}`">
+                    <v-icon :icon="getCategoryIcon(article.category_id)" size="large" />
+                  </div>
+
+                  <!-- 中间内容区域 -->
+                  <div class="list-content">
+                    <div class="list-header">
+                      <h3 class="list-title">{{ article.title }}</h3>
+                      <div class="list-category-badge">
+                        {{ getCategoryName(article.category_id) }}
                       </div>
-                      <span class="text-caption text-medium-emphasis">{{ formatDate(article.created_at) }}</span>
                     </div>
-                  </template>
-                </v-list-item>
-              </v-list>
+
+                    <p class="list-summary">{{ article.summary }}</p>
+
+                    <div class="list-tags" v-if="article.tag_ids && article.tag_ids.length > 0">
+                      <v-chip
+                        v-for="tagId in article.tag_ids.slice(0, 4)"
+                        :key="tagId"
+                        size="x-small"
+                        class="list-tag-chip"
+                        :style="`--tag-color: var(--v-theme-${getTagColor(tagId)})`"
+                        variant="outlined"
+                      >
+                        {{ getTagName(tagId) }}
+                      </v-chip>
+                      <span v-if="article.tag_ids.length > 4" class="more-tags-list">
+                        +{{ article.tag_ids.length - 4 }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- 右侧元信息 -->
+                  <div class="list-meta">
+                    <div class="list-date">
+                      <v-icon icon="mdi-calendar-outline" size="small" />
+                      <span>{{ formatDate(article.created_at) }}</span>
+                    </div>
+                    <div class="list-stats">
+                      <div class="stat-item">
+                        <v-icon icon="mdi-eye-outline" size="small" />
+                        <span>{{ article.views || 0 }}</span>
+                      </div>
+                      <div class="stat-item">
+                        <v-icon icon="mdi-heart-outline" size="small" />
+                        <span>{{ article.likes || 0 }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 悬停效果 -->
+                  <div class="list-item-glow"></div>
+                </article>
+              </div>
             </template>
             
             <!-- 卡片视图 -->
             <template v-else>
-              <v-row>
-                <v-col
+              <div class="articles-grid">
+                <article
                   v-for="article in paginatedArticles"
                   :key="article.id"
-                  cols="12"
-                  sm="6"
-                  lg="4"
-                  class="article-card-col"
+                  class="glass-article-card"
+                  @click="viewArticle(article.id)"
+                  tabindex="0"
+                  role="button"
+                  :aria-label="`阅读文章: ${article.title}`"
                 >
-                  <v-card
-                    class="article-card h-100"
-                    @click="viewArticle(article.id)"
-                    :ripple="false"
-                    hover
-                  >
-                    <div class="card-category-indicator" :class="`bg-${getCategoryColor(article.category_id)}`"></div>
-                    
-                    <v-card-title class="text-h6 text-truncate">
-                      {{ article.title }}
-                    </v-card-title>
-                    
-                    <v-card-subtitle class="pt-2">
-                      <v-icon :icon="getCategoryIcon(article.category_id)" size="small" class="me-1"></v-icon>
-                      {{ getCategoryName(article.category_id) }}
-                    </v-card-subtitle>
-                    
-                    <v-card-text>
-                      <p class="summary-text mb-3">{{ article.summary }}</p>
-                      
-                      <div class="mb-3 d-flex flex-wrap">
-                        <v-chip
-                          v-for="tagId in article.tag_ids"
-                          :key="tagId"
-                          size="x-small"
-                          class="me-1 mb-1"
-                          :color="getTagColor(tagId)"
-                          variant="flat"
-                          density="compact"
-                        >
-                          {{ getTagName(tagId) }}
-                        </v-chip>
+                  <!-- 分类指示器 -->
+                  <div class="card-category-badge" :class="`category-${getCategoryColor(article.category_id)}`">
+                    <v-icon :icon="getCategoryIcon(article.category_id)" size="small" />
+                    <span>{{ getCategoryName(article.category_id) }}</span>
+                  </div>
+
+                  <!-- 文章标题 -->
+                  <h3 class="article-title">{{ article.title }}</h3>
+
+                  <!-- 文章摘要 -->
+                  <p class="article-summary">{{ article.summary }}</p>
+
+                  <!-- 标签区域 -->
+                  <div class="article-tags" v-if="article.tag_ids && article.tag_ids.length > 0">
+                    <v-chip
+                      v-for="tagId in article.tag_ids.slice(0, 3)"
+                      :key="tagId"
+                      size="x-small"
+                      class="tag-chip"
+                      :style="`--tag-color: var(--v-theme-${getTagColor(tagId)})`"
+                      variant="flat"
+                    >
+                      {{ getTagName(tagId) }}
+                    </v-chip>
+                    <span v-if="article.tag_ids.length > 3" class="more-tags">
+                      +{{ article.tag_ids.length - 3 }}
+                    </span>
+                  </div>
+
+                  <!-- 文章元信息 -->
+                  <div class="article-meta">
+                    <div class="meta-item">
+                      <v-icon icon="mdi-calendar-outline" size="small" />
+                      <span>{{ formatDate(article.created_at) }}</span>
+                    </div>
+                    <div class="meta-stats">
+                      <div class="meta-item">
+                        <v-icon icon="mdi-eye-outline" size="small" />
+                        <span>{{ article.views || 0 }}</span>
                       </div>
-                      
-                      <div class="d-flex justify-space-between align-center text-caption text-medium-emphasis">
-                        <span>
-                          <v-icon icon="mdi-calendar" size="x-small" class="me-1"></v-icon>
-                          {{ formatDate(article.created_at) }}
-                        </span>
-                        <span>
-                          <v-icon icon="mdi-eye" size="x-small" class="me-1"></v-icon>
-                          {{ article.views }}
-                          <v-icon icon="mdi-thumb-up" size="x-small" class="ms-2 me-1"></v-icon>
-                          {{ article.likes || 0 }}
-                        </span>
+                      <div class="meta-item">
+                        <v-icon icon="mdi-heart-outline" size="small" />
+                        <span>{{ article.likes || 0 }}</span>
                       </div>
-                    </v-card-text>
-                  </v-card>
-                </v-col>
-              </v-row>
+                    </div>
+                  </div>
+
+                  <!-- 悬停效果装饰 -->
+                  <div class="card-glow"></div>
+                </article>
+              </div>
             </template>
             
             <!-- 分页 -->
@@ -339,14 +344,14 @@
               ></v-pagination>
             </div>
           </template>
-        </v-col>
+        </main>
       </div>
     </v-container>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getArticles } from '../api'
 
@@ -400,6 +405,11 @@ const categoriesWithoutAll = computed(() => {
 // 获取文章总数
 const getTotalArticleCount = () => {
   return articles.value.length
+}
+
+// 获取总阅读量
+const getTotalViews = () => {
+  return articles.value.reduce((total, article) => total + (article.views || 0), 0)
 }
 
 // 选择子分类
@@ -594,10 +604,7 @@ const getCategoryName = (categoryId) => {
   return category ? category.name : '未分类'
 }
 
-// 标签排序（按使用次数）
-const sortedTags = computed(() => {
-  return [...tags].sort((a, b) => b.count - a.count)
-})
+
 
 // 是否有活动的筛选条件
 const hasActiveFilters = computed(() => {

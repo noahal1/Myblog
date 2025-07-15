@@ -13,7 +13,7 @@ import * as directives from 'vuetify/directives'
 import { useUserStore } from './stores/user'
 import 'md-editor-v3/lib/style.css'
 
-// 创建 Vuetify 实例
+// 创建 Vuetify 实例 - 高端配色方案
 const vuetify = createVuetify({
   components,
   directives,
@@ -22,26 +22,42 @@ const vuetify = createVuetify({
     themes: {
       light: {
         colors: {
-          primary: '#3F51B5',
-          secondary: '#9C27B0', 
-          accent: '#FF9800',
-          error: '#F44336',
-          warning: '#FFC107',
-          info: '#2196F3',
-          success: '#4CAF50',
-          background: '#F5F5F5'
+          primary: 'rgb(0, 49, 83)',        // 普鲁士蓝 - 主色
+          secondary: 'rgb(229, 221, 215)',  // 雾灰色 - 撞色
+          accent: 'rgb(0, 49, 83)',         // 普鲁士蓝
+          error: '#E53E3E',                 // 优雅红 - 温和警示
+          warning: 'rgb(255, 193, 7)',      // 金色
+          info: 'rgb(0, 188, 212)',         // 青色
+          success: 'rgb(76, 175, 80)',      // 翡翠绿
+          surface: 'rgb(255, 255, 255)',    // 珍珠白
+          background: 'rgb(255, 255, 255)', // 珍珠白
+          'surface-variant': 'rgb(245, 240, 235)', // 浅雾灰
+          'on-primary': 'rgb(255, 255, 255)',
+          'on-secondary': 'rgb(0, 49, 83)',
+          'on-surface': 'rgb(33, 33, 33)',
+          'on-background': 'rgb(33, 33, 33)',
+          'outline': 'rgb(200, 190, 180)',      // 深雾灰
+          'outline-variant': 'rgb(229, 221, 215)' // 雾灰色
         },
       },
       dark: {
         colors: {
-          primary: '#5C6BC0',
-          secondary: '#BA68C8',
-          accent: '#FFB74D',
-          error: '#EF5350',
-          warning: '#FFD54F',
-          info: '#64B5F6',
-          success: '#81C784',
-          background: '#121212'
+          primary: 'rgb(100, 130, 250)',    // 普鲁士蓝亮色版本
+          secondary: 'rgb(160, 160, 160)',  // 雾灰色暗色版本
+          accent: 'rgb(100, 130, 250)',     // 普鲁士蓝
+          error: '#FC8181',                 // 珊瑚红 - 温和提醒
+          warning: 'rgb(255, 213, 79)',     // 金色
+          info: 'rgb(77, 208, 225)',        // 青色
+          success: 'rgb(102, 187, 106)',    // 翡翠绿
+          surface: 'rgb(18, 18, 18)',       // 炭黑 - 与CSS变量一致
+          background: 'rgb(18, 18, 18)',    // 炭黑 - 与CSS变量一致
+          'surface-variant': 'rgb(45, 45, 45)', // 浅炭黑
+          'on-primary': 'rgb(245, 245, 245)',
+          'on-secondary': 'rgb(245, 245, 245)',
+          'on-surface': 'rgb(240, 240, 240)',
+          'on-background': 'rgb(200, 200, 200)',
+          'outline': 'rgb(120, 120, 120)',      // 深雾灰
+          'outline-variant': 'rgb(45, 45, 45)'  // 浅炭黑
         },
       },
     },

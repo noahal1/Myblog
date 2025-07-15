@@ -10,7 +10,7 @@
 .tagline-text {
   font-weight: 500;
   letter-spacing: 1px;
-  color: rgb(var(--accent-orange));
+  color: rgb(var(--sage-green));
   transition: color 1.5s ease;
 }
 
@@ -19,18 +19,19 @@
   transition: color 2.0s ease;
 }
 
-/* === 深空宇宙Hero区域 === */
+/* === 撞色设计Hero区域 === */
 .hero-banner {
   background:
-    radial-gradient(circle at 15% 15%, rgba(var(--primary-indigo), 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 85% 25%, rgba(var(--secondary-violet), 0.08) 0%, transparent 45%),
-    radial-gradient(circle at 25% 85%, rgba(var(--accent-cyan), 0.06) 0%, transparent 40%),
-    radial-gradient(circle at 75% 75%, rgba(var(--accent-emerald), 0.04) 0%, transparent 35%),
+    radial-gradient(circle at 20% 20%, rgba(var(--prussian-blue), 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 80% 30%, rgba(var(--mist-gray), 0.15) 0%, transparent 60%),
+    radial-gradient(circle at 30% 80%, rgba(var(--prussian-blue), 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 70% 70%, rgba(var(--mist-gray), 0.1) 0%, transparent 40%),
     linear-gradient(135deg,
-      rgba(var(--background), 0.95) 0%,
-      rgba(15, 15, 35, 0.98) 50%,
-      rgba(var(--background), 0.95) 100%);
-  padding: 160px 0 60px;
+      rgba(var(--mist-gray), 0.95) 0%,
+      rgba(var(--pearl-white), 0.98) 30%,
+      rgba(var(--mist-gray-light), 0.9) 70%,
+      rgba(var(--pearl-white), 0.95) 100%);
+  padding: 160px 0 80px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -42,7 +43,24 @@
   -webkit-backdrop-filter: var(--blur-sm);
 }
 
-/* 宇宙星云动态效果 */
+/* Hero区域底部渐变过渡 */
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(var(--pearl-white), 0.3) 30%,
+    rgba(var(--pearl-white), 0.7) 70%,
+    rgba(var(--pearl-white), 0.95) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* 优雅雾境动态效果 */
 .hero-banner::before {
   content: '';
   position: absolute;
@@ -51,14 +69,14 @@
   right: 0;
   bottom: 0;
   background:
-    radial-gradient(circle at 30% 20%, rgba(var(--primary-indigo), 0.06) 0%, transparent 40%),
-    radial-gradient(circle at 70% 80%, rgba(var(--secondary-violet), 0.04) 0%, transparent 45%),
-    radial-gradient(circle at 20% 70%, rgba(var(--accent-cyan), 0.03) 0%, transparent 35%);
-  animation: nebulaFloat 25s ease-in-out infinite;
+    radial-gradient(circle at 30% 20%, rgba(var(--prussian-blue), 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 70% 80%, rgba(var(--sage-green), 0.03) 0%, transparent 45%),
+    radial-gradient(circle at 20% 70%, rgba(var(--mist-gray), 0.025) 0%, transparent 35%);
+  animation: mistFloat 25s ease-in-out infinite;
   z-index: 0;
 }
 
-.hero-banner::after {
+.hero-banner .mist-layer-2 {
   content: '';
   position: absolute;
   top: 0;
@@ -66,32 +84,60 @@
   right: 0;
   bottom: 0;
   background:
-    radial-gradient(circle at 60% 30%, rgba(var(--accent-emerald), 0.02) 0%, transparent 30%),
-    radial-gradient(circle at 40% 90%, rgba(var(--accent-rose), 0.025) 0%, transparent 35%);
-  animation: nebulaFloat 30s ease-in-out infinite reverse;
+    radial-gradient(circle at 60% 30%, rgba(var(--soft-lavender), 0.02) 0%, transparent 30%),
+    radial-gradient(circle at 40% 90%, rgba(var(--warm-beige), 0.025) 0%, transparent 35%);
+  animation: mistFloat 30s ease-in-out infinite reverse;
   z-index: 0;
+  pointer-events: none;
 }
 
-@keyframes nebulaFloat {
+/* === 主内容区域过渡背景 === */
+.main-content {
+  position: relative;
+  background: linear-gradient(180deg,
+    rgba(var(--pearl-white), 0.95) 0%,
+    rgba(var(--pearl-white), 1) 20%,
+    rgb(var(--pearl-white)) 100%);
+  margin-top: -60px; /* 与Hero区域重叠，创造无缝过渡 */
+  padding-top: 80px; /* 确保内容不被遮挡 */
+  z-index: 2;
+}
+
+/* 内容区域的微妙装饰效果 */
+.main-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(var(--mist-gray), 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(var(--sage-green), 0.02) 0%, transparent 40%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes mistFloat {
   0%, 100% {
     transform: translateX(0) translateY(0) scale(1) rotate(0deg);
-    opacity: 0.6;
+    opacity: 0.5;
   }
   20% {
-    transform: translateX(15px) translateY(-8px) scale(1.05) rotate(1deg);
-    opacity: 0.8;
-  }
-  40% {
-    transform: translateX(-8px) translateY(12px) scale(0.95) rotate(-0.5deg);
+    transform: translateX(12px) translateY(-6px) scale(1.03) rotate(0.8deg);
     opacity: 0.7;
   }
+  40% {
+    transform: translateX(-6px) translateY(10px) scale(0.97) rotate(-0.4deg);
+    opacity: 0.6;
+  }
   60% {
-    transform: translateX(-12px) translateY(-15px) scale(1.08) rotate(0.8deg);
-    opacity: 0.9;
+    transform: translateX(-10px) translateY(-12px) scale(1.05) rotate(0.6deg);
+    opacity: 0.8;
   }
   80% {
-    transform: translateX(8px) translateY(5px) scale(0.98) rotate(-0.3deg);
-    opacity: 0.75;
+    transform: translateX(6px) translateY(4px) scale(0.99) rotate(-0.2deg);
+    opacity: 0.65;
   }
 }
 
@@ -118,47 +164,43 @@
   transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* 高级宇宙渐变文字 */
+/* 高级优雅渐变文字 */
 .gradient-text {
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 800;
   background: linear-gradient(135deg,
-    rgb(var(--primary-indigo)) 0%,
-    rgb(var(--secondary-violet)) 20%,
-    rgb(var(--accent-cyan)) 40%,
-    rgb(var(--accent-emerald)) 60%,
-    rgb(var(--accent-rose)) 80%,
-    rgb(var(--accent-amber)) 100%);
-  background-size: 600% 600%;
+    rgb(var(--prussian-blue)) 0%,
+    rgb(var(--mist-gray-dark)) 20%,
+    rgb(var(--prussian-blue)) 40%,
+    rgb(var(--mist-gray)) 60%,
+    rgb(var(--prussian-blue)) 80%,
+    rgb(var(--mist-gray-dark)) 100%);
+  background-size: 400% 400%;
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
   display: inline-block;
-  animation: cosmicShift 15s ease-in-out infinite;
-  filter: drop-shadow(0 4px 8px rgba(var(--primary-indigo), 0.3));
+  animation: contrastShift 15s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(var(--prussian-blue), 0.25));
   will-change: background-position;
 }
 
-@keyframes cosmicShift {
+@keyframes contrastShift {
   0%, 100% {
     background-position: 0% 50%;
-    filter: drop-shadow(0 4px 8px rgba(var(--primary-indigo), 0.3));
+    filter: drop-shadow(0 4px 8px rgba(var(--prussian-blue), 0.25));
   }
-  20% {
+  25% {
     background-position: 100% 50%;
-    filter: drop-shadow(0 4px 8px rgba(var(--secondary-violet), 0.3));
+    filter: drop-shadow(0 4px 8px rgba(var(--mist-gray-dark), 0.3));
   }
-  40% {
+  50% {
     background-position: 50% 100%;
-    filter: drop-shadow(0 4px 8px rgba(var(--accent-cyan), 0.3));
+    filter: drop-shadow(0 4px 8px rgba(var(--prussian-blue), 0.3));
   }
-  60% {
+  75% {
     background-position: 100% 0%;
-    filter: drop-shadow(0 4px 8px rgba(var(--accent-emerald), 0.3));
-  }
-  80% {
-    background-position: 0% 100%;
-    filter: drop-shadow(0 4px 8px rgba(var(--accent-rose), 0.3));
+    filter: drop-shadow(0 4px 8px rgba(var(--mist-gray), 0.25));
   }
 }
 
@@ -303,18 +345,38 @@
 
 /* === 玻璃拟态分类标签 === */
 .glass-category-section {
-  margin: 40px 0;
+  margin: 20px 0 40px 0; /* 减少顶部间距，更好地融入过渡 */
+  position: relative;
 }
 
 .category-container {
-  background: var(--glass-gradient);
+  background: linear-gradient(135deg,
+    rgba(var(--pearl-white), 0.9) 0%,
+    rgba(var(--mist-gray-light), 0.7) 100%);
   backdrop-filter: var(--blur-md);
   -webkit-backdrop-filter: var(--blur-md);
-  border: 1px solid var(--glass-border-light);
+  border: 1px solid rgba(var(--mist-gray), 0.2);
   border-radius: var(--radius-organic-lg);
   box-shadow: var(--shadow-glass-md);
   padding: 24px;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 分类容器的微妙装饰效果 */
+.category-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(var(--prussian-blue), 0.3) 50%,
+    transparent 100%);
+  opacity: 0.6;
 }
 
 .category-label {
@@ -328,7 +390,7 @@
 }
 
 .category-label .v-icon {
-  color: rgba(var(--primary-blue), 0.7);
+  color: rgba(var(--prussian-blue), 0.7);
 }
 
 .glass-chip-group {
@@ -939,6 +1001,34 @@
   opacity: 1 !important;
   min-height: 200px;
   position: relative;
+  padding: 20px 0;
+}
+
+/* 文章容器的背景过渡 */
+.articles-container {
+  position: relative;
+  background: linear-gradient(180deg,
+    rgba(var(--pearl-white), 1) 0%,
+    rgba(var(--pearl-white), 0.98) 50%,
+    rgba(var(--pearl-white), 1) 100%);
+  border-radius: var(--radius-organic-lg);
+  padding: 20px;
+  margin-top: 20px;
+}
+
+/* 文章容器的微妙装饰 */
+.articles-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(var(--mist-gray), 0.3) 50%,
+    transparent 100%);
 }
 
 .article-item {
@@ -950,36 +1040,83 @@
 
 
 .home-view .v-card.article-card {
-  background: #ffffff !important;
-  border-radius: 12px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  background: linear-gradient(135deg,
+    rgba(var(--mist-gray), 0.8) 0%,
+    rgba(var(--pearl-white), 0.95) 50%,
+    rgba(var(--mist-gray-light), 0.7) 100%) !important;
+  border: 2px solid rgba(var(--prussian-blue), 0.15) !important;
+  border-radius: var(--radius-organic-md) !important;
+  box-shadow: var(--shadow-contrast-sm) !important;
   overflow: hidden !important;
   height: 100% !important;
   cursor: pointer !important;
-  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-  will-change: transform; /* 性能优化 */
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  will-change: transform;
+  position: relative;
+}
+
+.home-view .v-card.article-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    rgba(var(--prussian-blue), 0.6) 0%,
+    rgba(var(--mist-gray), 0.4) 50%,
+    rgba(var(--prussian-blue), 0.6) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .home-view .v-card.article-card:hover {
-  transform: translateY(-4px) !important;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-6px) scale(1.02) !important;
+  border-color: rgba(var(--prussian-blue), 0.3) !important;
+  box-shadow: var(--shadow-contrast-lg) !important;
+}
+
+.home-view .v-card.article-card:hover::before {
+  opacity: 1;
 }
 
 .v-theme--dark .v-card.article-card {
-  background: rgba(33, 33, 33, 0.8) !important;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.08) !important;
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.9) 0%,
+    rgba(var(--charcoal-light), 0.95) 50%,
+    rgba(var(--prussian-blue), 0.1) 100%) !important;
+  border: 2px solid rgba(var(--prussian-blue), 0.3) !important;
+  box-shadow: var(--shadow-contrast-md) !important;
+}
+
+.v-theme--dark .v-card.article-card::before {
+  background: linear-gradient(90deg,
+    rgba(var(--prussian-blue), 0.8) 0%,
+    rgba(var(--mist-gray), 0.6) 50%,
+    rgba(var(--prussian-blue), 0.8) 100%);
+}
+
+.v-theme--dark .v-card.article-card:hover {
+  border-color: rgba(var(--prussian-blue), 0.5) !important;
+  box-shadow: var(--shadow-contrast-xl) !important;
 }
 
 .v-theme--dark .v-card.article-card .v-card-text {
-  color: rgba(255, 255, 255, 0.7) !important;
+  color: rgba(var(--text-primary), 0.8) !important;
 }
 
 .v-theme--dark .v-card.article-card .v-card-title {
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: rgba(var(--text-primary), 0.95) !important;
+  background: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 1) 0%,
+    rgba(var(--mist-gray), 0.9) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
 }
 
 .v-theme--dark .v-card.article-card .v-card-subtitle {
-  color: rgba(255, 255, 255, 0.6) !important;
+  color: rgba(var(--text-secondary), 0.8) !important;
 }
 
 .card-content {
@@ -1156,6 +1293,58 @@
 .v-theme--dark .back-to-top {
   background-color: rgba(var(--surface, 33, 33, 33), 0.8) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 暗色模式下的背景过渡 */
+.v-theme--dark .main-content {
+  background: linear-gradient(180deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal), 1) 20%,
+    rgb(var(--charcoal)) 100%) !important;
+}
+
+
+
+.v-theme--dark .main-content::before {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(var(--prussian-blue), 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(var(--sage-green), 0.03) 0%, transparent 40%);
+}
+
+.v-theme--dark .articles-container {
+  background: linear-gradient(180deg,
+    rgba(var(--charcoal), 1) 0%,
+    rgba(var(--charcoal), 0.98) 50%,
+    rgba(var(--charcoal), 1) 100%);
+}
+
+.v-theme--dark .articles-container::before {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(var(--prussian-blue), 0.4) 50%,
+    transparent 100%);
+}
+
+.v-theme--dark .hero-banner {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(var(--prussian-blue), 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 30%, rgba(var(--mist-gray-dark), 0.1) 0%, transparent 60%),
+    radial-gradient(circle at 30% 80%, rgba(var(--prussian-blue), 0.1) 0%, transparent 45%),
+    radial-gradient(circle at 70% 70%, rgba(var(--mist-gray-dark), 0.08) 0%, transparent 40%),
+    linear-gradient(135deg,
+      rgba(var(--charcoal), 1) 0%,
+      rgba(var(--charcoal-light), 0.95) 30%,
+      rgba(var(--charcoal), 0.98) 70%,
+      rgba(var(--charcoal-light), 0.9) 100%) !important;
+  border-bottom: 3px solid rgba(var(--prussian-blue), 0.3) !important;
+}
+
+.v-theme--dark .hero-banner::after {
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(var(--charcoal), 0.3) 30%,
+    rgba(var(--charcoal), 0.7) 70%,
+    rgba(var(--charcoal), 0.95) 100%) !important;
 }
 
 .v-theme--dark .back-to-top i {

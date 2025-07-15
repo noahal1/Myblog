@@ -113,7 +113,7 @@ const props = defineProps({
 });
 
 // 定义事件
-defineEmits(['click']);
+const emit = defineEmits(['click']);
 
 // 悬停状态
 const isHovered = ref(false);
@@ -126,9 +126,16 @@ const cardVariant = ref(Math.floor(Math.random() * 4) + 1);
 // 动画延迟
 const cardDelay = ref(Math.random() * 2);
 
+// 路由导航
+const router = useRouter();
+
 // 处理卡片点击
 const handleCardClick = () => {
   console.log('查看文章:', props.article.id);
+  router.push({
+    name: 'article',
+    params: { id: props.article.id }
+  });
   emit('click');
 };
 
@@ -178,16 +185,6 @@ const formatDate = (date) => {
   });
 };
 
-const router = useRouter();
-
-const viewArticle = () => {
-  console.log('查看文章:', props.article.id)
-  router.push({
-    name: 'article',
-    params: { id: props.article.id }
-  })
-};
-
 // 使用计算属性优化频繁计算
 const formattedDate = computed(() => formatDate(props.article.created_at))
 
@@ -229,9 +226,9 @@ onMounted(() => {
   height: 2px;
   background: linear-gradient(90deg,
     transparent 0%,
-    rgba(var(--primary-blue), 0.6) 25%,
-    rgba(var(--secondary-purple), 0.4) 50%,
-    rgba(var(--accent-orange), 0.3) 75%,
+    rgba(var(--prussian-blue), 0.6) 25%,
+    rgba(var(--sage-green), 0.4) 50%,
+    rgba(var(--soft-lavender), 0.3) 75%,
     transparent 100%);
   opacity: 0;
   transition: opacity 0.4s ease;
@@ -243,7 +240,7 @@ onMounted(() => {
   background: var(--glass-gradient-hover);
   box-shadow: var(--shadow-glass-xl);
   transform: translateY(-8px) scale(1.02) rotateX(2deg);
-  border-color: rgba(var(--primary-blue), 0.3);
+  border-color: rgba(var(--prussian-blue), 0.3);
 }
 
 .glass-article-card:hover .card-border-glow {
@@ -252,9 +249,13 @@ onMounted(() => {
 
 /* 内容区域 */
 .card-content {
-  padding: 24px;
+  padding: 16px;
   position: relative;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 280px; /* 设置最小高度确保卡片统一 */
 }
 
 /* 文章标题 */
@@ -268,17 +269,17 @@ onMounted(() => {
 }
 
 .glass-article-card:hover .article-title {
-  color: rgb(var(--primary-indigo));
+  color: rgb(var(--prussian-blue));
   transform: translateY(-2px);
-  filter: drop-shadow(0 2px 8px rgba(var(--primary-indigo), 0.3));
+  filter: drop-shadow(0 2px 8px rgba(var(--prussian-blue), 0.3));
 }
 
 /* 元信息区域 */
 .article-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 6px;
+  margin-bottom: 12px;
   opacity: 0.8;
   transition: opacity 0.3s ease;
 }
@@ -303,7 +304,7 @@ onMounted(() => {
 
 .meta-item:hover .meta-icon {
   opacity: 1;
-  color: rgb(var(--primary-blue));
+  color: rgb(var(--prussian-blue));
   transform: scale(1.1);
 }
 
@@ -319,6 +320,8 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   transition: color 0.3s ease;
+  flex: 1; /* 让摘要区域占据剩余空间 */
+  min-height: 4.8rem; /* 确保至少3行的高度 */
 }
 
 .glass-article-card:hover .article-summary {
@@ -330,7 +333,9 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: auto;
+  margin-top: auto; /* 确保操作区始终在底部 */
+  padding-top: 16px; /* 增加与摘要的间距 */
+  border-top: 1px solid rgba(var(--mist-gray), 0.1); /* 添加分割线 */
 }
 
 /* 点赞按钮 */
@@ -340,7 +345,6 @@ onMounted(() => {
   gap: 6px;
   padding: 8px 12px;
   background: transparent;
-  border: 1px solid rgba(var(--accent-rose), 0.2);
   border-radius: var(--radius-organic-sm);
   color: var(--text-secondary);
   font-size: 0.85rem;
@@ -350,20 +354,19 @@ onMounted(() => {
 }
 
 .glass-btn-like:hover {
-  background: rgba(var(--accent-rose), 0.1);
-  border-color: rgba(var(--accent-rose), 0.4);
-  color: rgb(var(--accent-rose));
+  background: rgba(var(--sage-green), 0.1);
+  border-color: rgba(var(--sage-green), 0.5);
+  color: rgb(var(--sage-green));
   transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(var(--accent-rose), 0.2);
+  box-shadow: 0 0 15px rgba(var(--sage-green), 0.2);
 }
 
 .glass-btn-like.liked {
   background: linear-gradient(135deg,
-    rgba(var(--accent-rose), 0.2) 0%,
-    rgba(var(--accent-rose), 0.1) 100%);
-  border-color: rgba(var(--accent-rose), 0.5);
-  color: rgb(var(--accent-rose));
-  box-shadow: 0 0 20px rgba(var(--accent-rose), 0.3);
+    rgba(var(--sage-green), 0.2) 0%,
+    rgba(var(--sage-green), 0.1) 100%);
+  color: rgb(var(--sage-green));
+  box-shadow: 0 0 20px rgba(var(--sage-green), 0.3);
 }
 
 /* 阅读更多按钮 */
@@ -371,27 +374,25 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 10px 20px;
-  background: var(--cosmic-gradient);
-  border: 1px solid rgba(var(--primary-indigo), 0.3);
-  border-radius: var(--radius-organic-sm);
-  color: white;
-  font-size: 0.9rem;
+  padding: 10px 18px;
+  background: var(--prussian-gradient);
+  color: rgb(var(--prussian-blue-ligh));
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   backdrop-filter: var(--blur-sm);
   -webkit-backdrop-filter: var(--blur-sm);
-  box-shadow: 0 0 15px rgba(var(--primary-indigo), 0.2);
+  box-shadow: 0 0 15px rgba(var(--prussian-blue), 0.2);
 }
 
 .glass-btn-read:hover {
-  background: var(--aurora-gradient);
-  border-color: rgba(var(--accent-cyan), 0.4);
+  background: var(--sage-gradient);
+  border-color: rgba(var(--sage-green), 0.5);
   transform: translateX(4px) scale(1.02);
   box-shadow:
     var(--shadow-glass-sm),
-    0 0 25px rgba(var(--accent-cyan), 0.3);
+    0 0 25px rgba(var(--sage-green), 0.3);
 }
 
 /* 悬浮光效 */
@@ -420,6 +421,7 @@ onMounted(() => {
 @media (min-width: 768px) and (max-width: 1024px) {
   .card-content {
     padding: 22px;
+    min-height: 300px;
   }
 
   .article-title {
@@ -439,6 +441,7 @@ onMounted(() => {
   .article-summary {
     font-size: 0.93rem;
     margin-bottom: 18px;
+    min-height: 4.5rem;
   }
 
   .glass-btn-read {
@@ -468,6 +471,7 @@ onMounted(() => {
 
   .card-content {
     padding: 18px;
+    min-height: 280px;
   }
 
   .article-title {
@@ -490,6 +494,7 @@ onMounted(() => {
     font-size: 0.9rem;
     margin-bottom: 16px;
     -webkit-line-clamp: 2; /* 减少行数 */
+    min-height: 3.2rem; /* 确保2行的统一高度 */
   }
 
   .card-actions {
@@ -535,6 +540,7 @@ onMounted(() => {
 
   .card-content {
     padding: 16px;
+    min-height: 260px;
   }
 
   .article-title {
@@ -555,6 +561,7 @@ onMounted(() => {
     font-size: 0.85rem;
     margin-bottom: 14px;
     line-height: 1.5;
+    min-height: 2.8rem; /* 小屏幕设备的统一高度 */
   }
 
   .glass-btn-read {

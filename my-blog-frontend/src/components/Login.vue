@@ -7,12 +7,12 @@
     >
       <!-- 卡片头部 -->
       <div class="card-header">
-        <logo-icon 
-          :width="60" 
-          :height="60" 
-          color="rgba(63, 81, 181, 0.9)"
-          theme="light" 
-          class="logo-svg mb-4" 
+        <logo-icon
+          :width="60"
+          :height="60"
+          color="rgba(0, 49, 83, 0.9)"
+          theme="light"
+          class="logo-svg mb-4"
         />
         <h1 class="text-h4 font-weight-bold text-center gradient-title mb-2">
           {{ isLogin ? '欢迎回来' : '加入我们' }}

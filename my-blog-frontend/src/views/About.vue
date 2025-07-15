@@ -259,8 +259,8 @@ const skills = ref([
     color: 'primary',
     items: [
       { name: 'Vue.js', level: 80 },
-      { name: 'JavaScript', level: 70 },
-      { name: 'HTML/CSS', level: 55 },
+      { name: 'JavaScript', level: 0 },
+      { name: 'Vite', level: 55 },
       { name: 'React', level: 20 }
     ]
   },

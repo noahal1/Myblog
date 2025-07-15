@@ -14,8 +14,7 @@ node_modules
 dist
 dist-ssr
 *.local
-
-
+alembic.ini
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -32,3 +31,4 @@ dev
 docker_ali.md
 .env
 .cursor
+/.claude

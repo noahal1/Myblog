@@ -2,7 +2,10 @@
 @import './components.css';
 @import './animations.css';
 @import './text.css';
-
+@import './components/buttons.css';
+@import './components/ui-components.css';
+@import './dark-mode-enhancements.css';
+@import './contrast-design-enhancements.css';
 
 @import './components/navbar.css';
 @import './components/login.css';
@@ -21,6 +24,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+
 
 * {
   transition: background-color 0.3s ease, 

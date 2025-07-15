@@ -132,7 +132,7 @@ class ArticleResponse(BaseModel):
     is_knowledge_base: Optional[bool] = False
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ArticleCreate(BaseModel):
     title: str
@@ -163,7 +163,7 @@ class TagResponse(BaseModel):
     name: str
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class CommentCreate(BaseModel):
     content: str
@@ -185,7 +185,7 @@ class CommentResponse(BaseModel):
     location: Optional[str] = None
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # 添加刷新令牌请求模型
 class RefreshTokenRequest(BaseModel):
@@ -209,7 +209,8 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
     db_user = models.User( 
         username=user.username,
         email=user.email,
-        hashed_password=hashed_password
+        hashed_password=hashed_password,
+        role=models.UserRole.USER  # 设置默认角色为普通用户
     )
     db.add(db_user)
     db.commit()
@@ -256,6 +257,9 @@ async def login(credentials: UserLogin, db: Session = Depends(get_db)):
     refresh_token = create_refresh_token({"sub": str(user.id)})
     
     # 记录登录日志
+    user.last_login = datetime.utcnow()  # 更新最后登录时间
+    db.commit()
+    
     log.info(f"用户ID：{user.id} 在 {datetime.now()} 登录成功")
 
     return {
@@ -558,6 +562,35 @@ async def create_comment(
             article.comments_count = 1
         else:
             article.comments_count += 1
+        
+        # 为文章作者创建评论通知（如果评论者不是作者本人）
+        if article.author_id != current_user_id:
+            notification = models.Notification(
+                user_id=article.author_id,
+                type="comment",
+                title="新评论通知",
+                content=f"您的文章《{article.title}》收到了新评论",
+                article_id=article.id,
+                comment_id=db_comment.id
+            )
+            db.add(notification)
+            log.info(f"为文章作者 {article.author_id} 创建新评论通知")
+    
+    # 如果是回复评论，为被回复的用户创建通知
+    if comment.reply_to_id:
+        parent_comment = db.query(models.Comment).filter(models.Comment.id == comment.reply_to_id).first()
+        if parent_comment and parent_comment.user_id and parent_comment.user_id != current_user_id:
+            notification = models.Notification(
+                user_id=parent_comment.user_id,
+                type="reply",
+                title="新回复通知",
+                content=f"您的评论收到了新回复",
+                article_id=comment.article_id,
+                comment_id=db_comment.id
+            )
+            db.add(notification)
+            log.info(f"为被回复用户 {parent_comment.user_id} 创建回复通知")
+        
         db.commit()
     
     db.refresh(db_comment)
@@ -703,7 +736,7 @@ class VisitorLogResponse(BaseModel):
     referer: Optional[str] = None
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # 访问记录统计响应
 class VisitorStatsResponse(BaseModel):
@@ -1020,11 +1053,566 @@ async def update_article_status(
         raise HTTPException(status_code=404, detail="文章不存在")
     
     # 更新状态
+    old_status = article.status
     article.status = status
     db.commit()
     
+    # 如果状态发生变化，创建通知
+    if old_status != status and article.author_id != current_user_id:
+        notification_title = ""
+        notification_content = ""
+        notification_type = ""
+        
+        if status == "published":
+            notification_title = "文章审核通过"
+            notification_content = f"您的文章《{article.title}》已通过审核并发布"
+            notification_type = "article_approved"
+        elif status == "rejected":
+            notification_title = "文章审核未通过"
+            notification_content = f"您的文章《{article.title}》未通过审核，请修改后重新提交"
+            notification_type = "article_rejected"
+        
+        if notification_title:
+            notification = models.Notification(
+                user_id=article.author_id,
+                type=notification_type,
+                title=notification_title,
+                content=notification_content,
+                article_id=article.id
+            )
+            db.add(notification)
+            db.commit()
+            log.info(f"为用户 {article.author_id} 创建文章状态变更通知: {notification_title}")
+    
     # 返回成功信息
     return {"message": "文章状态已更新", "article_id": article_id, "status": status}
+
+# 通知系统相关Pydantic模型
+class NotificationCreate(BaseModel):
+    user_id: int
+    type: str
+    title: str
+    content: str
+    article_id: Optional[int] = None
+    comment_id: Optional[int] = None
+
+class NotificationResponse(BaseModel):
+    id: int
+    user_id: int
+    type: str
+    title: str
+    content: str
+    is_read: bool
+    created_at: datetime
+    article_id: Optional[int] = None
+    comment_id: Optional[int] = None
+    
+    class Config:
+        from_attributes = True
+
+# 通知系统API
+@app.get('/api/notifications', response_model=List[NotificationResponse])
+async def get_notifications(
+    skip: int = 0,
+    limit: int = 50,
+    unread_only: bool = False,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """获取当前用户的通知列表"""
+    query = db.query(models.Notification).filter(models.Notification.user_id == current_user_id)
+    
+    if unread_only:
+        query = query.filter(models.Notification.is_read == False)
+    
+    notifications = query.order_by(models.Notification.created_at.desc()).offset(skip).limit(limit).all()
+    
+    return notifications
+
+@app.post('/api/notifications', response_model=NotificationResponse)
+async def create_notification(
+    notification: NotificationCreate,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """创建新通知（仅管理员）"""
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以创建通知")
+    
+    # 验证通知类型
+    valid_types = ["comment", "reply", "like", "article_published", "article_approved", "article_rejected", "system"]
+    if notification.type not in valid_types:
+        raise HTTPException(status_code=400, detail="无效的通知类型")
+    
+    # 验证用户是否存在
+    user = db.query(models.User).filter(models.User.id == notification.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    
+    db_notification = models.Notification(
+        user_id=notification.user_id,
+        type=notification.type,
+        title=notification.title,
+        content=notification.content,
+        article_id=notification.article_id,
+        comment_id=notification.comment_id
+    )
+    
+    db.add(db_notification)
+    db.commit()
+    db.refresh(db_notification)
+    
+    log.info(f"管理员创建通知: {notification.title} for user {notification.user_id}")
+    
+    return db_notification
+
+@app.put('/api/notifications/{notification_id}/read')
+async def mark_notification_read(
+    notification_id: int,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """标记通知为已读"""
+    notification = db.query(models.Notification).filter(
+        models.Notification.id == notification_id,
+        models.Notification.user_id == current_user_id
+    ).first()
+    
+    if not notification:
+        raise HTTPException(status_code=404, detail="通知不存在")
+    
+    notification.is_read = True
+    db.commit()
+    
+    return {"message": "通知已标记为已读"}
+
+@app.put('/api/notifications/mark-all-read')
+async def mark_all_notifications_read(
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """标记所有通知为已读"""
+    db.query(models.Notification).filter(
+        models.Notification.user_id == current_user_id,
+        models.Notification.is_read == False
+    ).update({"is_read": True})
+    
+    db.commit()
+    
+    return {"message": "所有通知已标记为已读"}
+
+@app.delete('/api/notifications/{notification_id}')
+async def delete_notification(
+    notification_id: int,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """删除通知"""
+    notification = db.query(models.Notification).filter(
+        models.Notification.id == notification_id,
+        models.Notification.user_id == current_user_id
+    ).first()
+    
+    if not notification:
+        raise HTTPException(status_code=404, detail="通知不存在")
+    
+    db.delete(notification)
+    db.commit()
+    
+    return {"message": "通知已删除"}
+
+@app.get('/api/notifications/unread-count')
+async def get_unread_notifications_count(
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """获取未读通知数量"""
+    count = db.query(models.Notification).filter(
+        models.Notification.user_id == current_user_id,
+        models.Notification.is_read == False
+    ).count()
+    
+    return {"unread_count": count}
+
+# 用户角色管理相关Pydantic模型
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    role: str
+    is_active: bool
+    is_verified: bool
+    created_at: datetime
+    last_login: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+class UserRoleUpdate(BaseModel):
+    role: str
+
+# 用户角色管理API
+@app.get('/api/users', response_model=List[UserResponse])
+async def get_users(
+    skip: int = 0,
+    limit: int = 50,
+    role: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """获取用户列表（仅管理员）"""
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以查看用户列表")
+    
+    query = db.query(models.User)
+    
+    if role:
+        query = query.filter(models.User.role == role)
+    
+    users = query.order_by(models.User.created_at.desc()).offset(skip).limit(limit).all()
+    
+    return users
+
+@app.get('/api/users/{user_id}', response_model=UserResponse)
+async def get_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """获取用户详情（管理员或用户本人）"""
+    if current_user_id != 1 and current_user_id != user_id:
+        raise HTTPException(status_code=403, detail="无权访问其他用户信息")
+    
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    
+    return user
+
+@app.put('/api/users/{user_id}/role')
+async def update_user_role(
+    user_id: int,
+    role_update: UserRoleUpdate,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """更新用户角色（仅管理员）"""
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以更新用户角色")
+    
+    # 验证角色值
+    valid_roles = ["admin", "editor", "user"]
+    if role_update.role not in valid_roles:
+        raise HTTPException(status_code=400, detail="无效的角色值")
+    
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    
+    # 防止管理员修改自己的角色
+    if user_id == 1:
+        raise HTTPException(status_code=403, detail="不能修改主管理员的角色")
+    
+    user.role = role_update.role
+    db.commit()
+    
+    log.info(f"管理员更新用户 {user_id} 角色为 {role_update.role}")
+    
+    return {"message": "用户角色已更新", "user_id": user_id, "new_role": role_update.role}
+
+# 知识库分类相关Pydantic模型
+class KnowledgeCategoryCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    parent_id: Optional[int] = None
+    sort_order: Optional[int] = 0
+
+class KnowledgeCategoryResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    parent_id: Optional[int] = None
+    sort_order: int
+    is_active: bool
+    created_at: datetime
+    children: Optional[List['KnowledgeCategoryResponse']] = []
+    
+    class Config:
+        from_attributes = True
+
+# 知识库分类API
+@app.get('/api/knowledge-categories', response_model=List[KnowledgeCategoryResponse])
+async def get_knowledge_categories(
+    parent_id: Optional[int] = None,
+    include_children: bool = True,
+    db: Session = Depends(get_db)
+):
+    """获取知识库分类列表"""
+    query = db.query(models.KnowledgeCategory).filter(models.KnowledgeCategory.is_active == True)
+    
+    if parent_id is not None:
+        query = query.filter(models.KnowledgeCategory.parent_id == parent_id)
+    else:
+        query = query.filter(models.KnowledgeCategory.parent_id.is_(None))
+    
+    categories = query.order_by(models.KnowledgeCategory.sort_order).all()
+    
+    if include_children:
+        for category in categories:
+            category.children = db.query(models.KnowledgeCategory).filter(
+                models.KnowledgeCategory.parent_id == category.id,
+                models.KnowledgeCategory.is_active == True
+            ).order_by(models.KnowledgeCategory.sort_order).all()
+    
+    return categories
+
+@app.post('/api/knowledge-categories', response_model=KnowledgeCategoryResponse)
+async def create_knowledge_category(
+    category: KnowledgeCategoryCreate,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """创建知识库分类（仅管理员和编辑者）"""
+    user = db.query(models.User).filter(models.User.id == current_user_id).first()
+    if not user or user.role not in ["admin", "editor"]:
+        raise HTTPException(status_code=403, detail="仅管理员和编辑者可以创建分类")
+    
+    # 检查分类名是否已存在
+    existing = db.query(models.KnowledgeCategory).filter(models.KnowledgeCategory.name == category.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="分类名称已存在")
+    
+    # 如果指定了父分类，验证其是否存在
+    if category.parent_id:
+        parent = db.query(models.KnowledgeCategory).filter(models.KnowledgeCategory.id == category.parent_id).first()
+        if not parent:
+            raise HTTPException(status_code=404, detail="父分类不存在")
+    
+    db_category = models.KnowledgeCategory(
+        name=category.name,
+        description=category.description,
+        parent_id=category.parent_id,
+        sort_order=category.sort_order
+    )
+    
+    db.add(db_category)
+    db.commit()
+    db.refresh(db_category)
+    
+    log.info(f"用户 {current_user_id} 创建知识库分类: {category.name}")
+    
+    return db_category
+
+@app.put('/api/knowledge-categories/{category_id}')
+async def update_knowledge_category(
+    category_id: int,
+    category_update: KnowledgeCategoryCreate,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """更新知识库分类（仅管理员和编辑者）"""
+    user = db.query(models.User).filter(models.User.id == current_user_id).first()
+    if not user or user.role not in ["admin", "editor"]:
+        raise HTTPException(status_code=403, detail="仅管理员和编辑者可以更新分类")
+    
+    category = db.query(models.KnowledgeCategory).filter(models.KnowledgeCategory.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="分类不存在")
+    
+    # 检查新名称是否与其他分类冲突
+    if category_update.name != category.name:
+        existing = db.query(models.KnowledgeCategory).filter(
+            models.KnowledgeCategory.name == category_update.name,
+            models.KnowledgeCategory.id != category_id
+        ).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="分类名称已存在")
+    
+    category.name = category_update.name
+    category.description = category_update.description
+    category.parent_id = category_update.parent_id
+    category.sort_order = category_update.sort_order
+    
+    db.commit()
+    
+    return {"message": "分类已更新"}
+
+@app.delete('/api/knowledge-categories/{category_id}')
+async def delete_knowledge_category(
+    category_id: int,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """删除知识库分类（仅管理员）"""
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以删除分类")
+    
+    category = db.query(models.KnowledgeCategory).filter(models.KnowledgeCategory.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="分类不存在")
+    
+    # 检查是否有子分类
+    children = db.query(models.KnowledgeCategory).filter(models.KnowledgeCategory.parent_id == category_id).count()
+    if children > 0:
+        raise HTTPException(status_code=400, detail="不能删除包含子分类的分类")
+    
+    # 软删除：标记为非活跃状态
+    category.is_active = False
+    db.commit()
+    
+    return {"message": "分类已删除"}
+
+# 邮件模板相关Pydantic模型
+class EmailTemplateCreate(BaseModel):
+    name: str
+    subject: str
+    content: str
+
+class EmailTemplateResponse(BaseModel):
+    id: int
+    name: str
+    subject: str
+    content: str
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class EmailLogResponse(BaseModel):
+    id: int
+    to_email: str
+    subject: str
+    template_name: Optional[str] = None
+    status: str
+    error_message: Optional[str] = None
+    sent_at: Optional[datetime] = None
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# 邮件模板API
+@app.get('/api/email-templates', response_model=List[EmailTemplateResponse])
+async def get_email_templates(
+    skip: int = 0,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """获取邮件模板列表（仅管理员）"""
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以查看邮件模板")
+    
+    templates = db.query(models.EmailTemplate).filter(
+        models.EmailTemplate.is_active == True
+    ).order_by(models.EmailTemplate.created_at.desc()).offset(skip).limit(limit).all()
+    
+    return templates
+
+@app.post('/api/email-templates', response_model=EmailTemplateResponse)
+async def create_email_template(
+    template: EmailTemplateCreate,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """创建邮件模板（仅管理员）"""
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以创建邮件模板")
+    
+    # 检查模板名是否已存在
+    existing = db.query(models.EmailTemplate).filter(models.EmailTemplate.name == template.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="模板名称已存在")
+    
+    db_template = models.EmailTemplate(
+        name=template.name,
+        subject=template.subject,
+        content=template.content
+    )
+    
+    db.add(db_template)
+    db.commit()
+    db.refresh(db_template)
+    
+    log.info(f"管理员创建邮件模板: {template.name}")
+    
+    return db_template
+
+@app.put('/api/email-templates/{template_id}')
+async def update_email_template(
+    template_id: int,
+    template_update: EmailTemplateCreate,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """更新邮件模板（仅管理员）"""
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以更新邮件模板")
+    
+    template = db.query(models.EmailTemplate).filter(models.EmailTemplate.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="模板不存在")
+    
+    # 检查新名称是否与其他模板冲突
+    if template_update.name != template.name:
+        existing = db.query(models.EmailTemplate).filter(
+            models.EmailTemplate.name == template_update.name,
+            models.EmailTemplate.id != template_id
+        ).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="模板名称已存在")
+    
+    template.name = template_update.name
+    template.subject = template_update.subject
+    template.content = template_update.content
+    template.updated_at = datetime.utcnow()
+    
+    db.commit()
+    
+    return {"message": "模板已更新"}
+
+@app.delete('/api/email-templates/{template_id}')
+async def delete_email_template(
+    template_id: int,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """删除邮件模板（仅管理员）"""
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以删除邮件模板")
+    
+    template = db.query(models.EmailTemplate).filter(models.EmailTemplate.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="模板不存在")
+    
+    # 软删除：标记为非活跃状态
+    template.is_active = False
+    db.commit()
+    
+    return {"message": "模板已删除"}
+
+@app.get('/api/email-logs', response_model=List[EmailLogResponse])
+async def get_email_logs(
+    skip: int = 0,
+    limit: int = 50,
+    status: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """获取邮件发送日志（仅管理员）"""
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以查看邮件日志")
+    
+    query = db.query(models.EmailLog)
+    
+    if status:
+        query = query.filter(models.EmailLog.status == status)
+    
+    logs = query.order_by(models.EmailLog.created_at.desc()).offset(skip).limit(limit).all()
+    
+    return logs
 
 # 启动服务器
 if __name__ == "__main__":

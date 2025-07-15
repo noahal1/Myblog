@@ -1,0 +1,215 @@
+/* ===========================
+   精确的暗色模式增强样式
+   只修复必要的元素，避免性能问题
+   =========================== */
+
+/* === 全局基础修复 === */
+.v-theme--dark body {
+  background: rgb(var(--charcoal)) !important;
+  color: rgba(var(--text-primary), 0.9) !important;
+}
+
+.v-theme--dark .v-application {
+  background: rgb(var(--charcoal)) !important;
+}
+
+/* === 导航栏暗色模式 === */
+.v-theme--dark .nav-link {
+  color: rgba(var(--text-primary), 0.9);
+}
+
+.v-theme--dark .nav-link:hover {
+  color: rgba(var(--prussian-blue), 1);
+  background: rgba(var(--prussian-blue), 0.1);
+}
+
+.v-theme--dark .nav-link.active {
+  color: rgba(var(--prussian-blue), 1);
+  background: rgba(var(--prussian-blue), 0.15);
+}
+
+.v-theme--dark .user-menu-trigger {
+  color: rgba(var(--text-primary), 0.9);
+}
+
+.v-theme--dark .user-menu-trigger:hover {
+  background-color: rgba(var(--prussian-blue), 0.1) !important;
+}
+
+/* === 卡片组件暗色模式 === */
+.v-theme--dark .v-card {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal-light), 0.9) 100%) !important;
+  border: 1px solid rgba(var(--mist-gray-dark), 0.2) !important;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 1px 3px rgba(0, 0, 0, 0.5) !important;
+}
+
+.v-theme--dark .v-card:hover {
+  border-color: rgba(var(--prussian-blue), 0.4) !important;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    0 8px 16px rgba(var(--prussian-blue), 0.2) !important;
+}
+
+.v-theme--dark .v-card-title {
+  color: rgba(var(--text-primary), 0.95) !important;
+}
+
+.v-theme--dark .v-card-subtitle {
+  color: rgba(var(--text-secondary), 0.8) !important;
+}
+
+.v-theme--dark .v-card-text {
+  color: rgba(var(--text-primary), 0.85) !important;
+}
+
+/* === 按钮暗色模式 === */
+.v-theme--dark .v-btn--variant-elevated.v-btn--color-primary {
+  background: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.8) 0%,
+    rgba(var(--prussian-blue-light), 0.7) 100%) !important;
+  color: rgba(var(--pearl-white), 1) !important;
+  box-shadow: 0 4px 14px rgba(var(--prussian-blue), 0.3), 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+.v-theme--dark .v-btn--variant-elevated.v-btn--color-primary:hover {
+  background: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.9) 0%,
+    rgba(var(--prussian-blue-light), 0.8) 100%) !important;
+  box-shadow: 0 8px 25px rgba(var(--prussian-blue), 0.4), 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.v-theme--dark .v-btn--variant-text.v-btn--color-primary {
+  color: rgba(var(--prussian-blue), 1) !important;
+}
+
+.v-theme--dark .v-btn--variant-text.v-btn--color-primary:hover {
+  background: rgba(var(--prussian-blue), 0.1) !important;
+  color: rgba(var(--prussian-blue-light), 1) !important;
+}
+
+.v-theme--dark .v-btn--variant-outlined.v-btn--color-primary {
+  border-color: rgba(var(--prussian-blue), 0.6) !important;
+  color: rgba(var(--prussian-blue), 1) !important;
+}
+
+.v-theme--dark .v-btn--variant-outlined.v-btn--color-primary:hover {
+  background: rgba(var(--prussian-blue), 0.1) !important;
+  border-color: rgba(var(--prussian-blue-light), 0.8) !important;
+  color: rgba(var(--prussian-blue-light), 1) !important;
+}
+
+/* === 表单组件暗色模式 === */
+.v-theme--dark .v-text-field .v-field {
+  background: rgba(var(--charcoal-light), 0.8) !important;
+  border-color: rgba(var(--mist-gray-dark), 0.3) !important;
+}
+
+.v-theme--dark .v-text-field .v-field:hover {
+  border-color: rgba(var(--prussian-blue), 0.5) !important;
+}
+
+.v-theme--dark .v-text-field .v-field.v-field--focused {
+  border-color: rgba(var(--prussian-blue), 0.8) !important;
+  box-shadow: 0 0 0 2px rgba(var(--prussian-blue), 0.2) !important;
+}
+
+.v-theme--dark .v-text-field input {
+  color: rgba(var(--text-primary), 0.9) !important;
+}
+
+.v-theme--dark .v-text-field .v-label {
+  color: rgba(var(--text-secondary), 0.8) !important;
+}
+
+.v-theme--dark .v-text-field .v-label.v-label--active {
+  color: rgba(var(--prussian-blue), 1) !important;
+}
+
+/* === 应用栏暗色模式 === */
+.v-theme--dark .v-app-bar {
+  background: linear-gradient(180deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal-light), 0.9) 100%) !important;
+  border-bottom: 1px solid rgba(var(--mist-gray-dark), 0.2) !important;
+  backdrop-filter: var(--blur-lg) !important;
+  -webkit-backdrop-filter: var(--blur-lg) !important;
+}
+
+/* === 滚动条暗色模式 === */
+.v-theme--dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.v-theme--dark ::-webkit-scrollbar-track {
+  background: rgba(var(--charcoal-light), 0.3);
+  border-radius: 4px;
+}
+
+.v-theme--dark ::-webkit-scrollbar-thumb {
+  background: rgba(var(--mist-gray-dark), 0.6);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.v-theme--dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--prussian-blue), 0.7);
+}
+
+/* === 选择文本暗色模式 === */
+.v-theme--dark ::selection {
+  background: rgba(var(--prussian-blue), 0.3) !important;
+  color: rgba(var(--text-primary), 1) !important;
+}
+
+.v-theme--dark ::-moz-selection {
+  background: rgba(var(--prussian-blue), 0.3) !important;
+  color: rgba(var(--text-primary), 1) !important;
+}
+
+/* === 焦点状态暗色模式 === */
+.v-theme--dark *:focus-visible {
+  outline: 2px solid rgba(var(--prussian-blue), 0.8) !important;
+  outline-offset: 2px !important;
+}
+
+/* === 专门修复黄色背景问题 === */
+/* 只针对可能出现黄色背景的特定元素 */
+.v-theme--dark .v-main,
+.v-theme--dark .v-main__wrap,
+.v-theme--dark #main-content {
+  background: rgb(var(--charcoal)) !important;
+}
+
+/* 确保主要容器有正确的背景 */
+.v-theme--dark .v-container:not(.v-card .v-container) {
+  background: transparent !important;
+}
+
+/* 修复可能的Vuetify默认样式冲突 */
+.v-theme--dark .v-application__wrap {
+  background: rgb(var(--charcoal)) !important;
+}
+
+/* === Footer暗色模式 === */
+.v-theme--dark .v-footer {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal-light), 0.9) 50%,
+    rgba(var(--prussian-blue), 0.1) 100%) !important;
+  border-top: 1px solid rgba(var(--prussian-blue), 0.3) !important;
+  color: rgba(var(--text-primary), 0.9) !important;
+}
+
+.v-theme--dark .footer-container {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal-light), 0.9) 50%,
+    rgba(var(--prussian-blue), 0.1) 100%) !important;
+  border-top: 1px solid rgba(var(--prussian-blue), 0.3) !important;
+  color: rgba(var(--text-primary), 0.9) !important;
+}

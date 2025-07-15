@@ -10,6 +10,7 @@ import ImageManager from '../views/ImageManager.vue'
 import TestUpload from '../views/TestUpload.vue'
 import TestImageList from '../views/TestImageList.vue'
 import ImageTest from '../views/ImageTest.vue'
+import ColorSchemeDemo from '../views/ColorSchemeDemo.vue'
 import { useUserStore } from '../stores/user'
 
 const routes = [
@@ -72,6 +73,11 @@ const routes = [
     path: '/image-test',
     name: 'image-test',
     component: ImageTest
+  },
+  {
+    path: '/color-demo',
+    name: 'color-demo',
+    component: ColorSchemeDemo
   }
 ]
 

@@ -1,0 +1,444 @@
+/* ===========================
+   高端按钮系统 - 奢华配色方案
+   =========================== */
+
+/* 全局按钮样式重置 */
+.v-btn {
+  font-weight: 500;
+  letter-spacing: 0.025rem;
+  text-transform: none !important;
+  border-radius: 8px !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* 移除所有按钮的激活状态背景 */
+.v-btn:active,
+.v-btn:focus,
+.v-btn.v-btn--active {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* ===========================
+   主要按钮 - 撞色设计（普鲁士蓝 + 雾灰色）
+   =========================== */
+.v-btn--variant-elevated.v-btn--color-primary {
+  background: var(--contrast-gradient-primary) !important;
+  color: rgb(var(--pearl-white)) !important;
+  box-shadow: var(--shadow-contrast-md) !important;
+  border: 1px solid rgba(var(--prussian-blue), 0.3) !important;
+}
+
+.v-btn--variant-elevated.v-btn--color-primary:hover {
+  background: var(--contrast-gradient-secondary) !important;
+  box-shadow: var(--shadow-contrast-lg) !important;
+  transform: translateY(-2px) !important;
+}
+
+.v-btn--variant-elevated.v-btn--color-primary:active {
+  background: linear-gradient(135deg,
+    rgb(var(--prussian-blue)) 0%,
+    rgb(var(--prussian-blue-light)) 100%) !important;
+  box-shadow: 0 2px 8px rgba(var(--prussian-blue), 0.2) !important;
+  transform: translateY(0) !important;
+}
+
+/* ===========================
+   成功按钮 - 森林绿系列
+   =========================== */
+.v-btn--variant-elevated.v-btn--color-success {
+  background: linear-gradient(135deg, #38A169 0%, #2F855A 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(56, 161, 105, 0.25), 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.v-btn--variant-elevated.v-btn--color-success:hover {
+  background: linear-gradient(135deg, #48BB78 0%, #38A169 100%) !important;
+  box-shadow: 0 8px 25px rgba(56, 161, 105, 0.35), 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-2px) !important;
+}
+
+.v-btn--variant-elevated.v-btn--color-error {
+  background: linear-gradient(135deg, #E53E3E 0%, #C53030 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(229, 62, 62, 0.25), 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.v-btn--variant-elevated.v-btn--color-error:hover {
+  background: linear-gradient(135deg, #F56565 0%, #E53E3E 100%) !important;
+  box-shadow: 0 8px 25px rgba(229, 62, 62, 0.35), 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-2px) !important;
+}
+
+.v-btn--variant-elevated.v-btn--color-warning {
+  background: linear-gradient(135deg, #DD6B20 0%, #C05621 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(221, 107, 32, 0.25), 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.v-btn--variant-elevated.v-btn--color-warning:hover {
+  background: linear-gradient(135deg, #ED8936 0%, #DD6B20 100%) !important;
+  box-shadow: 0 8px 25px rgba(221, 107, 32, 0.35), 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===========================
+   信息按钮 - 蓝宝石蓝系列
+   =========================== */
+.v-btn--variant-elevated.v-btn--color-info {
+  background: linear-gradient(135deg, #3182CE 0%, #2C5282 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(49, 130, 206, 0.25), 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.v-btn--variant-elevated.v-btn--color-info:hover {
+  background: linear-gradient(135deg, #4299E1 0%, #3182CE 100%) !important;
+  box-shadow: 0 8px 25px rgba(49, 130, 206, 0.35), 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-2px) !important;
+}
+
+
+.v-btn--variant-text {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.v-btn--variant-text.v-btn--color-primary {
+  color: #1A202C !important;
+}
+
+.v-btn--variant-text.v-btn--color-primary:hover {
+  background: rgba(26, 32, 44, 0.04) !important;
+  color: #2D3748 !important;
+}
+
+.v-btn--variant-text.v-btn--color-success {
+  color: #38A169 !important;
+}
+
+.v-btn--variant-text.v-btn--color-success:hover {
+  background: rgba(56, 161, 105, 0.04) !important;
+  color: #2F855A !important;
+}
+
+.v-btn--variant-text.v-btn--color-error {
+  color: #E53E3E !important;
+}
+
+.v-btn--variant-text.v-btn--color-error:hover {
+  background: rgba(229, 62, 62, 0.04) !important;
+  color: #C53030 !important;
+}
+
+.v-btn--variant-text.v-btn--color-info {
+  color: #3182CE !important;
+}
+
+.v-btn--variant-text.v-btn--color-info:hover {
+  background: rgba(49, 130, 206, 0.04) !important;
+  color: #2C5282 !important;
+}
+
+/* ===========================
+   轮廓按钮 - 精致边框
+   =========================== */
+.v-btn--variant-outlined {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+}
+
+.v-btn--variant-outlined.v-btn--color-primary {
+  border-color: rgba(var(--mist-gray), 0.8) !important;
+  color: rgb(var(--prussian-blue)) !important;
+  background: transparent !important;
+}
+
+.v-btn--variant-outlined.v-btn--color-primary:hover {
+  background: var(--mist-gradient) !important;
+  border-color: rgba(var(--prussian-blue), 0.8) !important;
+  color: rgb(var(--prussian-blue)) !important;
+  box-shadow: var(--shadow-contrast-sm) !important;
+}
+
+.v-btn--variant-outlined.v-btn--color-success {
+  border-color: #38A169 !important;
+  color: #38A169 !important;
+}
+
+.v-btn--variant-outlined.v-btn--color-success:hover {
+  background: rgba(56, 161, 105, 0.04) !important;
+  border-color: #2F855A !important;
+  color: #2F855A !important;
+  box-shadow: 0 2px 8px rgba(56, 161, 105, 0.1) !important;
+}
+
+.v-btn--variant-outlined.v-btn--color-error {
+  border-color: #E53E3E !important;
+  color: #E53E3E !important;
+}
+
+.v-btn--variant-outlined.v-btn--color-error:hover {
+  background: rgba(229, 62, 62, 0.04) !important;
+  border-color: #C53030 !important;
+  color: #C53030 !important;
+  box-shadow: 0 2px 8px rgba(229, 62, 62, 0.1) !important;
+}
+
+.v-btn--variant-outlined.v-btn--color-info {
+  border-color: #3182CE !important;
+  color: #3182CE !important;
+}
+
+.v-btn--variant-outlined.v-btn--color-info:hover {
+  background: rgba(49, 130, 206, 0.04) !important;
+  border-color: #2C5282 !important;
+  color: #2C5282 !important;
+  box-shadow: 0 2px 8px rgba(49, 130, 206, 0.1) !important;
+}
+
+.v-btn--size-small {
+  font-size: 0.875rem !important;
+  padding: 0 16px !important;
+  height: 36px !important;
+  border-radius: 6px !important;
+}
+
+.v-btn--size-large {
+  font-size: 1rem !important;
+  padding: 0 32px !important;
+  height: 48px !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+}
+
+.v-btn--icon {
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.v-btn--icon:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-1px) !important;
+}
+
+.luxury-btn {
+  background: linear-gradient(135deg, #1A202C 0%, #2D3748 50%, #4A5568 100%) !important;
+  color: white !important;
+  box-shadow: 
+    0 10px 30px rgba(26, 32, 44, 0.2),
+    0 4px 10px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.luxury-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.luxury-btn:hover::before {
+  left: 100%;
+}
+
+.luxury-btn:hover {
+  background: linear-gradient(135deg, #2D3748 0%, #4A5568 50%, #718096 100%) !important;
+  box-shadow: 
+    0 15px 40px rgba(26, 32, 44, 0.3),
+    0 8px 20px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* 极简按钮 */
+.minimal-btn {
+  background: rgba(26, 32, 44, 0.02) !important;
+  color: #1A202C !important;
+  border: 1px solid rgba(26, 32, 44, 0.1) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.minimal-btn:hover {
+  background: rgba(26, 32, 44, 0.06) !important;
+  border-color: rgba(26, 32, 44, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(-1px) !important;
+}
+
+.v-btn-group .v-btn {
+  border-radius: 0 !important;
+  border-right: 1px solid rgba(26, 32, 44, 0.1) !important;
+}
+
+.v-btn-group .v-btn:first-child {
+  border-top-left-radius: 8px !important;
+  border-bottom-left-radius: 8px !important;
+}
+
+.v-btn-group .v-btn:last-child {
+  border-top-right-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+  border-right: none !important;
+}
+
+/* ===========================
+   暗色模式适配 - 使用 Vuetify 主题类
+   =========================== */
+.v-theme--dark .v-btn {
+  color: rgba(var(--text-primary), 0.9) !important;
+  background: rgba(var(--charcoal-light), 0.8) !important;
+  border-color: rgba(var(--mist-gray-dark), 0.3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.v-theme--dark .v-btn:hover {
+  background: rgba(var(--charcoal-light), 0.9) !important;
+  border-color: rgba(var(--prussian-blue), 0.5) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.v-theme--dark .v-btn--variant-elevated.v-btn--color-primary {
+  background: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.8) 0%,
+    rgba(var(--prussian-blue-light), 0.7) 100%) !important;
+  color: rgba(var(--pearl-white), 1) !important;
+  box-shadow: 0 4px 14px rgba(var(--prussian-blue), 0.3), 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+.v-theme--dark .v-btn--variant-elevated.v-btn--color-primary:hover {
+  background: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.9) 0%,
+    rgba(var(--prussian-blue-light), 0.8) 100%) !important;
+  box-shadow: 0 8px 25px rgba(var(--prussian-blue), 0.4), 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.v-theme--dark .v-btn--variant-text.v-btn--color-primary {
+  color: rgba(var(--prussian-blue), 1) !important;
+}
+
+.v-theme--dark .v-btn--variant-text.v-btn--color-primary:hover {
+  background: rgba(var(--prussian-blue), 0.1) !important;
+  color: rgba(var(--prussian-blue-light), 1) !important;
+}
+
+.v-theme--dark .v-btn--variant-outlined.v-btn--color-primary {
+  border-color: rgba(var(--prussian-blue), 0.6) !important;
+  color: rgba(var(--prussian-blue), 1) !important;
+}
+
+.v-theme--dark .v-btn--variant-outlined.v-btn--color-primary:hover {
+  background: rgba(var(--prussian-blue), 0.1) !important;
+  border-color: rgba(var(--prussian-blue-light), 0.8) !important;
+  color: rgba(var(--prussian-blue-light), 1) !important;
+}
+
+.v-theme--dark .luxury-btn {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.9) 0%,
+    rgba(var(--charcoal-light), 0.8) 50%,
+    rgba(var(--mist-gray-dark), 0.7) 100%) !important;
+  color: rgba(var(--pearl-white), 1) !important;
+  border-color: rgba(var(--mist-gray), 0.3) !important;
+}
+
+.v-theme--dark .minimal-btn {
+  background: rgba(var(--charcoal-light), 0.6) !important;
+  color: rgba(var(--text-primary), 0.9) !important;
+  border-color: rgba(var(--mist-gray-dark), 0.4) !important;
+}
+
+.v-theme--dark .minimal-btn:hover {
+  background: rgba(var(--charcoal-light), 0.8) !important;
+  border-color: rgba(var(--prussian-blue), 0.5) !important;
+}
+
+/* ===========================
+   响应式优化
+   =========================== */
+@media (max-width: 600px) {
+  .v-btn {
+    font-size: 0.875rem !important;
+    padding: 0 16px !important;
+    height: 40px !important;
+  }
+  
+  .v-btn--size-large {
+    height: 44px !important;
+    padding: 0 24px !important;
+  }
+  
+  .v-btn--size-small {
+    height: 32px !important;
+    padding: 0 12px !important;
+  }
+}
+
+.v-btn--disabled {
+  background: rgba(26, 32, 44, 0.04) !important;
+  color: rgba(26, 32, 44, 0.38) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  border-color: rgba(26, 32, 44, 0.12) !important;
+}
+
+.v-btn--disabled:hover {
+  background: rgba(26, 32, 44, 0.04) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ===========================
+   加载状态
+   =========================== */
+.v-btn--loading {
+  pointer-events: none;
+  position: relative;
+}
+
+.v-btn--loading .v-btn__content {
+  opacity: 0.6;
+}
+
+
+@keyframes button-press {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+.v-btn:active {
+  animation: button-press 0.15s ease-out;
+}
+
+/* 焦点环 */
+.v-btn:focus-visible {
+  outline: 2px solid #3182CE;
+  outline-offset: 2px;
+}
+
+/* 按钮内图标对齐 */
+.v-btn .v-icon {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.v-btn .v-btn__content .v-icon + span,
+.v-btn .v-btn__content span + .v-icon {
+  margin-left: 8px;
+}

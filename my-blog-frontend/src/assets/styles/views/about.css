@@ -92,7 +92,6 @@
   background: var(--glass-gradient);
   backdrop-filter: var(--blur-lg);
   -webkit-backdrop-filter: var(--blur-lg);
-  border: 1px solid var(--glass-border-light);
   border-radius: var(--radius-organic-xl);
   box-shadow: var(--shadow-glass-xl);
   padding: 0;
@@ -111,7 +110,7 @@
 
 /* === 卡片头部 === */
 .glass-card-header {
-  padding: 32px;
+  padding: 28px;
   text-align: center;
   background: linear-gradient(135deg, 
     rgba(var(--primary-blue), 0.05) 0%,
@@ -288,9 +287,7 @@
     height: 150px;
   }
   
-  .glass-name {
-    font-size: 1.5rem;
-  }
+  
   
   .glass-social-btn {
     width: 44px;

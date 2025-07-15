@@ -15,9 +15,6 @@ export default {
 
 <template>
   <v-app>
-    <!-- 无障碍跳转链接 -->
-    <a href="#main-content" class="skip-link">跳转到主要内容</a>
-
     <nav-bar @toggle-theme="toggleTheme" :current-theme="currentTheme" />
     <v-main id="main-content" role="main">
       <router-view v-slot="{ Component }">
@@ -37,6 +34,7 @@ export default {
 @import './assets/styles/glassmorphism.css';
 @import './assets/styles/microinteractions.css';
 @import './assets/styles/performance.css';
+@import './assets/styles/premium-theme.css';
 @import './assets/styles/views/article.css';
 @import './assets/styles/views/about.css';
 @import './assets/styles/views/knowledge.css';
@@ -73,9 +71,9 @@ body {
 }
 
 :root {
-  --primary-blue: 63, 81, 181;
-  --accent-orange: 255, 145, 55;
-  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --primary-blue: var(--prussian-blue);
+  --accent-orange: var(--sage-green);
+  --card-shadow: 0 4px 20px rgba(var(--prussian-blue), 0.08);
   --transition-default: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow-text: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
   --transition-medium: 1.5s cubic-bezier(0.4, 0, 0.2, 1);

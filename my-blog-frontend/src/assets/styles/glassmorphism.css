@@ -25,9 +25,9 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.4) 50%, 
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(var(--mist-gray), 0.6) 50%,
     transparent 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -37,7 +37,7 @@
   background: var(--glass-gradient-hover);
   box-shadow: var(--shadow-glass-lg);
   transform: translateY(-4px) scale(1.02);
-  border-color: rgba(var(--primary-blue), 0.3);
+  border-color: rgba(var(--prussian-blue), 0.3);
 }
 
 .glass-card:hover::before {
@@ -46,33 +46,33 @@
 
 /* 强化玻璃效果 */
 .glass-card-strong {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.2) 100%);
+  background: linear-gradient(135deg,
+    rgba(var(--pearl-white), 0.95) 0%,
+    rgba(var(--mist-gray-light), 0.8) 100%);
   backdrop-filter: var(--blur-lg);
   -webkit-backdrop-filter: var(--blur-lg);
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border: 1.5px solid rgba(var(--mist-gray), 0.4);
 }
 
 /* 微妙玻璃效果 */
 .glass-card-subtle {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0.05) 100%);
+  background: linear-gradient(135deg,
+    rgba(var(--pearl-white), 0.7) 0%,
+    rgba(var(--mist-gray-light), 0.4) 100%);
   backdrop-filter: var(--blur-sm);
   -webkit-backdrop-filter: var(--blur-sm);
-  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  border: 0.5px solid rgba(var(--mist-gray), 0.2);
 }
 
 /* === 导航栏玻璃效果 === */
 .glass-navbar {
-  background: linear-gradient(180deg, 
-    rgba(255, 255, 255, 0.8) 0%,
-    rgba(255, 255, 255, 0.6) 100%);
+  background: linear-gradient(180deg,
+    rgba(var(--pearl-white), 0.95) 0%,
+    rgba(var(--mist-gray-light), 0.85) 100%);
   backdrop-filter: var(--blur-xl);
   -webkit-backdrop-filter: var(--blur-xl);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(var(--mist-gray), 0.3);
+  box-shadow: 0 4px 24px rgba(var(--prussian-blue), 0.08);
   position: relative;
 }
 
@@ -83,9 +83,9 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(var(--primary-blue), 0.3) 50%, 
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(var(--prussian-blue), 0.4) 50%,
     transparent 100%);
 }
 

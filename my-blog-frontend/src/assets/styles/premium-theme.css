@@ -1,0 +1,299 @@
+.premium-card {
+  background: linear-gradient(135deg,
+    rgba(var(--pearl-white), 0.95) 0%,
+    rgba(var(--mist-gray-light), 0.8) 100%);
+  border: 1px solid rgba(var(--mist-gray), 0.3);
+  border-radius: var(--radius-organic-md);
+  box-shadow: 
+    0 8px 32px rgba(var(--prussian-blue), 0.08),
+    0 2px 8px rgba(var(--mist-gray-dark), 0.04);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    rgba(var(--prussian-blue), 0.6) 0%,
+    rgba(var(--sage-green), 0.4) 50%,
+    rgba(var(--soft-lavender), 0.3) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.premium-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 
+    0 16px 64px rgba(var(--prussian-blue), 0.12),
+    0 4px 16px rgba(var(--mist-gray-dark), 0.08);
+  border-color: rgba(var(--prussian-blue), 0.4);
+}
+
+.premium-card:hover::before {
+  opacity: 1;
+}
+
+/* 高级按钮样式 */
+.premium-btn {
+  background: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.9) 0%,
+    rgba(var(--prussian-blue-light), 0.8) 100%);
+  color: rgb(var(--pearl-white));
+  border: 1px solid rgba(var(--prussian-blue), 0.6);
+  border-radius: var(--radius-organic-sm);
+  padding: 12px 24px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(var(--pearl-white), 0.2) 50%,
+    transparent 100%);
+  transition: left 0.5s ease;
+}
+
+.premium-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 32px rgba(var(--prussian-blue), 0.3),
+    0 2px 8px rgba(var(--prussian-blue), 0.2);
+  background: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 1) 0%,
+    rgba(var(--prussian-blue-light), 0.9) 100%);
+}
+
+.premium-btn:hover::before {
+  left: 100%;
+}
+
+/* 次要按钮样式 */
+.premium-btn-secondary {
+  background: linear-gradient(135deg,
+    rgba(var(--sage-green), 0.8) 0%,
+    rgba(var(--mist-gray), 0.6) 100%);
+  color: rgb(var(--charcoal));
+  border: 1px solid rgba(var(--sage-green), 0.5);
+}
+
+.premium-btn-secondary:hover {
+  background: linear-gradient(135deg,
+    rgba(var(--sage-green), 0.9) 0%,
+    rgba(var(--mist-gray), 0.7) 100%);
+  color: rgb(var(--prussian-blue));
+}
+
+/* 高级输入框样式 */
+.premium-input {
+  background: rgba(var(--pearl-white), 0.8);
+  border: 1px solid rgba(var(--mist-gray), 0.4);
+  border-radius: var(--radius-organic-sm);
+  padding: 12px 16px;
+  color: rgb(var(--charcoal));
+  transition: all 0.3s ease;
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+}
+
+.premium-input:focus {
+  outline: none;
+  border-color: rgba(var(--prussian-blue), 0.6);
+  box-shadow: 
+    0 0 0 3px rgba(var(--prussian-blue), 0.1),
+    0 4px 16px rgba(var(--prussian-blue), 0.08);
+  background: rgba(var(--pearl-white), 0.95);
+}
+
+.premium-input::placeholder {
+  color: rgb(var(--mist-gray-dark));
+}
+
+/* 高级标签样式 */
+.premium-chip {
+  background: linear-gradient(135deg,
+    rgba(var(--mist-gray-light), 0.8) 0%,
+    rgba(var(--pearl-white), 0.9) 100%);
+  color: rgb(var(--prussian-blue));
+  border: 1px solid rgba(var(--mist-gray), 0.3);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.premium-chip:hover {
+  background: linear-gradient(135deg,
+    rgba(var(--sage-green), 0.2) 0%,
+    rgba(var(--mist-gray-light), 0.9) 100%);
+  border-color: rgba(var(--sage-green), 0.4);
+  transform: translateY(-1px);
+}
+
+.premium-chip.active {
+  background: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.9) 0%,
+    rgba(var(--prussian-blue-light), 0.8) 100%);
+  color: rgb(var(--pearl-white));
+  border-color: rgba(var(--prussian-blue), 0.6);
+}
+
+/* 高级渐变文字 */
+.premium-gradient-text {
+  background: linear-gradient(135deg,
+    rgb(var(--prussian-blue)) 0%,
+    rgb(var(--sage-green)) 50%,
+    rgb(var(--soft-lavender)) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* 高级分割线 */
+.premium-divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(var(--mist-gray), 0.6) 20%,
+    rgba(var(--prussian-blue), 0.3) 50%,
+    rgba(var(--mist-gray), 0.6) 80%,
+    transparent 100%);
+  margin: 24px 0;
+}
+
+/* 高级阴影效果 */
+.premium-shadow-sm {
+  box-shadow: 0 4px 16px rgba(var(--prussian-blue), 0.06);
+}
+
+.premium-shadow-md {
+  box-shadow: 0 8px 32px rgba(var(--prussian-blue), 0.1);
+}
+
+.premium-shadow-lg {
+  box-shadow: 0 16px 64px rgba(var(--prussian-blue), 0.12);
+}
+
+/* 高级悬浮效果 */
+.premium-hover-lift {
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.premium-hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* 高级背景渐变 */
+.premium-bg-gradient {
+  background: linear-gradient(135deg,
+    rgba(var(--pearl-white), 1) 0%,
+    rgba(var(--mist-gray-light), 0.8) 50%,
+    rgba(var(--warm-beige), 0.6) 100%);
+}
+
+/* === 暗色模式适配 - 使用 Vuetify 主题类 === */
+.v-theme--dark .premium-card {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal-light), 0.9) 50%,
+    rgba(var(--prussian-blue), 0.1) 100%);
+  border: 1px solid rgba(var(--mist-gray-dark), 0.3);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(var(--prussian-blue), 0.1);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+}
+
+.v-theme--dark .premium-card:hover {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.98) 0%,
+    rgba(var(--charcoal-light), 0.95) 50%,
+    rgba(var(--prussian-blue), 0.15) 100%);
+  border-color: rgba(var(--prussian-blue), 0.5);
+  box-shadow:
+    0 16px 64px rgba(0, 0, 0, 0.5),
+    0 4px 16px rgba(var(--prussian-blue), 0.2);
+}
+
+.v-theme--dark .premium-input {
+  background: rgba(var(--charcoal-light), 0.8);
+  color: rgba(var(--pearl-white), 0.95);
+  border: 1px solid rgba(var(--mist-gray-dark), 0.4);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+}
+
+.v-theme--dark .premium-input:focus {
+  border-color: rgba(var(--prussian-blue), 0.6);
+  box-shadow: 0 0 0 2px rgba(var(--prussian-blue), 0.2);
+}
+
+.v-theme--dark .premium-chip {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal-light), 0.9) 0%,
+    rgba(var(--prussian-blue), 0.2) 100%);
+  color: rgba(var(--text-primary), 0.9);
+  border: 1px solid rgba(var(--mist-gray-dark), 0.3);
+}
+
+.v-theme--dark .premium-chip:hover {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal-light), 0.95) 0%,
+    rgba(var(--prussian-blue), 0.3) 100%);
+  border-color: rgba(var(--prussian-blue), 0.5);
+}
+
+.v-theme--dark .premium-bg-gradient {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 1) 0%,
+    rgba(var(--charcoal-light), 0.95) 30%,
+    rgba(var(--prussian-blue), 0.1) 70%,
+    rgba(var(--prussian-blue-light), 0.05) 100%);
+}
+
+.v-theme--dark .premium-btn {
+  background: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.9) 0%,
+    rgba(var(--prussian-blue-light), 0.8) 100%);
+  color: rgba(var(--pearl-white), 1);
+  border-color: rgba(var(--prussian-blue), 0.7);
+}
+
+.v-theme--dark .premium-btn:hover {
+  background: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 1) 0%,
+    rgba(var(--prussian-blue-light), 0.9) 100%);
+  box-shadow:
+    0 8px 32px rgba(var(--prussian-blue), 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.v-theme--dark .premium-btn-secondary {
+  background: linear-gradient(135deg,
+    rgba(var(--sage-green), 0.8) 0%,
+    rgba(var(--mist-gray-dark), 0.6) 100%);
+  color: rgba(var(--text-primary), 0.95);
+  border-color: rgba(var(--sage-green), 0.6);
+}

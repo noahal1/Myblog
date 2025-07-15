@@ -3,70 +3,233 @@
 ======================*/
 
 :root {
+  /* === 核心色彩系统 === */
   /* 主色调 */
-  --primary-blue: 0, 49, 83;/* 普鲁士蓝*/  
-  --accent-grey: 229, 221, 215; /*雾灰色*/
-  --secondary-purple: 156, 39, 176;
-  --accent-orange: 255, 109, 0; 
-  
-  /* 渐变与效果 */
+  --primary-blue: 0, 49, 83;        /* 普鲁士蓝 */
+  --prussian-blue: 0, 49, 83;       /* 普鲁士蓝 */
+  --prussian-blue-light: 52, 84, 122; /* 浅普鲁士蓝 */
+  --secondary-purple: 156, 39, 176;  /* 紫色 */
+  --accent-orange: 255, 109, 0;      /* 橙色 */
+
+  /* 中性色调 */
+  --pearl-white: 255, 255, 255;      /* 珍珠白 */
+  --mist-gray: 229, 221, 215;        /* 雾灰色 */
+  --mist-gray-light: 245, 240, 235;  /* 浅雾灰 */
+  --mist-gray-dark: 200, 190, 180;   /* 深雾灰 */
+  --charcoal: 33, 33, 33;            /* 炭黑 */
+  --charcoal-light: 66, 66, 66;      /* 浅炭黑 */
+
+  /* 辅助色调 */
+  --sage-green: 106, 153, 78;        /* 鼠尾草绿 */
+  --soft-lavender: 186, 164, 204;    /* 柔和薰衣草 */
+  --accent-gold: 255, 193, 7;        /* 金色 */
+  --accent-cyan: 0, 188, 212;        /* 青色 */
+  --accent-emerald: 76, 175, 80;     /* 翡翠绿 */
+
+  /* === 撞色设计玻璃拟态效果 === */
+  /* 基于普鲁士蓝和雾灰色的撞色设计 */
+  --glass-bg-light: rgba(var(--mist-gray), 0.3);
+  --glass-bg-dark: rgba(var(--prussian-blue), 0.1);
+  --glass-border-light: rgba(var(--prussian-blue), 0.2);
+  --glass-border-dark: rgba(var(--mist-gray), 0.15);
+  --glass-shadow-light: 0 8px 32px rgba(var(--prussian-blue), 0.15);
+  --glass-shadow-dark: 0 8px 32px rgba(var(--prussian-blue), 0.25);
+
+  /* 撞色玻璃渐变 */
+  --glass-gradient: linear-gradient(135deg,
+    rgba(var(--mist-gray), 0.2) 0%,
+    rgba(var(--prussian-blue), 0.05) 50%,
+    rgba(var(--mist-gray), 0.1) 100%);
+  --glass-gradient-hover: linear-gradient(135deg,
+    rgba(var(--mist-gray), 0.3) 0%,
+    rgba(var(--prussian-blue), 0.1) 50%,
+    rgba(var(--mist-gray), 0.15) 100%);
+
+  /* === 模糊效果 === */
+  --blur-xs: blur(2px);
+  --blur-sm: blur(4px);
+  --blur-md: blur(8px);
+  --blur-lg: blur(16px);
+  --blur-xl: blur(24px);
+
+  /* === 撞色阴影系统 === */
+  /* 基于普鲁士蓝的优雅阴影 */
+  --shadow-glass-sm: 0 2px 8px rgba(var(--prussian-blue), 0.12);
+  --shadow-glass-md: 0 4px 16px rgba(var(--prussian-blue), 0.18);
+  --shadow-glass-lg: 0 8px 32px rgba(var(--prussian-blue), 0.25);
+  --shadow-glass-xl: 0 16px 64px rgba(var(--prussian-blue), 0.3);
+
+  /* 撞色组合阴影 */
+  --shadow-contrast-sm: 0 2px 8px rgba(var(--prussian-blue), 0.1), 0 1px 4px rgba(var(--mist-gray), 0.2);
+  --shadow-contrast-md: 0 4px 16px rgba(var(--prussian-blue), 0.15), 0 2px 8px rgba(var(--mist-gray), 0.25);
+  --shadow-contrast-lg: 0 8px 32px rgba(var(--prussian-blue), 0.2), 0 4px 16px rgba(var(--mist-gray), 0.3);
+  --shadow-contrast-xl: 0 16px 64px rgba(var(--prussian-blue), 0.25), 0 8px 32px rgba(var(--mist-gray), 0.35);
+
+  /* === 圆角系统 === */
+  --radius-organic-xs: 4px;
+  --radius-organic-sm: 8px;
+  --radius-organic-md: 12px;
+  --radius-organic-lg: 16px;
+  --radius-organic-xl: 24px;
+
+  /* === 撞色渐变系统 === */
   --gradient-angle: 135deg;
-  --neon-gradient: linear-gradient(
-    var(--gradient-angle),
-    rgba(var(--primary-blue), 0.8) 0%,
-    rgba(var(--secondary-purple), 0.6) 50%,
-    rgba(var(--accent-orange), 0.4) 100%
-  );
+
+  /* 主要撞色渐变 - 普鲁士蓝到雾灰色 */
+  --contrast-gradient-primary: linear-gradient(var(--gradient-angle),
+    rgba(var(--prussian-blue), 0.9) 0%,
+    rgba(var(--mist-gray), 0.7) 100%);
+  --contrast-gradient-secondary: linear-gradient(var(--gradient-angle),
+    rgba(var(--mist-gray), 0.8) 0%,
+    rgba(var(--prussian-blue), 0.6) 100%);
+
+  /* 撞色玻璃渐变 */
+  --prussian-gradient: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.15) 0%,
+    rgba(var(--mist-gray), 0.08) 50%,
+    rgba(var(--prussian-blue), 0.05) 100%);
+  --mist-gradient: linear-gradient(135deg,
+    rgba(var(--mist-gray), 0.2) 0%,
+    rgba(var(--prussian-blue), 0.1) 50%,
+    rgba(var(--mist-gray), 0.15) 100%);
+
+  /* 撞色霓虹渐变 */
+  --neon-gradient: linear-gradient(var(--gradient-angle),
+    rgba(var(--prussian-blue), 0.8) 0%,
+    rgba(var(--mist-gray), 0.6) 30%,
+    rgba(var(--prussian-blue), 0.9) 70%,
+    rgba(var(--mist-gray), 0.4) 100%);
+
+  /* === 阴影与效果 === */
   --card-shadow: 0 8px 32px rgba(var(--primary-blue), 0.15);
   --hover-shadow: 0 12px 36px rgba(var(--secondary-purple), 0.25);
   --card-hover-elevate: translateY(-5px);
-  
-  /* 文本与边框 */
+
+  /* === 文本颜色 === */
   --text-primary: 33, 33, 33;
   --text-secondary: 97, 97, 97;
   --text-tertiary: 120, 120, 120;
+
+  /* === 边框 === */
   --border-radius: 12px;
   --border-radius-md: 8px;
   --border-radius-sm: 4px;
   --border-subtle: 1px solid rgba(var(--primary-blue), 0.1);
-  
-  /* 动画速度 */
+
+  /* === 动画 === */
   --transition-default: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow-text: 0.6s ease;
-  
-  /* 字体 */
+
+  /* === 字体 === */
   --font-heading: 'Space Grotesk', system-ui;
   --font-body: 'Inter', 'Roboto', sans-serif;
-  
-  /* 层级 */
+
+  /* === 层级 === */
   --z-index-nav: 1000;
   --z-index-modal: 2000;
   --z-index-top: 9999;
-  
-  /* 布局 */
+
+  /* === 布局 === */
   --header-gradient: linear-gradient(
     var(--gradient-angle),
     rgba(var(--primary-blue), 0.05),
     rgba(var(--secondary-purple), 0.03),
     rgba(var(--accent-orange), 0.01)
   );
-  
+
   font-family: var(--font-body);
   line-height: 1.6;
   font-weight: 400;
   color-scheme: light dark;
 }
 
-/* 暗色模式变量 */
+/* === 暗色模式变量重定义 === */
 .v-theme--dark {
-  --primary-blue: 100, 130, 250;
-  --accent-orange: 255, 160, 65;
-  --secondary-purple: 186, 104, 200;
+  /* 核心色彩 - 暗色模式调整 */
+  --primary-blue: 100, 130, 250;        /* 亮蓝色 */
+  --prussian-blue: 100, 130, 250;       /* 亮普鲁士蓝 */
+  --prussian-blue-light: 130, 160, 255; /* 更亮的普鲁士蓝 */
+  --secondary-purple: 186, 104, 200;    /* 亮紫色 */
+  --accent-orange: 255, 160, 65;        /* 亮橙色 */
+
+  /* 中性色调 - 暗色模式 */
+  --pearl-white: 245, 245, 245;         /* 暗色模式下的白色 */
+  --mist-gray: 160, 160, 160;           /* 暗色模式雾灰 */
+  --mist-gray-light: 200, 200, 200;     /* 暗色模式浅雾灰 */
+  --mist-gray-dark: 120, 120, 120;      /* 暗色模式深雾灰 */
+  --charcoal: 18, 18, 18;               /* 暗色模式炭黑 */
+  --charcoal-light: 45, 45, 45;         /* 暗色模式浅炭黑 */
+
+  /* 辅助色调 - 暗色模式 */
+  --sage-green: 129, 199, 132;          /* 亮鼠尾草绿 */
+  --soft-lavender: 206, 184, 224;       /* 亮薰衣草 */
+  --accent-gold: 255, 213, 79;          /* 亮金色 */
+  --accent-cyan: 77, 208, 225;          /* 亮青色 */
+  --accent-emerald: 102, 187, 106;      /* 亮翡翠绿 */
+
+  /* 撞色玻璃拟态效果 - 暗色模式 */
+  --glass-bg-light: rgba(var(--prussian-blue), 0.15);
+  --glass-bg-dark: rgba(var(--charcoal), 0.8);
+  --glass-border-light: rgba(var(--prussian-blue), 0.3);
+  --glass-border-dark: rgba(var(--mist-gray), 0.1);
+  --glass-shadow-light: 0 8px 32px rgba(var(--prussian-blue), 0.3);
+  --glass-shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.6);
+
+  /* 撞色玻璃渐变 - 暗色模式 */
+  --glass-gradient: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.2) 0%,
+    rgba(var(--mist-gray-dark), 0.1) 50%,
+    rgba(var(--prussian-blue), 0.08) 100%);
+  --glass-gradient-hover: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.3) 0%,
+    rgba(var(--mist-gray-dark), 0.15) 50%,
+    rgba(var(--prussian-blue), 0.12) 100%);
+
+  /* 阴影系统 - 暗色模式 */
+  --shadow-glass-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-glass-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-glass-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glass-xl: 0 16px 64px rgba(0, 0, 0, 0.6);
+
+  /* 撞色渐变系统 - 暗色模式 */
+  --contrast-gradient-primary: linear-gradient(var(--gradient-angle),
+    rgba(var(--prussian-blue), 1) 0%,
+    rgba(var(--mist-gray), 0.9) 100%);
+  --contrast-gradient-secondary: linear-gradient(var(--gradient-angle),
+    rgba(var(--mist-gray), 0.9) 0%,
+    rgba(var(--prussian-blue), 0.8) 100%);
+
+  --neon-gradient: linear-gradient(var(--gradient-angle),
+    rgba(var(--prussian-blue), 1) 0%,
+    rgba(var(--mist-gray), 0.8) 30%,
+    rgba(var(--prussian-blue), 0.9) 70%,
+    rgba(var(--mist-gray), 0.6) 100%);
+
+  --prussian-gradient: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.25) 0%,
+    rgba(var(--mist-gray-dark), 0.15) 50%,
+    rgba(var(--prussian-blue), 0.12) 100%);
+  --mist-gradient: linear-gradient(135deg,
+    rgba(var(--mist-gray), 0.3) 0%,
+    rgba(var(--prussian-blue), 0.2) 50%,
+    rgba(var(--mist-gray), 0.25) 100%);
+
+  /* 阴影与效果 - 暗色模式 */
   --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   --hover-shadow: 0 12px 36px rgba(var(--primary-blue), 0.35);
+
+  /* 文本颜色 - 暗色模式 */
   --text-primary: 240, 240, 240;
   --text-secondary: 200, 200, 200;
   --text-tertiary: 170, 170, 170;
-} 
+
+  /* 布局 - 暗色模式 */
+  --header-gradient: linear-gradient(
+    var(--gradient-angle),
+    rgba(var(--primary-blue), 0.08),
+    rgba(var(--secondary-purple), 0.06),
+    rgba(var(--accent-orange), 0.04)
+  );
+}

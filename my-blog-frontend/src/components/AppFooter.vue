@@ -172,13 +172,18 @@
 
 <style scoped>
 .footer-container {
-  background: var(--header-gradient);
-  border-top: var(--border-subtle);
+  background: linear-gradient(135deg,
+    rgba(var(--pearl-white), 0.95) 0%,
+    rgba(var(--mist-gray-light), 0.9) 50%,
+    rgba(var(--warm-beige), 0.8) 100%);
+  border-top: 1px solid rgba(var(--mist-gray), 0.3);
   padding: 24px 0 24px;
   margin-top: 0 !important;
-  color: rgba(var(--text-primary), 0.9);
+  color: rgb(var(--charcoal));
   width: 100%;
   height: auto;
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
 }
 
 .footer-logo {
@@ -193,7 +198,10 @@
 .footer-title {
   font-size: 1.5rem;
   font-weight: 700;
-  background: var(--neon-gradient);
+  background: linear-gradient(135deg,
+    rgb(var(--prussian-blue)) 0%,
+    rgb(var(--sage-green)) 50%,
+    rgb(var(--soft-lavender)) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -201,7 +209,7 @@
 }
 
 .footer-description {
-  color: rgba(var(--text-secondary), 1);
+  color: rgb(var(--mist-gray-dark));
   margin-top: 12px;
   font-size: 0.95rem;
   line-height: 1.6;
@@ -222,7 +230,9 @@
   left: 0;
   width: 40px;
   height: 3px;
-  background: var(--neon-gradient);
+  background: linear-gradient(90deg,
+    rgba(var(--prussian-blue), 0.8) 0%,
+    rgba(var(--sage-green), 0.6) 100%);
   border-radius: 2px;
 }
 
@@ -237,7 +247,7 @@
 }
 
 .footer-link {
-  color: rgba(var(--text-secondary), 1);
+  color: rgb(var(--mist-gray-dark));
   text-decoration: none;
   font-size: 0.95rem;
   transition: all var(--transition-default);
@@ -252,12 +262,14 @@
   left: 0;
   width: 0;
   height: 1px;
-  background: var(--neon-gradient);
+  background: linear-gradient(90deg,
+    rgba(var(--prussian-blue), 0.8) 0%,
+    rgba(var(--sage-green), 0.6) 100%);
   transition: width var(--transition-default);
 }
 
 .footer-link:hover {
-  color: rgba(var(--primary-blue), 1);
+  color: rgb(var(--prussian-blue));
   transform: translateX(4px);
 }
 
@@ -266,7 +278,7 @@
 }
 
 .footer-text {
-  color: rgba(var(--text-secondary), 1);
+  color: rgb(var(--mist-gray-dark));
   font-size: 0.95rem;
   line-height: 1.6;
 }
@@ -309,7 +321,7 @@
 }
 
 .beian-link:hover {
-  color: rgba(var(--primary-blue), 1);
+  color: rgb(var(--prussian-blue));
 }
 
 /* 微信二维码样式 */
@@ -354,13 +366,135 @@
   font-size: 1rem;
 }
 
+/* === 暗色模式适配 === */
+.v-theme--dark .footer-container {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal-light), 0.9) 50%,
+    rgba(var(--prussian-blue), 0.1) 100%) !important;
+  border-top: 1px solid rgba(var(--prussian-blue), 0.3) !important;
+  color: rgba(var(--text-primary), 0.9) !important;
+}
+
+.v-theme--dark .footer-title {
+  background: linear-gradient(135deg,
+    rgb(var(--prussian-blue)) 0%,
+    rgb(var(--mist-gray)) 50%,
+    rgb(var(--prussian-blue-light)) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.v-theme--dark .footer-description {
+  color: rgba(var(--text-secondary), 0.8) !important;
+}
+
+.v-theme--dark .footer-heading {
+  color: rgba(var(--text-primary), 0.95) !important;
+}
+
+.v-theme--dark .footer-heading::after {
+  background: linear-gradient(90deg,
+    rgba(var(--prussian-blue), 0.9) 0%,
+    rgba(var(--mist-gray), 0.7) 100%);
+}
+
+.v-theme--dark .footer-link {
+  color: rgba(var(--text-secondary), 0.8) !important;
+}
+
+.v-theme--dark .footer-link:hover {
+  color: rgba(var(--prussian-blue), 1) !important;
+}
+
+.v-theme--dark .footer-link::after {
+  background: linear-gradient(90deg,
+    rgba(var(--prussian-blue), 0.9) 0%,
+    rgba(var(--mist-gray), 0.7) 100%);
+}
+
+.v-theme--dark .footer-text {
+  color: rgba(var(--text-secondary), 0.8) !important;
+}
+
+.v-theme--dark .social-btn {
+  color: rgba(var(--text-primary), 0.8) !important;
+}
+
+.v-theme--dark .social-btn:hover {
+  color: rgba(var(--prussian-blue), 1) !important;
+}
+
+.v-theme--dark .subscribe-input {
+  background: rgba(var(--charcoal-light), 0.8) !important;
+}
+
+.v-theme--dark .subscribe-input .v-field {
+  background: rgba(var(--charcoal-light), 0.8) !important;
+  border-color: rgba(var(--mist-gray-dark), 0.3) !important;
+}
+
+.v-theme--dark .subscribe-input .v-field:hover {
+  border-color: rgba(var(--prussian-blue), 0.5) !important;
+}
+
+.v-theme--dark .subscribe-input .v-field.v-field--focused {
+  border-color: rgba(var(--prussian-blue), 0.8) !important;
+  box-shadow: 0 0 0 2px rgba(var(--prussian-blue), 0.2) !important;
+}
+
+.v-theme--dark .subscribe-input input {
+  color: rgba(var(--text-primary), 0.9) !important;
+}
+
+.v-theme--dark .subscribe-input .v-label {
+  color: rgba(var(--text-secondary), 0.8) !important;
+}
+
+.v-theme--dark .subscribe-input .v-label.v-label--active {
+  color: rgba(var(--prussian-blue), 1) !important;
+}
+
+.v-theme--dark .footer-bottom {
+  color: rgba(var(--text-secondary), 0.7) !important;
+}
+
+.v-theme--dark .copyright {
+  color: rgba(var(--text-secondary), 0.7) !important;
+}
+
+.v-theme--dark .beian-link {
+  color: rgba(var(--text-secondary), 0.7) !important;
+}
+
+.v-theme--dark .beian-link:hover {
+  color: rgba(var(--prussian-blue), 1) !important;
+}
+
+.v-theme--dark .v-divider {
+  border-color: rgba(var(--mist-gray-dark), 0.3) !important;
+}
+
+/* 微信对话框暗色模式 */
+.v-theme--dark .wechat-dialog {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.98) 0%,
+    rgba(var(--charcoal-light), 0.95) 100%) !important;
+  border: 1px solid rgba(var(--mist-gray-dark), 0.3) !important;
+}
+
+.v-theme--dark .wechat-text {
+  color: rgba(var(--text-primary), 0.9) !important;
+}
+
 @media (max-width: 600px) {
   .subscribe-btn {
     height: 40px;
     min-width: 60px;
     font-size: 0.85rem;
   }
-  
+
   .footer-section {
     margin-bottom: 24px;
   }

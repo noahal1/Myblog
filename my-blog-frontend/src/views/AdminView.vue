@@ -152,7 +152,8 @@
                 <v-btn
                   color="info"
                   size="small"
-                  class="mr-2"
+                  class="mr-2 modern-btn"
+                  variant="outlined"
                   @click="openEditDialog(item)"
                 >
                   编辑
@@ -212,7 +213,8 @@
                   <v-btn
                     color="primary"
                     size="small"
-                    class="mr-2"
+                    class="mr-2 modern-btn"
+                    variant="elevated"
                     @click="viewArticle(item)"
                   >
                     查看
@@ -221,7 +223,8 @@
                     <v-btn
                       color="success"
                       size="small"
-                      class="mr-2"
+                      class="mr-2 modern-btn"
+                      variant="elevated"
                       @click="approveArticle(item)"
                     >
                       通过
@@ -229,6 +232,8 @@
                     <v-btn
                       color="error"
                       size="small"
+                      class="modern-btn"
+                      variant="elevated"
                       @click="rejectArticle(item)"
                     >
                       拒绝
@@ -238,6 +243,8 @@
                     <v-btn
                       color="success"
                       size="small"
+                      class="modern-btn"
+                      variant="elevated"
                       @click="approveArticle(item)"
                     >
                       通过
@@ -247,6 +254,8 @@
                     <v-btn
                       color="warning"
                       size="small"
+                      class="modern-btn"
+                      variant="elevated"
                       @click="pendingArticle(item)"
                     >
                       撤回发布
@@ -284,16 +293,51 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" @click="articleDialog = false">关闭</v-btn>
+                <v-btn 
+                  color="primary" 
+                  class="modern-btn"
+                  variant="text"
+                  @click="articleDialog = false"
+                >
+                  关闭
+                </v-btn>
                 <template v-if="selectedArticle.status === 'pending'">
-                  <v-btn color="success" @click="approveArticle(selectedArticle); articleDialog = false">通过</v-btn>
-                  <v-btn color="error" @click="rejectArticle(selectedArticle); articleDialog = false">拒绝</v-btn>
+                  <v-btn 
+                    color="success" 
+                    class="modern-btn"
+                    variant="elevated"
+                    @click="approveArticle(selectedArticle); articleDialog = false"
+                  >
+                    通过
+                  </v-btn>
+                  <v-btn 
+                    color="error" 
+                    class="modern-btn"
+                    variant="elevated"
+                    @click="rejectArticle(selectedArticle); articleDialog = false"
+                  >
+                    拒绝
+                  </v-btn>
                 </template>
                 <template v-else-if="selectedArticle.status === 'rejected'">
-                  <v-btn color="success" @click="approveArticle(selectedArticle); articleDialog = false">通过</v-btn>
+                  <v-btn 
+                    color="success" 
+                    class="modern-btn"
+                    variant="elevated"
+                    @click="approveArticle(selectedArticle); articleDialog = false"
+                  >
+                    通过
+                  </v-btn>
                 </template>
                 <template v-else>
-                  <v-btn color="warning" @click="pendingArticle(selectedArticle); articleDialog = false">撤回发布</v-btn>
+                  <v-btn 
+                    color="warning" 
+                    class="modern-btn"
+                    variant="elevated"
+                    @click="pendingArticle(selectedArticle); articleDialog = false"
+                  >
+                    撤回发布
+                  </v-btn>
                 </template>
               </v-card-actions>
             </v-card>
@@ -313,7 +357,14 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" @click="editDialog = false">关闭</v-btn>
+                <v-btn 
+                  color="primary" 
+                  class="modern-btn"
+                  variant="text"
+                  @click="editDialog = false"
+                >
+                  关闭
+                </v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
@@ -332,7 +383,8 @@
         <p class="mt-2">请确认您已登录并拥有管理员权限</p>
         <v-btn
           color="primary"
-          class="mt-4"
+          class="mt-4 modern-btn"
+          variant="elevated"
           @click="goToHome"
         >
           返回首页
@@ -679,53 +731,6 @@ watch(articleStatus, () => {
   articlePage.value = 1 // 重置分页
   fetchArticlesByStatus()
 })
-const openEditDialog = async (article) => {
-  loadingArticles.value = true
-  try {
-    const res = await getArticleDetail(article.id)
-    editArticle.value = res.data
-    editDialog.value = true
-  } catch (error) {
-    console.error('获取文章详情失败:', error)
-    showSnackbar('获取文章详情失败', 'error')
-  } finally {
-    loadingArticles.value = false
-  }
-}
-
-const submitEdit = async (formData) => {
-  loadingArticles.value = true
-  try {
-    await updateArticleDetail(editArticle.value.id, formData)
-    showSnackbar('文章更新成功')
-    editDialog.value = false
-    fetchArticlesByStatus()
-  } catch (error) {
-    console.error('更新文章失败:', error)
-    showSnackbar('更新文章失败', 'error')
-  } finally {
-    loadingArticles.value = false
-  }
-}
-
-// 监听分页变化
-watch(page, () => {
-  if (activeTab.value === 'logs') {
-    fetchVisitorLogs()
-  }
-})
-
-watch(articlePage, () => {
-  if (activeTab.value === 'articles') {
-    fetchArticlesByStatus()
-  }
-})
-
-// 监听文章状态变化
-watch(articleStatus, () => {
-  articlePage.value = 1 // 重置分页
-  fetchArticlesByStatus()
-})
 
 onMounted(async () => {
   // 检查是否已登录，如果未登录尝试初始化用户状态
@@ -745,7 +750,120 @@ onMounted(async () => {
 <style scoped>
 .max-width-200 {
   max-width: 200px;
-.max-width-200 {
-  max-width: 200px;
+}
+
+/* 现代化按钮样式增强 */
+.modern-btn {
+  font-weight: 500;
+  letter-spacing: 0.025rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.modern-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.modern-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* 卡片现代化 */
+.admin-view .v-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-view .v-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+/* 统计卡片特殊效果 */
+.admin-view .v-window-item[value="stats"] .v-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* 标签页现代化 */
+.admin-view .v-tabs {
+  background: transparent;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.admin-view .v-tab {
+  text-transform: none;
+  font-weight: 500;
+  color: #6B7280;
+  border-radius: 8px 8px 0 0;
+  margin-right: 4px;
+  transition: all 0.3s ease;
+}
+
+.admin-view .v-tab.v-tab--selected {
+  color: #6366F1;
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.admin-view .v-tab:hover {
+  color: #4F46E5;
+  background: rgba(99, 102, 241, 0.04);
+}
+
+/* 数据表格优化 */
+.admin-view .v-data-table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* 芯片优化 */
+.admin-view .v-chip {
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 响应式调整 */
+@media (max-width: 600px) {
+  .modern-btn {
+    font-size: 0.875rem;
+    padding: 0 12px;
+    height: 40px;
+  }
+  
+  .admin-view .v-card {
+    border-radius: 12px;
+    margin: 8px;
+  }
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .admin-view .v-window-item[value="stats"] .v-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%);
+  }
+  
+  .admin-view .v-tabs {
+    border-bottom-color: #475569;
+  }
+  
+  .admin-view .v-tab {
+    color: #9CA3AF;
+  }
+  
+  .admin-view .v-tab.v-tab--selected {
+    color: #8B5CF6;
+  }
 }
 </style> 

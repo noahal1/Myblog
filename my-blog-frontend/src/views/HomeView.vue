@@ -2,6 +2,7 @@
   <div class="home-view">
     <section class="hero-banner" ref="heroBanner" role="banner" aria-labelledby="hero-title">
       <tree-background :height="400" />
+      <div class="mist-layer-2"></div>
       <v-container>
         <h1 id="hero-title" class="hero-title">
           <span class="tagline-prefix" ref="tagline">抒情与逻辑之间的</span>
@@ -590,7 +591,7 @@ const getLatestUpdateDate = () => {
 .article-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  gap: 24px;
   margin-bottom: 2rem;
 }
 
