@@ -143,19 +143,44 @@
 .organic-shape-lg { border-radius: var(--radius-organic-lg); }
 .organic-shape-xl { border-radius: var(--radius-organic-xl); }
 
-.theme-minimal-transition * {
+/* === 主题切换性能优化 === */
+
+/* 主题切换时的快速过渡 */
+.theme-switching * {
   transition-duration: 0.1s !important;
   transition-delay: 0s !important;
+  transition-property: background-color, color, border-color !important;
 }
 
-/* 优化重要元素的过渡 */
+/* 禁用复杂动画在主题切换时 */
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* 优化关键元素的过渡 */
 html, body {
-  transition: background-color 0.2s ease;
+  transition: background-color 0.15s ease;
 }
 
-/* 确保背景色过渡平滑 */
 .v-application {
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* 减少不必要的重绘 */
+.theme-switching .v-card,
+.theme-switching .glass-effect,
+.theme-switching .premium-card {
+  will-change: background-color, color;
+  transform: translateZ(0); /* 强制硬件加速 */
+}
+
+/* 主题切换完成后恢复正常过渡 */
+.v-card, .glass-effect, .premium-card {
+  transition: background-color 0.2s ease,
+              color 0.2s ease,
+              border-color 0.2s ease;
 }
 
 /* 页面切换淡入淡出动画 */

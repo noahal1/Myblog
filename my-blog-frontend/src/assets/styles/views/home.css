@@ -407,7 +407,7 @@
   padding: 10px 20px;
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: rgba(var(--prussian-blue), 0.8);
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   overflow: hidden;
@@ -430,7 +430,7 @@
 
 .glass-chip:hover {
   border-color: rgba(var(--primary-indigo), 0.4);
-  color: rgb(var(--primary-indigo));
+  color: rgba(var(--prussian-blue), 1);
   transform: translateY(-2px) scale(1.05);
   box-shadow:
     var(--shadow-glass-sm),
@@ -442,13 +442,15 @@
 }
 
 .glass-chip.active {
-  background: var(--cosmic-gradient);
-  border-color: rgba(var(--primary-indigo), 0.6);
-  color: white;
+  background: linear-gradient(135deg,
+    rgba(var(--prussian-blue), 0.15) 0%,
+    rgba(var(--mist-gray), 0.1) 100%);
+  border-color: rgba(var(--prussian-blue), 0.6);
+  color: rgba(var(--prussian-blue), 1);
   font-weight: 600;
   box-shadow:
     var(--shadow-glass-md),
-    0 0 20px rgba(var(--primary-indigo), 0.3);
+    0 0 20px rgba(var(--prussian-blue), 0.2);
 }
 
 .glass-chip.active .chip-glow {
@@ -760,10 +762,10 @@
 
 .v-theme--dark .glass-chip.active {
   background: linear-gradient(135deg,
-    rgba(var(--primary-blue), 0.2) 0%,
-    rgba(var(--secondary-purple), 0.15) 100%);
-  border-color: rgba(var(--primary-blue), 0.5);
-  color: rgba(var(--primary-blue), 1);
+    rgba(var(--prussian-blue), 0.25) 0%,
+    rgba(var(--mist-gray), 0.1) 100%);
+  border-color: rgba(var(--prussian-blue), 0.6);
+  color: rgba(var(--prussian-blue), 1);
 }
 
 /* === 玻璃拟态分页控件 === */
@@ -968,7 +970,7 @@
 
 
 .main-content {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding-bottom: 0 !important;
   margin-bottom: 0 !important;

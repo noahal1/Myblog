@@ -192,6 +192,9 @@ import { useDisplay, useTheme } from 'vuetify'
 import { useRoute } from 'vue-router'
 import LogoIcon from './icons/LogoIcon.vue'
 
+// 定义事件
+const emit = defineEmits(['toggle-theme'])
+
 const userStore = useUserStore()
 const display = useDisplay()
 const theme = useTheme()
@@ -238,19 +241,24 @@ const isThemeChanging = ref(false)
 const toggleTheme = () => {
   if (isThemeChanging.value) return
   isThemeChanging.value = true
-  
+
+  // 添加性能优化类
+  document.documentElement.classList.add('theme-switching')
+
   requestAnimationFrame(() => {
     const currentSetting = localStorage.getItem('theme') || theme.global.name.value
     const nextTheme = currentSetting === 'light' ? 'dark' : 'light'
-    document.documentElement.classList.add('theme-minimal-transition')
-    
+
     localStorage.setItem('theme', nextTheme)
     theme.global.name.value = nextTheme
-    
+
+    // 通知父组件主题已切换
+    emit('toggle-theme')
+
     setTimeout(() => {
-      document.documentElement.classList.remove('theme-minimal-transition')
+      document.documentElement.classList.remove('theme-switching')
       isThemeChanging.value = false
-    }, 100)
+    }, 150)
   })
 }
 

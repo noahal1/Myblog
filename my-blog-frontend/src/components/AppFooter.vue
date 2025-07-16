@@ -209,7 +209,7 @@
 }
 
 .footer-description {
-  color: rgb(var(--mist-gray-dark));
+  color: rgba(var(--charcoal), 0.9);
   margin-top: 12px;
   font-size: 0.95rem;
   line-height: 1.6;
@@ -247,7 +247,7 @@
 }
 
 .footer-link {
-  color: rgb(var(--mist-gray-dark));
+  color: rgba(var(--charcoal), 0.85);
   text-decoration: none;
   font-size: 0.95rem;
   transition: all var(--transition-default);
@@ -278,7 +278,7 @@
 }
 
 .footer-text {
-  color: rgb(var(--mist-gray-dark));
+  color: rgba(var(--charcoal), 0.85);
   font-size: 0.95rem;
   line-height: 1.6;
 }
@@ -311,11 +311,11 @@
 
 .footer-bottom {
   font-size: 0.85rem;
-  color: rgba(var(--text-secondary), 0.8);
+  color: rgba(var(--charcoal), 0.8);
 }
 
 .beian-link {
-  color: rgba(var(--text-secondary), 0.8);
+  color: rgba(var(--charcoal), 0.8);
   text-decoration: none;
   transition: color var(--transition-default);
 }
@@ -387,11 +387,11 @@
 }
 
 .v-theme--dark .footer-description {
-  color: rgba(var(--text-secondary), 0.8) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .v-theme--dark .footer-heading {
-  color: rgba(var(--text-primary), 0.95) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
 }
 
 .v-theme--dark .footer-heading::after {
@@ -401,7 +401,7 @@
 }
 
 .v-theme--dark .footer-link {
-  color: rgba(var(--text-secondary), 0.8) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
 }
 
 .v-theme--dark .footer-link:hover {
@@ -415,7 +415,7 @@
 }
 
 .v-theme--dark .footer-text {
-  color: rgba(var(--text-secondary), 0.8) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
 }
 
 .v-theme--dark .social-btn {
@@ -457,15 +457,15 @@
 }
 
 .v-theme--dark .footer-bottom {
-  color: rgba(var(--text-secondary), 0.7) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .v-theme--dark .copyright {
-  color: rgba(var(--text-secondary), 0.7) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .v-theme--dark .beian-link {
-  color: rgba(var(--text-secondary), 0.7) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .v-theme--dark .beian-link:hover {

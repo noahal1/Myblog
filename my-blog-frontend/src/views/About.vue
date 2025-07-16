@@ -68,10 +68,10 @@
         </div>
         
         <!-- 技能卡片 -->
-        <v-card class="about-card mx-auto mb-8 tilt-card" max-width="900" elevation="4" ref="skillsCard">
+        <v-card class="about-card mx-auto mb-8 tilt-card magnetic-card parallax-element" max-width="900" elevation="4" ref="skillsCard">
           <div class="card-header pa-6">
             <h2 class="text-h5 font-weight-bold mb-2" data-aos="fade-up">
-              <v-icon color="primary" class="mr-2 rotating-icon">mdi-lightbulb</v-icon>
+              <v-icon color="primary" class="mr-2 rotating-icon pulse-icon">mdi-lightbulb</v-icon>
               专业技能
             </h2>
           </div>
@@ -102,10 +102,10 @@
         </v-card>
         
         <!-- 博客历程卡片 -->
-        <v-card class="about-card mx-auto mb-8 tilt-card" max-width="900" elevation="4" ref="timelineCard">
+        <v-card class="about-card mx-auto mb-8 tilt-card magnetic-card parallax-element" max-width="900" elevation="4" ref="timelineCard">
           <div class="card-header pa-6">
             <h2 class="text-h5 font-weight-bold mb-2" data-aos="fade-up">
-              <v-icon color="primary" class="mr-2 bounce-icon">mdi-book-open-page-variant</v-icon>
+              <v-icon color="primary" class="mr-2 bounce-icon swing-animation">mdi-book-open-page-variant</v-icon>
               博客历程
             </h2>
           </div>
@@ -126,12 +126,15 @@
                   <div class="text-caption">{{ event.date }}</div>
                 </template>
                 <v-card class="timeline-card floating-card" variant="outlined">
-                  <v-card-title class="text-subtitle-1 font-weight-bold">
-                    {{ event.title }}
-                  </v-card-title>
-                  <v-card-text>
-                    {{ event.description }}
-                  </v-card-text>
+                  <div class="timeline-card-content">
+                    <v-card-title class="text-subtitle-1 font-weight-bold">
+                      {{ event.title }}
+                    </v-card-title>
+                    <v-card-text>
+                      {{ event.description }}
+                    </v-card-text>
+                    <div class="timeline-card-glow"></div>
+                  </div>
                 </v-card>
               </v-timeline-item>
             </v-timeline>
@@ -139,10 +142,10 @@
         </v-card>
         
         <!-- 联系卡片 -->
-        <v-card class="about-card mx-auto tilt-card" max-width="900" elevation="4" ref="contactCard">
+        <v-card class="about-card mx-auto tilt-card magnetic-card parallax-element" max-width="900" elevation="4" ref="contactCard">
           <div class="card-header pa-6">
             <h2 class="text-h5 font-weight-bold mb-2" data-aos="fade-up">
-              <v-icon color="primary" class="mr-2 swing-icon">mdi-message-text</v-icon>
+              <v-icon color="primary" class="mr-2 swing-icon elastic-animation">mdi-message-text</v-icon>
               如何找到我
             </h2>
             <p class="text-subtitle-1 text-medium-emphasis" data-aos="fade-up" data-aos-delay="100">有任何问题或想法，欢迎联系我</p>
@@ -663,6 +666,121 @@ const initScrollAnimations = () => {
   }, 500); // 添加延迟确保DOM已完全准备好
 };
 
+// 新增：炫酷卡片滚动动画
+const initCardScrollAnimations = () => {
+  const cards = document.querySelectorAll('.about-card');
+  if (!cards || cards.length === 0) return;
+
+  cards.forEach((card, index) => {
+    // 设置初始状态
+    const animationClass = index % 3 === 0 ? 'card-slide-in-left' :
+                          index % 3 === 1 ? 'card-slide-in-right' : 'card-slide-in-up';
+    card.classList.add(animationClass);
+
+    // 创建观察器
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('card-visible');
+          entry.target.classList.remove(animationClass);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    observer.observe(card);
+  });
+};
+
+// 新增：技能项目动画
+const initSkillItemAnimations = () => {
+  const skillItems = document.querySelectorAll('.skill-item');
+  if (!skillItems || skillItems.length === 0) return;
+
+  skillItems.forEach((item, index) => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add('animate-in');
+          }, index * 100); // 错开动画时间
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    observer.observe(item);
+  });
+};
+
+// 新增：时间线项目增强动画
+const initTimelineItemAnimations = () => {
+  const timelineItems = document.querySelectorAll('.timeline-item');
+  if (!timelineItems || timelineItems.length === 0) return;
+
+  timelineItems.forEach((item, index) => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add('animate-in');
+            // 添加弹性效果
+            entry.target.style.animation = 'bounceIn 0.8s ease forwards';
+          }, index * 200);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    observer.observe(item);
+  });
+};
+
+// 新增：联系项目动画
+const initContactItemAnimations = () => {
+  const contactItems = document.querySelectorAll('.contact-item');
+  if (!contactItems || contactItems.length === 0) return;
+
+  contactItems.forEach((item, index) => {
+    // 添加磁性效果类
+    item.classList.add('magnetic-card');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.style.animation = 'slideInLeft 0.6s ease forwards';
+            entry.target.style.opacity = '1';
+          }, index * 150);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    // 设置初始状态
+    item.style.opacity = '0';
+    observer.observe(item);
+  });
+};
+
+// 新增：视差滚动效果
+const initParallaxEffect = () => {
+  const parallaxElements = document.querySelectorAll('.parallax-element');
+  if (!parallaxElements || parallaxElements.length === 0) return;
+
+  const handleScroll = () => {
+    const scrolled = window.pageYOffset;
+    const rate = scrolled * -0.5;
+
+    parallaxElements.forEach(element => {
+      element.style.transform = `translateY(${rate}px)`;
+    });
+  };
+
+  window.addEventListener('scroll', handleScroll);
+  return () => window.removeEventListener('scroll', handleScroll);
+};
+
 // 添加变量保存清理函数
 let cleanupFunctions = null;
 
@@ -739,10 +857,33 @@ const initializeEffects = () => {
           resolve();
         }, 300);
       });
-      
+
+      // 初始化新的炫酷动画效果
+      await new Promise(resolve => {
+        setTimeout(() => {
+          try {
+            initCardScrollAnimations();
+            initSkillItemAnimations();
+            initTimelineItemAnimations();
+            initContactItemAnimations();
+          } catch (e) { console.error('炫酷动画初始化失败:', e); }
+          resolve();
+        }, 400);
+      });
+
+      // 初始化视差效果
+      const parallaxCleanup = await new Promise(resolve => {
+        setTimeout(() => {
+          let cleanup = null;
+          try { cleanup = initParallaxEffect(); } catch (e) { console.error('视差效果初始化失败:', e); }
+          resolve(cleanup);
+        }, 500);
+      });
+
       // 返回清理函数
       return {
-        cleanupMouseFollower: typeof cleanupMouseFollower === 'function' ? cleanupMouseFollower : null
+        cleanupMouseFollower: typeof cleanupMouseFollower === 'function' ? cleanupMouseFollower : null,
+        parallaxCleanup: typeof parallaxCleanup === 'function' ? parallaxCleanup : null
       };
     } catch (error) {
       console.error('初始化序列错误:', error);
@@ -1265,6 +1406,133 @@ const initializeEffects = () => {
   .wave {
     animation-duration: 35s;
     opacity: 0.25;
+  }
+}
+
+/* === 新增炫酷动画效果 === */
+
+/* 增强的图标动画组合 */
+.rotating-icon.pulse-icon {
+  animation: rotate 3s infinite, pulse 2s infinite;
+}
+
+.bounce-icon.swing-animation:hover {
+  animation: bounce 1s infinite, swing 1s ease;
+}
+
+.swing-icon.elastic-animation:hover {
+  animation: swing 1s ease, elastic 0.8s ease;
+}
+
+/* 卡片进入时的特殊效果 */
+.about-card.card-visible {
+  animation: cardEntrance 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes cardEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) scale(0.9);
+    filter: blur(5px);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-10px) scale(1.02);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* 技能条闪光效果增强 */
+.skill-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(var(--primary-blue), 0.6),
+    transparent);
+  animation: skillShine 2s ease-in-out;
+  animation-delay: 1s;
+}
+
+/* 时间线卡片特殊效果 */
+.timeline-card.floating-card {
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.timeline-card.floating-card:hover {
+  transform: translateY(-8px) rotateX(5deg) scale(1.02);
+  box-shadow:
+    0 15px 35px rgba(var(--primary-blue), 0.2),
+    0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* 视差滚动效果 */
+.parallax-element {
+  transition: transform 0.1s ease-out;
+}
+
+/* 时间线卡片发光效果 */
+.timeline-card-content {
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-card-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle,
+    rgba(var(--primary-blue), 0.1) 0%,
+    transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.timeline-card:hover .timeline-card-glow {
+  opacity: 1;
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1) rotate(180deg);
+    opacity: 0.6;
+  }
+}
+
+/* 技能项目增强动画 */
+.skill-item.animate-in {
+  animation: skillItemEntrance 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes skillItemEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) rotateX(-15deg);
+  }
+  60% {
+    opacity: 0.8;
+    transform: translateY(-5px) rotateX(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
   }
 }
 </style>

@@ -34,6 +34,7 @@ export default {
 @import './assets/styles/glassmorphism.css';
 @import './assets/styles/microinteractions.css';
 @import './assets/styles/performance.css';
+@import './assets/styles/theme-performance.css';
 @import './assets/styles/premium-theme.css';
 @import './assets/styles/views/article.css';
 @import './assets/styles/views/about.css';
@@ -74,9 +75,9 @@ body {
   --primary-blue: var(--prussian-blue);
   --accent-orange: var(--sage-green);
   --card-shadow: 0 4px 20px rgba(var(--prussian-blue), 0.08);
-  --transition-default: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow-text: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-  --transition-medium: 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-default: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow-text: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-medium: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .page-container {
@@ -95,20 +96,20 @@ body {
 }
 
 
+/* 优化文本过渡性能 */
 .subtitle-text,
 .tagline-text,
 .site-description {
-  transition: color var(--transition-slow-text), 
-              opacity var(--transition-slow-text),
-              text-shadow var(--transition-slow -text);
+  transition: color 0.2s ease, opacity 0.2s ease;
 }
 
+/* 优化主题切换性能 */
 body, .v-application {
-  transition: background-color 0.3s ease;
+  transition: background-color 0.15s ease;
 }
 
 .v-application {
-  transition: background-color 0.3s ease-out !important;
+  transition: background-color 0.15s ease !important;
 }
 
 .v-main {
@@ -120,12 +121,16 @@ body, .v-application {
   margin-top: 0 !important; 
 }
 
+/* 优化暗色模式过渡 */
 .v-theme--dark .hero-subtitle,
 .v-theme--dark .tagline-prefix {
-  transition-duration: 0.3s !important;
+  transition-duration: 0.15s !important;
 }
+
+/* 性能优化 */
 :deep(.v-theme--dark) .gradient-text {
-  will-change: opacity;
+  will-change: color;
+  transform: translateZ(0); /* 硬件加速 */
 }
 </style>
 
@@ -145,11 +150,27 @@ const userStore = useUserStore()
 // 提供主题给子组件
 provide('theme', currentTheme)
 
+// 优化的主题切换函数
+const isThemeChanging = ref(false)
 const toggleTheme = () => {
+  if (isThemeChanging.value) return
+
+  isThemeChanging.value = true
+
+  // 添加快速切换类，减少过渡动画
+  document.documentElement.classList.add('theme-switching')
+
   requestAnimationFrame(() => {
-    currentTheme.value = currentTheme.value === 'light' ? 'dark' : 'light'
-    theme.global.name.value = currentTheme.value
-    localStorage.setItem('theme', currentTheme.value)
+    const newTheme = currentTheme.value === 'light' ? 'dark' : 'light'
+    currentTheme.value = newTheme
+    theme.global.name.value = newTheme
+    localStorage.setItem('theme', newTheme)
+
+    // 短暂延迟后移除快速切换类
+    setTimeout(() => {
+      document.documentElement.classList.remove('theme-switching')
+      isThemeChanging.value = false
+    }, 150)
   })
 }
 

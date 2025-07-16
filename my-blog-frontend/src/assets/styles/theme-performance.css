@@ -1,0 +1,203 @@
+/*======================
+  主题切换性能优化
+======================*/
+
+/* === 核心性能优化 === */
+
+/* 主题切换时禁用复杂动画 */
+.theme-switching {
+  /* 强制硬件加速 */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.theme-switching * {
+  /* 只保留必要的过渡属性 */
+  transition-property: background-color, color, border-color !important;
+  transition-duration: 0.1s !important;
+  transition-timing-function: ease !important;
+  transition-delay: 0s !important;
+  
+  /* 强制硬件加速 */
+  will-change: background-color, color;
+  transform: translateZ(0);
+}
+
+/* 禁用伪元素动画 */
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+  animation: none !important;
+  will-change: auto !important;
+}
+
+/* 禁用复杂效果 */
+.theme-switching .glass-effect,
+.theme-switching .premium-card,
+.theme-switching .organic-float,
+.theme-switching .hover-lift {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+/* === 关键元素优化 === */
+
+/* 导航栏优化 */
+.theme-switching .nav-bar {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 卡片优化 */
+.theme-switching .v-card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 按钮优化 */
+.theme-switching .v-btn {
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 输入框优化 */
+.theme-switching .v-field {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* === 恢复正常状态 === */
+
+/* 主题切换完成后恢复正常过渡 */
+body:not(.theme-switching) * {
+  transition-property: background-color, color, border-color, box-shadow, transform;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+/* 恢复玻璃效果 */
+body:not(.theme-switching) .glass-effect {
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 恢复卡片效果 */
+body:not(.theme-switching) .v-card {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* === 减少重绘重排 === */
+
+/* 使用 contain 属性优化渲染 */
+.theme-switching .v-main {
+  contain: layout style paint;
+}
+
+.theme-switching .v-app-bar {
+  contain: layout style paint;
+}
+
+.theme-switching .v-footer {
+  contain: layout style paint;
+}
+
+/* === 移动端优化 === */
+@media (max-width: 768px) {
+  .theme-switching * {
+    transition-duration: 0.05s !important;
+  }
+  
+  /* 移动端禁用更多效果 */
+  .theme-switching .organic-float,
+  .theme-switching .floating-card,
+  .theme-switching .hover-lift {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* === 低性能设备优化 === */
+@media (prefers-reduced-motion: reduce) {
+  .theme-switching * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* === GPU 加速优化 === */
+.theme-switching .v-application,
+.theme-switching .v-main,
+.theme-switching .v-app-bar,
+.theme-switching .v-footer {
+  will-change: background-color;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* === 内存优化 === */
+.theme-switching {
+  /* 减少重绘区域 */
+  isolation: isolate;
+}
+
+/* 主题切换完成后清理 will-change */
+body:not(.theme-switching) * {
+  will-change: auto;
+}
+
+/* === 特殊元素优化 === */
+
+/* 渐变文本优化 */
+.theme-switching .gradient-text {
+  background-attachment: local !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+/* 图标优化 */
+.theme-switching .v-icon {
+  transition: color 0.1s ease !important;
+}
+
+/* 链接优化 */
+.theme-switching a {
+  transition: color 0.1s ease !important;
+}
+
+/* === 预计算颜色值优化 === */
+.theme-switching {
+  /* 使用预计算的颜色值而不是CSS变量 */
+  --fast-bg-light: #ffffff;
+  --fast-bg-dark: #121212;
+  --fast-text-light: #212121;
+  --fast-text-dark: #f0f0f0;
+  --fast-border-light: #e0e0e0;
+  --fast-border-dark: #424242;
+}
+
+/* 快速颜色切换 */
+.theme-switching.v-theme--light {
+  background-color: var(--fast-bg-light) !important;
+  color: var(--fast-text-light) !important;
+}
+
+.theme-switching.v-theme--dark {
+  background-color: var(--fast-bg-dark) !important;
+  color: var(--fast-text-dark) !important;
+}
+
+/* === 调试辅助 === */
+.debug-theme-switching .theme-switching {
+  outline: 2px solid red !important;
+}
+
+.debug-theme-switching .theme-switching * {
+  outline: 1px solid blue !important;
+}

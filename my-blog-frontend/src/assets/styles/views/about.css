@@ -295,9 +295,120 @@
   }
 }
 
+/* === 炫酷滚动动画效果 === */
+
+/* 卡片进入动画 - 从不同方向滑入 */
+.card-slide-in-left {
+  opacity: 0;
+  transform: translateX(-100px) rotateY(-15deg);
+  transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card-slide-in-right {
+  opacity: 0;
+  transform: translateX(100px) rotateY(15deg);
+  transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card-slide-in-up {
+  opacity: 0;
+  transform: translateY(80px) scale(0.9);
+  transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card-visible {
+  opacity: 1;
+  transform: translateX(0) translateY(0) rotateY(0) scale(1);
+}
+
+/* 技能条炫酷动画 */
+.skill-item {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.skill-item.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.skill-progress {
+  position: relative;
+  overflow: hidden;
+}
+
+.skill-progress::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent);
+  animation: skillShine 2s ease-in-out;
+  animation-delay: 0.5s;
+}
+
+@keyframes skillShine {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* 时间线项目动画 */
+.timeline-item {
+  opacity: 0;
+  transform: translateX(-50px) scale(0.8);
+  transition: all 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.timeline-item:nth-child(even) {
+  transform: translateX(50px) scale(0.8);
+}
+
+.timeline-item.animate-in {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+/* 联系项目悬浮动画 */
+.contact-item {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 8px 0;
+}
+
+.contact-item:hover {
+  background: rgba(var(--primary-blue), 0.05);
+  transform: translateX(10px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(var(--primary-blue), 0.15);
+}
+
+/* 卡片磁性效果 */
+.magnetic-card {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: pointer;
+}
+
+.magnetic-card:hover {
+  transform: translateY(-8px) rotateX(5deg);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(var(--primary-blue), 0.1);
+}
+
+/* 视差滚动效果 */
+.parallax-element {
+  transition: transform 0.1s ease-out;
+}
+
 /* === 暗色模式适配 === */
 .v-theme--dark .glass-about-card {
-  background: linear-gradient(135deg, 
+  background: linear-gradient(135deg,
     rgba(255, 255, 255, 0.08) 0%,
     rgba(255, 255, 255, 0.04) 100%);
   border-color: rgba(255, 255, 255, 0.12);
