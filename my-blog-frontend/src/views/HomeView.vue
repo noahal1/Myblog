@@ -204,7 +204,25 @@ const showBackToTop = ref(false);
 const isAnimating = ref(false);
 const isSearching = ref(false);
 const isLoading = ref(true);
-const itemsPerPage = 6; // 每页显示的文章数量
+// 响应式每页显示数量
+const itemsPerPage = computed(() => {
+  if (typeof window === 'undefined') return 6; // SSR 兼容
+
+  const width = window.innerWidth;
+
+  // 根据屏幕宽度动态调整每页显示数量
+  if (width >= 1400) {
+    return 8; // 超大屏幕: 4列 × 2行 = 8篇
+  } else if (width >= 1200) {
+    return 6; // 大屏幕: 3列 × 2行 = 6篇
+  } else if (width >= 900) {
+    return 6; // 中等屏幕: 2列 × 3行 = 6篇
+  } else if (width >= 600) {
+    return 4; // 平板: 2列 × 2行 = 4篇
+  } else {
+    return 3; // 手机: 1列 × 3行 = 3篇
+  }
+});
 
 // DOM引用
 const heroBanner = ref(null);
@@ -280,8 +298,8 @@ const paginatedArticles = computed(() => {
   }
 
   // 计算切片范围
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
 
   return filteredArticles.value.slice(start, end);
 });
@@ -313,8 +331,8 @@ const visiblePages = computed(() => {
 // 分页信息
 const paginationInfo = computed(() => {
   const total = filteredArticles.value.length;
-  const from = total === 0 ? 0 : (currentPage.value - 1) * itemsPerPage + 1;
-  const to = Math.min(currentPage.value * itemsPerPage, total);
+  const from = total === 0 ? 0 : (currentPage.value - 1) * itemsPerPage.value + 1;
+  const to = Math.min(currentPage.value * itemsPerPage.value, total);
   
   return { from, to, total };
 });
@@ -367,8 +385,8 @@ const fetchArticles = async () => {
 // 更新总页数
 const updateTotalPages = () => {
   const count = filteredArticles.value.length;
-  totalPages.value = Math.max(1, Math.ceil(count / itemsPerPage));
-  
+  totalPages.value = Math.max(1, Math.ceil(count / itemsPerPage.value));
+
   // 确保当前页在有效范围内
   if (currentPage.value > totalPages.value) {
     currentPage.value = totalPages.value;
@@ -492,7 +510,7 @@ const setupHeroAnimation = () => {
 watch([searchQuery, selectedCategory], () => {
   currentPage.value = 1;
   updateTotalPages();
-  
+
   // 重置动画
   isAnimating.value = false;
   nextTick(() => {
@@ -500,30 +518,42 @@ watch([searchQuery, selectedCategory], () => {
   });
 });
 
+// 监听每页显示数量变化（响应式布局）
+watch(itemsPerPage, () => {
+  updateTotalPages();
+});
+
+// 窗口大小变化监听器
+const handleResize = () => {
+  // 防抖处理，避免频繁重新计算
+  clearTimeout(window.resizeTimer);
+  window.resizeTimer = setTimeout(() => {
+    updateTotalPages();
+  }, 150);
+};
+
 // 组件挂载
 onMounted(() => {
   // 确保页面可见
   const homeView = document.querySelector('.home-view');
   if (homeView) homeView.style.opacity = '1';
-  
-  // 监听滚动事件
   window.addEventListener('scroll', checkScrollPosition);
-  
-  // 获取文章数据
+  window.addEventListener('resize', handleResize);
   fetchArticles();
-  
-  // 设置视差动画
   nextTick(() => {
     scrollCleanup = setupHeroAnimation();
   });
 });
-
 // 组件卸载
 onUnmounted(() => {
   // 移除滚动监听
   window.removeEventListener('scroll', checkScrollPosition);
-  
-  // 清理视差动画
+  // 移除窗口大小变化监听
+  window.removeEventListener('resize', handleResize);
+  // 清理防抖定时器
+  if (window.resizeTimer) {
+    clearTimeout(window.resizeTimer);
+  }
   if (typeof scrollCleanup === 'function') {
     scrollCleanup();
   }
@@ -588,23 +618,9 @@ const getLatestUpdateDate = () => {
   }
 }
 
+/* 文章网格样式已在 home.css 中统一定义 */
 .article-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
   margin-bottom: 2rem;
-}
-
-@media (max-width: 600px) {
-  .article-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (min-width: 601px) and (max-width: 960px) {
-  .article-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 /* 分页控件优化样式 */

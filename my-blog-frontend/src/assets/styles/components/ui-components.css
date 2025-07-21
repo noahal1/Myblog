@@ -363,9 +363,22 @@
   background: linear-gradient(90deg, #3182CE 0%, #2C5282 100%) !important;
 }
 
+/* 用户菜单特殊处理 - 覆盖全局 v-card 样式 */
+.user-menu .v-overlay__content .v-card {
+  background: var(--glass-gradient) !important;
+  backdrop-filter: var(--blur-lg) !important;
+  -webkit-backdrop-filter: var(--blur-lg) !important;
+  border: 1px solid var(--glass-border-light) !important;
+}
+
+.v-theme--dark .user-menu .v-overlay__content .v-card {
+  background: var(--glass-gradient) !important;
+  border: 1px solid var(--glass-border-dark) !important;
+}
+
 .v-menu .v-list {
   border-radius: 12px !important;
-  box-shadow: 
+  box-shadow:
     0 12px 40px rgba(26, 32, 44, 0.15),
     0 4px 16px rgba(0, 0, 0, 0.1) !important;
   overflow: hidden !important;

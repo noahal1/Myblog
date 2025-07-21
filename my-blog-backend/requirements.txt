@@ -18,6 +18,7 @@ pip==23.2.1
 pyasn1==0.4.8
 pycparser==2.22
 pydantic==2.10.6
+loguru==0.7.3
 pydantic_core==2.27.2
 PyMySQL==1.1.1
 python-dateutil==2.9.0.post0

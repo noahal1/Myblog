@@ -752,7 +752,6 @@ onMounted(async () => {
   max-width: 200px;
 }
 
-/* 现代化按钮样式增强 */
 .modern-btn {
   font-weight: 500;
   letter-spacing: 0.025rem;
@@ -763,7 +762,7 @@ onMounted(async () => {
 
 .modern-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12); 
 }
 
 .modern-btn:active {
@@ -771,11 +770,10 @@ onMounted(async () => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* 卡片现代化 */
+
 .admin-view .v-card {
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -792,7 +790,7 @@ onMounted(async () => {
   -webkit-backdrop-filter: blur(16px);
 }
 
-/* 标签页现代化 */
+
 .admin-view .v-tabs {
   background: transparent;
   border-bottom: 1px solid #E5E7EB;

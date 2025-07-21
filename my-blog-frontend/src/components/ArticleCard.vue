@@ -194,20 +194,17 @@ const checkIfLiked = () => {
   hasLiked.value = !!likedArticles[props.article.id];
 };
 
-// 在组件挂载时检查点赞状态
 onMounted(() => {
   checkIfLiked();
 });
 </script>
 
 <style scoped>
-/* === 玻璃拟态文章卡片 === */
 .glass-article-card {
   position: relative;
   background: var(--glass-gradient);
   backdrop-filter: var(--blur-md);
   -webkit-backdrop-filter: var(--blur-md);
-  border: 1px solid var(--glass-border-light);
   border-radius: var(--radius-organic-lg);
   box-shadow: var(--shadow-glass-md);
   cursor: pointer;
@@ -217,7 +214,6 @@ onMounted(() => {
   will-change: transform, box-shadow;
 }
 
-/* 装饰性边框光效 */
 .card-border-glow {
   position: absolute;
   top: 0;
@@ -608,7 +604,6 @@ onMounted(() => {
   }
 }
 
-/* === 暗色模式专项适配 === */
 .v-theme--dark .glass-article-card {
   background: linear-gradient(135deg,
     rgba(255, 255, 255, 0.08) 0%,

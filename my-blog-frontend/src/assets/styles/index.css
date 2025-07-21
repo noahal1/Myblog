@@ -11,6 +11,7 @@
 @import './components/login.css';
 @import './views/home.css';
 @import './views/article.css';
+@import './markdown-images.css';
 
 :root {
 }

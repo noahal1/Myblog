@@ -170,12 +170,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getTags, createArticle, createTag, uploadImage } from '../api'
 import { MdEditor } from 'md-editor-v3'
 import ImagePicker from '../components/ImagePicker.vue'
 import { useTheme } from 'vuetify'
+import { useUserStore } from '../stores/user'
 import 'md-editor-v3/lib/style.css'
 import '@mdi/font/css/materialdesignicons.min.css'
 import '../assets/animate.css'
@@ -184,6 +185,7 @@ import 'highlight.js/styles/github.css'
 
 
 const router = useRouter()
+const userStore = useUserStore()
 const loading = ref(false)
 const savingDraft = ref(false)
 const isFormValid = ref(false)
@@ -414,17 +416,26 @@ const submitArticle = async () => {
 watch([() => article.value.title, () => article.value.content, () => article.value.summary], 
   () => checkFormValidity())
 
+// 定时器引用
+let draftSaveInterval = null
+
 onMounted(() => {
+  // 检查用户认证状态
+  if (!userStore.isAuthenticated) {
+    router.push('/login')
+    return
+  }
+
   fetchTags()
   checkFormValidity()
-  
+
   // 从本地存储恢复草稿
   const savedDraft = localStorage.getItem('article_draft')
   if (savedDraft) {
     try {
       const draftData = JSON.parse(savedDraft)
       article.value = { ...article.value, ...draftData }
-      
+
       if (draftData.cover_image) {
         coverImagePreview.value = draftData.cover_image
       }
@@ -432,13 +443,21 @@ onMounted(() => {
       console.error('恢复草稿失败:', e)
     }
   }
-  
+
   // 定期自动保存草稿
-  setInterval(() => {
-    if (article.value.title || article.value.content) {
+  draftSaveInterval = setInterval(() => {
+    if (article.value && (article.value.title || article.value.content)) {
       localStorage.setItem('article_draft', JSON.stringify(article.value))
     }
   }, 30000) // 每30秒保存一次
+})
+
+// 组件卸载时清理
+onUnmounted(() => {
+  if (draftSaveInterval) {
+    clearInterval(draftSaveInterval)
+    draftSaveInterval = null
+  }
 })
 </script>
 

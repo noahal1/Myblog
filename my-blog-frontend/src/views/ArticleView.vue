@@ -32,13 +32,14 @@
 
         <!-- 文章内容 -->
         <v-col :cols="article?.is_knowledge_base ? 12 : 12" :md="article?.is_knowledge_base ? 9 : 12">
-          <!-- 加载状态 -->
-          <div v-if="loading" class="glass-card">
-            <SkeletonLoader type="article-card" />
-          </div>
-
-          <!-- 文章内容 -->
-          <template v-else-if="article">
+          <!-- 增强的文章加载器 -->
+          <ArticleLoader
+            :loading="loading"
+            :content-type="article?.is_knowledge_base ? 'knowledge' : 'article'"
+            :estimated-read-time="article?.read_time || 5"
+          >
+            <!-- 文章内容 -->
+            <template v-if="article">
             <article class="glass-article-container">
               <header class="glass-article-header">
                 <h1 class="article-main-title">{{ article.title }}</h1>
@@ -143,7 +144,7 @@
             
             <!-- 文章内容 -->
             <div class="article-content">
-              <div v-html="article.renderedContent" class="markdown-body"></div>
+              <div v-html="article.renderedContent" class="markdown-body" @click="handleImageClick"></div>
             </div>
             
             <v-divider class="my-6"></v-divider>
@@ -172,40 +173,50 @@
                 </div>
                 
             <!-- 评论区 -->
-            <CommentSection 
-              :article-id="article.id" 
+            <CommentSection
+              :article-id="article.id"
               :author-id="article.author_id"
               @comment-added="handleCommentAdded"
               @comment-deleted="handleCommentDeleted"
             />
-          </template>
-          
-          <!-- 文章不存在 -->
-          <div v-else class="text-center py-12">
-            <v-icon icon="mdi-alert-circle-outline" size="64" class="mb-4"></v-icon>
-            <h2 class="text-h4 mb-2">文章不存在</h2>
-            <p class="text-body-1 mb-6">抱歉，您要查看的文章不存在或已被删除</p>
-                              <v-btn 
-            color="primary"
-            prepend-icon="mdi-home"
-            @click="$router.push('/')"
-          >
-            返回首页
-                              </v-btn>
-                            </div>
+            </template>
+
+            <!-- 文章不存在 -->
+            <template v-else>
+              <div class="text-center py-12">
+                <v-icon icon="mdi-alert-circle-outline" size="64" class="mb-4"></v-icon>
+                <h2 class="text-h4 mb-2">文章不存在</h2>
+                <p class="text-body-1 mb-6">抱歉，您要查看的文章不存在或已被删除</p>
+                <v-btn
+                  color="primary"
+                  prepend-icon="mdi-home"
+                  @click="$router.push('/')"
+                >
+                  返回首页
+                </v-btn>
+              </div>
+            </template>
+          </ArticleLoader>
         </v-col>
       </v-row>
     </v-container>
+
+    <!-- 图片灯箱 -->
+    <div v-if="lightboxVisible" class="image-lightbox-overlay active" @click="closeLightbox">
+      <div class="image-lightbox-content" @click.stop>
+        <img :src="lightboxImage" :alt="lightboxAlt" class="image-lightbox-img" />
+        <button class="image-lightbox-close" @click="closeLightbox">×</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, onUnmounted } from 'vue'
+import { ref, onMounted, nextTick, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchArticle as fetchMockArticle } from '../utils/mock-api'
 import { renderMarkdown } from '../utils/markdown'  // 导入 markdown 渲染函数
 import CommentSection from '../components/CommentSection.vue'
-import SkeletonLoader from '../components/SkeletonLoader.vue'
+import ArticleLoader from '../components/ArticleLoader.vue'
 import { getArticle, likeArticle } from '../api'
 
 const route = useRoute()
@@ -216,6 +227,11 @@ const hasLiked = ref(false)
 
 const tocItems = ref([])
 const activeTocItem = ref(null)
+
+// 图片灯箱状态
+const lightboxVisible = ref(false)
+const lightboxImage = ref('')
+const lightboxAlt = ref('')
 
 // 处理点赞
 const handleLike = async () => {
@@ -240,10 +256,35 @@ const handleLike = async () => {
 // 检查是否已点赞
 const checkIfLiked = () => {
   if (!article.value) return;
-  
+
   const likedArticles = JSON.parse(localStorage.getItem('likedArticles') || '{}');
   hasLiked.value = !!likedArticles[article.value.id];
 };
+
+// 处理图片点击 - 打开灯箱
+const handleImageClick = (event) => {
+  if (event.target.tagName === 'IMG' && event.target.classList.contains('markdown-image')) {
+    lightboxImage.value = event.target.src
+    lightboxAlt.value = event.target.alt || ''
+    lightboxVisible.value = true
+    document.body.style.overflow = 'hidden' // 防止背景滚动
+  }
+}
+
+// 关闭灯箱
+const closeLightbox = () => {
+  lightboxVisible.value = false
+  lightboxImage.value = ''
+  lightboxAlt.value = ''
+  document.body.style.overflow = '' // 恢复滚动
+}
+
+// 键盘事件处理
+const handleKeydown = (event) => {
+  if (event.key === 'Escape' && lightboxVisible.value) {
+    closeLightbox()
+  }
+}
 
 // 检测内容是否为 HTML
 function isHTML(str) {
@@ -409,6 +450,8 @@ watch(() => article.value?.content, async (newContent) => {
 
 onMounted(() => {
   fetchArticle()
+  // 添加键盘事件监听
+  document.addEventListener('keydown', handleKeydown)
 })
 
 // 在文章加载完成后处理目录
@@ -424,6 +467,10 @@ onUnmounted(() => {
   if (article.value?.is_knowledge_base) {
     window.removeEventListener('scroll', updateActiveTocItem)
   }
+  // 清理键盘事件监听
+  document.removeEventListener('keydown', handleKeydown)
+  // 恢复body滚动
+  document.body.style.overflow = ''
 })
 </script>
 

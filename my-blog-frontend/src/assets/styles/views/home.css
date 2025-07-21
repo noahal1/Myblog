@@ -243,7 +243,6 @@
   background: var(--glass-gradient);
   backdrop-filter: var(--blur-lg);
   -webkit-backdrop-filter: var(--blur-lg);
-  border: 1.5px solid var(--glass-border-light);
   border-radius: var(--radius-organic-lg);
   box-shadow: var(--shadow-glass-lg);
   padding: 0 24px;
@@ -995,18 +994,61 @@
   transform: translateY(-3px);
 }
 
-/* 文章网格优化 */
+/* 文章网格优化 - 响应式布局 */
 .article-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
   opacity: 1 !important;
   min-height: 200px;
   position: relative;
   padding: 20px 0;
+
+  /* 超大屏幕 (1400px+): 4列 */
+  grid-template-columns: repeat(4, 1fr);
 }
 
-/* 文章容器的背景过渡 */
+/* 大屏幕 (1200px - 1399px): 3列 */
+@media (max-width: 1399px) {
+  .article-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 中等屏幕 (900px - 1199px): 2列 */
+@media (max-width: 1199px) {
+  .article-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+/* 平板屏幕 (600px - 899px): 2列，间距调整 */
+@media (max-width: 899px) {
+  .article-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    padding: 16px 0;
+  }
+}
+
+/* 小屏幕 (480px - 599px): 1列 */
+@media (max-width: 599px) {
+  .article-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 12px 0;
+  }
+}
+
+/* 超小屏幕 (479px以下): 1列，最小间距 */
+@media (max-width: 479px) {
+  .article-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 8px 0;
+  }
+}
+
 .articles-container {
   position: relative;
   background: linear-gradient(180deg,
@@ -1018,7 +1060,7 @@
   margin-top: 20px;
 }
 
-/* 文章容器的微妙装饰 */
+
 .articles-container::before {
   content: '';
   position: absolute;
@@ -1046,7 +1088,6 @@
     rgba(var(--mist-gray), 0.8) 0%,
     rgba(var(--pearl-white), 0.95) 50%,
     rgba(var(--mist-gray-light), 0.7) 100%) !important;
-  border: 2px solid rgba(var(--prussian-blue), 0.15) !important;
   border-radius: var(--radius-organic-md) !important;
   box-shadow: var(--shadow-contrast-sm) !important;
   overflow: hidden !important;
@@ -1055,6 +1096,20 @@
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
   will-change: transform;
   position: relative;
+  min-height: 280px; /* 确保卡片最小高度 */
+}
+
+/* 响应式卡片高度调整 */
+@media (max-width: 599px) {
+  .home-view .v-card.article-card {
+    min-height: 240px; /* 手机端减少高度 */
+  }
+}
+
+@media (min-width: 1400px) {
+  .home-view .v-card.article-card {
+    min-height: 320px; /* 超大屏幕增加高度 */
+  }
 }
 
 .home-view .v-card.article-card::before {
@@ -1125,16 +1180,15 @@
   padding: 1.5rem;
 }
 
-/* 标题样式 - 仅应用于非组件的默认样式 */
+
 .home-view .title:not(.v-card-title) {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
 }
 
-/* 摘要样式 - 仅应用于非组件的默认样式 */
 .home-view .preview:not(.v-card-text) {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #666;
   margin-bottom: 1rem;
   line-height: 1.5;
@@ -1203,9 +1257,7 @@
     font-size: 1rem;
   }
   
-  .article-grid {
-    grid-template-columns: 1fr;
-  }
+  /* 文章网格响应式已在上方统一定义 */
   
   .hero .gradient-text {
     font-size: 2.3rem !important;

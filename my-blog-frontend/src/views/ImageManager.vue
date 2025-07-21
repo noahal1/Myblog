@@ -290,10 +290,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import ImageUpload from '../components/ImageUpload.vue'
 import { deleteImage as deleteImageApi, getImageList } from '../api'
 import { getCdnUrl, getRawUrl, convertToCdnUrl } from '../utils/cdn'
+import { useUserStore } from '../stores/user'
+
+// 用户状态
+const userStore = useUserStore()
+const isAuthenticated = computed(() => userStore.isAuthenticated)
 
 // 响应式数据
 const showUploadDialog = ref(false)
@@ -333,11 +338,21 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
+// 组件是否已卸载的标志
+let isUnmounted = false
+
 // 加载已有图片
 const loadImages = async (page = 1) => {
+  if (isUnmounted) return // 如果组件已卸载，直接返回
+
   loadingImages.value = true
+
   try {
     const response = await getImageList(page, 20)
+
+    // 检查组件是否在请求期间被卸载
+    if (isUnmounted) return
+
     if (response && response.data && response.data.success) {
       existingImages.value = response.data.data.images
       imageStats.value = {
@@ -345,13 +360,37 @@ const loadImages = async (page = 1) => {
         total_pages: response.data.data.total_pages
       }
       currentPage.value = page
+    } else {
+      console.error('API响应格式错误:', response)
+      errorMessage.value = '获取图片列表失败，请检查网络连接'
+      showErrorSnackbar.value = true
     }
   } catch (error) {
+    // 检查组件是否在请求期间被卸载
+    if (isUnmounted) return
+
     console.error('加载图片失败:', error)
-    errorMessage.value = '加载图片失败，请重试'
+
+    // 更详细的错误处理
+    if (error.response) {
+      if (error.response.status === 401) {
+        errorMessage.value = '认证失败，请重新登录'
+      } else if (error.response.status === 403) {
+        errorMessage.value = '权限不足，无法访问图片管理'
+      } else {
+        errorMessage.value = `服务器错误: ${error.response.status}`
+      }
+    } else if (error.request) {
+      errorMessage.value = '网络连接失败，请检查网络设置'
+    } else {
+      errorMessage.value = '加载图片失败，请重试'
+    }
+
     showErrorSnackbar.value = true
   } finally {
-    loadingImages.value = false
+    if (!isUnmounted) {
+      loadingImages.value = false
+    }
   }
 }
 
@@ -465,14 +504,28 @@ const switchCdnProvider = (provider) => {
 
 // 组件挂载时加载图片
 onMounted(() => {
+  isUnmounted = false
   loadImages()
+})
+
+// 组件卸载时清理
+onUnmounted(() => {
+  isUnmounted = true
+  // 清理响应式数据
+  existingImages.value = []
+  uploadedImages.value = []
+  loadingImages.value = false
+  showUploadDialog.value = false
 })
 </script>
 
 <style scoped>
 .image-manager {
   min-height: 100vh;
-  background-color: #fafafa;
+  background: linear-gradient(135deg,
+    rgba(var(--pearl-white), 1) 0%,
+    rgba(var(--mist-gray-light), 0.5) 100%);
+  transition: background 0.2s ease;
 }
 
 .images-grid {
@@ -483,11 +536,16 @@ onMounted(() => {
 
 .image-card {
   transition: all 0.3s ease;
+  background: rgba(var(--pearl-white), 0.9) !important;
+  border: 1px solid rgba(var(--mist-gray), 0.3) !important;
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
 }
 
 .image-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 25px rgba(var(--prussian-blue), 0.15);
+  border-color: rgba(var(--prussian-blue), 0.3) !important;
 }
 
 .image-preview {
@@ -495,8 +553,55 @@ onMounted(() => {
 }
 
 .empty-state {
-  background: white;
-  border-radius: 8px;
+  background: rgba(var(--pearl-white), 0.9);
+  border: 1px solid rgba(var(--mist-gray), 0.2);
+  border-radius: var(--radius-organic-md);
   margin: 20px 0;
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+}
+
+/* === 暗色模式适配 === */
+.v-theme--dark .image-manager {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal-light), 0.9) 50%,
+    rgba(var(--prussian-blue), 0.1) 100%);
+}
+
+.v-theme--dark .image-card {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal-light), 0.9) 100%) !important;
+  border: 1px solid rgba(var(--mist-gray-dark), 0.3) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.v-theme--dark .image-card:hover {
+  border-color: rgba(var(--prussian-blue), 0.5) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.v-theme--dark .empty-state {
+  background: linear-gradient(135deg,
+    rgba(var(--charcoal), 0.95) 0%,
+    rgba(var(--charcoal-light), 0.9) 100%);
+  border: 1px solid rgba(var(--mist-gray-dark), 0.3);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .images-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .images-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
 </style>

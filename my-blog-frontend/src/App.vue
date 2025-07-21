@@ -135,7 +135,7 @@ body, .v-application {
 </style>
 
 <script setup>
-import { ref, provide, onMounted, watch } from 'vue'
+import { ref, provide, onMounted, onErrorCaptured, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import NavBar from './components/NavBar.vue'
 import AppFooter from './components/AppFooter.vue'
@@ -174,8 +174,31 @@ const toggleTheme = () => {
   })
 }
 
+// 全局错误捕获
+onErrorCaptured((err, instance, info) => {
+  console.error('Vue组件错误:', err)
+  console.error('错误实例:', instance)
+  console.error('错误信息:', info)
+
+  // 防止错误向上传播
+  return false
+})
+
 // 初始化应用
 onMounted(async () => {
+  // 添加全局错误处理
+  window.addEventListener('error', (event) => {
+    console.error('全局错误:', event.error)
+    console.error('错误文件:', event.filename)
+    console.error('错误行号:', event.lineno)
+  })
+
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('未处理的Promise拒绝:', event.reason)
+    // 防止错误在控制台显示
+    event.preventDefault()
+  })
+
 // 初始化主题
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme) {
@@ -186,7 +209,7 @@ onMounted(async () => {
     currentTheme.value = 'dark'
     theme.global.name.value = 'dark'
   }
-  
+
   // 初始化用户状态
   try {
     await userStore.initUserState()

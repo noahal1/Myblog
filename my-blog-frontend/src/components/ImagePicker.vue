@@ -16,6 +16,15 @@
         <v-icon class="mr-2">mdi-image-multiple</v-icon>
         选择图片
         <v-spacer />
+
+        <v-btn
+          icon="mdi-refresh"
+          variant="text"
+          @click="retryLoad"
+          class="mr-2"
+          :disabled="loading"
+        />
+
         <v-btn
           icon="mdi-close"
           variant="text"
@@ -56,6 +65,14 @@
             class="mb-4"
           />
           <p class="text-body-1">正在加载图片...</p>
+        </div>
+
+        <!-- 错误状态 -->
+        <div v-else-if="error" class="text-center py-8">
+          <v-icon size="64" color="error" class="mb-4">mdi-alert-circle</v-icon>
+          <div class="text-h6 mb-2">加载失败</div>
+          <div class="text-body-2 text-grey mb-4">{{ error }}</div>
+          <v-btn color="primary" @click="retryLoad">重试</v-btn>
         </div>
         
         <!-- 图片网格 -->
@@ -151,7 +168,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { getImageList } from '../api'
 import { useUserStore } from '../stores/user'
 
@@ -170,6 +187,7 @@ const userStore = useUserStore()
 // 响应式数据
 const dialog = ref(false)
 const loading = ref(false)
+const error = ref('')
 const images = ref([])
 const selectedImages = ref([])
 const searchQuery = ref('')
@@ -235,29 +253,70 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
+// 组件是否已卸载的标志
+let isUnmounted = false
+
 // 加载图片列表
 const loadImages = async (page = 1) => {
+  if (isUnmounted) return // 如果组件已卸载，直接返回
+
   loading.value = true
-  console.log('开始加载图片列表，页码:', page)
+  error.value = ''
 
   try {
     const response = await getImageList(page, 50) // 加载更多图片用于选择
-    console.log('图片列表API响应:', response)
+
+    // 检查组件是否在请求期间被卸载
+    if (isUnmounted) return
 
     if (response && response.data && response.data.success) {
-      images.value = response.data.data.images
-      totalPages.value = response.data.data.total_pages
+      images.value = response.data.data.images || []
+      totalPages.value = response.data.data.total_pages || 0
       currentPage.value = page
-      console.log('成功加载图片:', images.value.length, '张')
+
+      if (images.value.length === 0) {
+        error.value = '暂无图片，请先上传一些图片'
+      }
     } else {
-      console.error('API响应格式错误:', response)
+      console.error('ImagePicker: API响应格式错误:', response)
+      error.value = '获取图片列表失败，响应格式错误'
       images.value = []
     }
-  } catch (error) {
-    console.error('加载图片失败:', error)
+  } catch (err) {
+    // 检查组件是否在请求期间被卸载
+    if (isUnmounted) return
+
+    console.error('ImagePicker: 加载图片失败:', err)
+
+    // 详细的错误处理
+    if (err.response) {
+      if (err.response.status === 401) {
+        error.value = '认证失败，请重新登录后再试'
+      } else if (err.response.status === 403) {
+        error.value = '权限不足，无法访问图片库'
+      } else if (err.response.status === 404) {
+        error.value = '图片服务不可用'
+      } else {
+        error.value = `服务器错误: ${err.response.status}`
+      }
+    } else if (err.request) {
+      error.value = '网络连接失败，请检查网络设置'
+    } else {
+      error.value = '加载图片失败，请重试'
+    }
+
     images.value = []
   } finally {
-    loading.value = false
+    if (!isUnmounted) {
+      loading.value = false
+    }
+  }
+}
+
+// 重试加载
+const retryLoad = () => {
+  if (!isUnmounted) {
+    loadImages(currentPage.value)
   }
 }
 
@@ -305,23 +364,35 @@ const sortImages = () => {
 
 // 监听对话框状态变化
 const onDialogChange = (isOpen) => {
-  if (isOpen && images.value.length === 0) {
-    console.log('对话框打开，开始加载图片...')
-    console.log('用户登录状态:', userStore.isLoggedIn)
-    console.log('用户信息:', userStore.user)
-
-    if (!userStore.isLoggedIn) {
-      console.error('用户未登录，无法加载图片')
+  if (isOpen) {
+    if (!userStore.isAuthenticated) {
+      error.value = '请先登录后再选择图片'
       return
     }
 
+    // 每次打开都重新加载，确保获取最新的图片列表
     loadImages()
   }
 }
 
 // 组件挂载时不加载图片，等用户打开对话框时再加载
 onMounted(() => {
-  console.log('ImagePicker组件已挂载')
+  isUnmounted = false
+})
+
+// 组件卸载时清理
+onUnmounted(() => {
+  isUnmounted = true
+  // 清理响应式数据
+  images.value = []
+  selectedImages.value = []
+  error.value = ''
+  loading.value = false
+  // 清理响应式数据
+  images.value = []
+  selectedImages.value = []
+  error.value = ''
+  loading.value = false
 })
 </script>
 

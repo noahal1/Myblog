@@ -11,6 +11,7 @@ declare module 'vue' {
     AppFooter: typeof import('./components/AppFooter.vue')['default']
     ArticleCard: typeof import('./components/ArticleCard.vue')['default']
     ArticleForm: typeof import('./components/ArticleForm.vue')['default']
+    ArticleLoader: typeof import('./components/ArticleLoader.vue')['default']
     CommentSection: typeof import('./components/CommentSection.vue')['default']
     FaviconIcon: typeof import('./components/icons/FaviconIcon.vue')['default']
     ImagePicker: typeof import('./components/ImagePicker.vue')['default']

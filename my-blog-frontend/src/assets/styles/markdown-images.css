@@ -1,0 +1,355 @@
+/*======================
+  Markdown 图片增强样式
+======================*/
+
+/* === Markdown 图片容器 === */
+.markdown-image-container {
+  position: relative;
+  margin: 2rem 0;
+  border-radius: var(--radius-organic-md);
+  overflow: hidden;
+  background: var(--glass-gradient);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+  border: 1px solid var(--glass-border-light);
+  box-shadow: var(--shadow-glass-sm);
+  transition: all var(--transition-default);
+}
+
+.markdown-image-container:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glass-md);
+  border-color: rgba(var(--prussian-blue), 0.3);
+}
+
+/* === 图片骨架屏 === */
+.markdown-image-skeleton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  background: linear-gradient(90deg,
+    rgba(var(--mist-gray), 0.1) 0%,
+    rgba(var(--mist-gray), 0.2) 50%,
+    rgba(var(--mist-gray), 0.1) 100%);
+  background-size: 200% 100%;
+  animation: imageSkeletonShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes imageSkeletonShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.image-skeleton-placeholder {
+  text-align: center;
+  color: rgba(var(--prussian-blue), 0.6);
+}
+
+.image-skeleton-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.7;
+}
+
+.image-skeleton-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* 错误状态 */
+.image-skeleton-error {
+  text-align: center;
+  color: rgba(220, 53, 69, 0.8);
+}
+
+.markdown-image-skeleton.error-state {
+  background: linear-gradient(90deg,
+    rgba(220, 53, 69, 0.1) 0%,
+    rgba(220, 53, 69, 0.15) 50%,
+    rgba(220, 53, 69, 0.1) 100%);
+  animation: none;
+}
+
+/* === 实际图片样式 === */
+.markdown-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius-organic-md);
+  transition: all var(--transition-default);
+  cursor: zoom-in;
+}
+
+.markdown-image.fade-in {
+  animation: imageLoadFadeIn 0.5s ease-out;
+}
+
+@keyframes imageLoadFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 图片悬浮效果 */
+.markdown-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(var(--prussian-blue), 0.15);
+}
+
+/* === 图片灯箱效果 === */
+.image-lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.image-lightbox-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.image-lightbox-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: var(--radius-organic-lg);
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+
+.image-lightbox-overlay.active .image-lightbox-content {
+  transform: scale(1);
+}
+
+.image-lightbox-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.image-lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #333;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.image-lightbox-close:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+}
+
+/* === 图片标题和描述 === */
+.markdown-image-caption {
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: rgba(var(--prussian-blue), 0.8);
+  font-style: italic;
+  background: rgba(var(--mist-gray), 0.1);
+  border-top: 1px solid rgba(var(--mist-gray), 0.2);
+}
+
+/* === 图片网格布局（多图片） === */
+.markdown-images-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.markdown-images-grid.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.markdown-images-grid.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.markdown-images-grid.grid-4 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* === 图片尺寸变体 === */
+.markdown-image-container.size-small {
+  max-width: 300px;
+  margin: 1rem auto;
+}
+
+.markdown-image-container.size-medium {
+  max-width: 600px;
+  margin: 1.5rem auto;
+}
+
+.markdown-image-container.size-large {
+  max-width: 100%;
+  margin: 2rem 0;
+}
+
+/* === 图片对齐 === */
+.markdown-image-container.align-left {
+  float: left;
+  margin: 0 2rem 1rem 0;
+  max-width: 50%;
+}
+
+.markdown-image-container.align-right {
+  float: right;
+  margin: 0 0 1rem 2rem;
+  max-width: 50%;
+}
+
+.markdown-image-container.align-center {
+  margin: 2rem auto;
+  display: block;
+}
+
+/* === 响应式设计 === */
+@media (max-width: 768px) {
+  .markdown-image-container {
+    margin: 1.5rem 0;
+  }
+  
+  .markdown-image-skeleton {
+    min-height: 150px;
+  }
+  
+  .image-skeleton-icon {
+    font-size: 2rem;
+  }
+  
+  .markdown-images-grid.grid-2,
+  .markdown-images-grid.grid-3,
+  .markdown-images-grid.grid-4 {
+    grid-template-columns: 1fr;
+  }
+  
+  .markdown-image-container.align-left,
+  .markdown-image-container.align-right {
+    float: none;
+    max-width: 100%;
+    margin: 1rem 0;
+  }
+  
+  .image-lightbox-content {
+    max-width: 95%;
+    max-height: 95%;
+  }
+  
+  .image-lightbox-close {
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 35px;
+    height: 35px;
+  }
+}
+
+@media (max-width: 480px) {
+  .markdown-image-container {
+    margin: 1rem 0;
+    border-radius: var(--radius-organic-sm);
+  }
+  
+  .markdown-image-skeleton {
+    min-height: 120px;
+  }
+  
+  .image-skeleton-icon {
+    font-size: 1.5rem;
+  }
+  
+  .image-skeleton-text {
+    font-size: 0.8rem;
+  }
+  
+  .markdown-image-caption {
+    padding: 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* === 暗色模式适配 === */
+.v-theme--dark .markdown-image-skeleton {
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%);
+}
+
+.v-theme--dark .image-skeleton-placeholder {
+  color: rgba(var(--mist-gray), 0.8);
+}
+
+.v-theme--dark .markdown-image-caption {
+  color: rgba(var(--mist-gray), 0.9);
+  background: rgba(var(--charcoal), 0.3);
+  border-top-color: rgba(var(--mist-gray), 0.2);
+}
+
+.v-theme--dark .image-lightbox-close {
+  background: rgba(var(--charcoal), 0.9);
+  color: rgba(var(--mist-gray), 0.9);
+}
+
+.v-theme--dark .image-lightbox-close:hover {
+  background: rgba(var(--charcoal), 1);
+}
+
+/* === 性能优化 === */
+.markdown-image-container {
+  contain: layout style;
+}
+
+.markdown-image {
+  will-change: transform;
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .markdown-image-skeleton,
+  .markdown-image.fade-in,
+  .markdown-image:hover,
+  .image-lightbox-overlay,
+  .image-lightbox-content {
+    animation: none;
+    transition: none;
+    transform: none;
+  }
+  
+  .markdown-image-skeleton {
+    background: rgba(var(--mist-gray), 0.15);
+  }
+}
