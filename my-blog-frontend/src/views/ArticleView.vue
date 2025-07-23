@@ -4,7 +4,7 @@
       <v-row>
         <!-- 文章目录 - 仅在知识库文章时显示 -->
         <v-col v-if="article && article.is_knowledge_base" cols="12" md="3" class="d-none d-md-block">
-          <div class="glass-toc-container sticky-toc">
+          <div class="glass-toc-container sticky-toc toc-scrollbar">
             <div class="glass-card glass-toc">
               <div class="toc-header">
                 <v-icon icon="mdi-format-list-bulleted" class="me-2" aria-hidden="true"></v-icon>
@@ -213,14 +213,14 @@
 
 <script setup>
 import { ref, onMounted, nextTick, onUnmounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { renderMarkdown } from '../utils/markdown'  // 导入 markdown 渲染函数
+import { attachImageEventListeners } from '../utils/markdown'
 import CommentSection from '../components/CommentSection.vue'
 import ArticleLoader from '../components/ArticleLoader.vue'
 import { getArticle, likeArticle } from '../api'
 
 const route = useRoute()
-const router = useRouter()
 const loading = ref(true)
 const article = ref(null)
 const hasLiked = ref(false)
@@ -340,13 +340,16 @@ const fetchArticle = async () => {
     
     // 将Markdown转换为HTML
     if (article.value.content) {
-      console.log('Original content:', article.value.content) // 调试日志
       if (isHTML(article.value.content)) {
         article.value.renderedContent = article.value.content
       } else {
         article.value.renderedContent = renderMarkdown(article.value.content)
-        console.log('Rendered content:', article.value.renderedContent) // 调试日志
       }
+
+      // 在下一个tick中重新附加图片事件监听器
+      nextTick(() => {
+        attachImageEventListeners()
+      })
     }
     
     // 设置文档标题
@@ -476,62 +479,4 @@ onUnmounted(() => {
 
 <style scoped>
 /* 所有样式已移至 src/assets/styles/views/article.css */
-.sticky-toc {
-  position: sticky;
-  top: 80px;
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
-}
-
-.toc-list {
-  padding: 8px 0;
-}
-
-.toc-item-level-1 {
-  font-weight: bold;
-}
-
-.toc-item-level-2 {
-  font-weight: 500;
-}
-
-.toc-item-level-3,
-.toc-item-level-4,
-.toc-item-level-5,
-.toc-item-level-6 {
-  font-size: 0.9em;
-}
-
-.v-list-item.active {
-  background-color: rgba(var(--v-theme-primary), 0.1);
-  color: rgb(var(--v-theme-primary));
-}
-
-.v-list-item {
-  min-height: 36px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.v-list-item:hover {
-  background-color: rgba(var(--v-theme-primary), 0.05);
-}
-
-/* 自定义滚动条样式 */
-.sticky-toc::-webkit-scrollbar {
-  width: 4px;
-}
-
-.sticky-toc::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sticky-toc::-webkit-scrollbar-thumb {
-  background: rgba(var(--v-theme-primary), 0.3);
-  border-radius: 2px;
-}
-
-.sticky-toc::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--v-theme-primary), 0.5);
-}
 </style>

@@ -116,8 +116,7 @@
 .v-btn {
   background: var(--glass-gradient) !important;
   backdrop-filter: var(--blur-sm) !important;
-  -webkit-backdrop-filter: var(--blur-sm) !important;
-  border: 1px solid rgba(var(--primary-blue), 0.2) !important;
+  
   border-radius: var(--radius-organic-sm) !important;
   box-shadow: var(--shadow-glass-sm) !important;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
@@ -232,4 +231,109 @@
 
 .v-theme--dark .v-data-table tbody tr:hover {
   background: rgba(var(--primary-blue), 0.1) !important;
+}
+
+/* === 编辑对话框样式 === */
+.edit-dialog .v-overlay__content {
+  margin: 24px;
+  max-height: calc(100vh - 48px);
+}
+
+.edit-dialog-card {
+  background: rgb(255, 255, 255) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(var(--primary-blue), 0.12) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  overflow: hidden;
+}
+
+.edit-dialog-header {
+  background: linear-gradient(135deg,
+    rgba(var(--primary-blue), 0.05) 0%,
+    rgba(var(--secondary-purple), 0.03) 100%) !important;
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+  padding: 20px 24px !important;
+  border-bottom: 1px solid rgba(var(--primary-blue), 0.08);
+}
+
+.edit-dialog-content {
+  padding: 24px !important;
+  background: rgb(255, 255, 255) !important;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+/* 暗色模式下的编辑对话框 */
+.v-theme--dark .edit-dialog-card {
+  background: rgb(18, 18, 18) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.v-theme--dark .edit-dialog-header {
+  background: linear-gradient(135deg,
+    rgba(var(--primary-blue), 0.08) 0%,
+    rgba(var(--secondary-purple), 0.05) 100%) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.v-theme--dark .edit-dialog-content {
+  background: rgb(18, 18, 18) !important;
+}
+
+/* 编辑对话框内的表单样式优化 */
+.edit-dialog-content .v-form {
+  background: transparent !important;
+}
+
+.edit-dialog-content .v-text-field,
+.edit-dialog-content .v-textarea,
+.edit-dialog-content .v-autocomplete {
+  background: rgba(var(--primary-blue), 0.02) !important;
+  border-radius: 12px !important;
+}
+
+.edit-dialog-content .v-text-field .v-field,
+.edit-dialog-content .v-textarea .v-field,
+.edit-dialog-content .v-autocomplete .v-field {
+  background: transparent !important;
+  border: 1px solid rgba(var(--primary-blue), 0.12) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+.edit-dialog-content .v-text-field:hover .v-field,
+.edit-dialog-content .v-textarea:hover .v-field,
+.edit-dialog-content .v-autocomplete:hover .v-field {
+  border-color: rgba(var(--primary-blue), 0.3) !important;
+}
+
+.edit-dialog-content .v-text-field.v-field--focused .v-field,
+.edit-dialog-content .v-textarea.v-field--focused .v-field,
+.edit-dialog-content .v-autocomplete.v-field--focused .v-field {
+  border-color: rgb(var(--primary-blue)) !important;
+  box-shadow: 0 0 0 2px rgba(var(--primary-blue), 0.1) !important;
+}
+
+/* 暗色模式下的表单样式 */
+.v-theme--dark .edit-dialog-content .v-text-field,
+.v-theme--dark .edit-dialog-content .v-textarea,
+.v-theme--dark .edit-dialog-content .v-autocomplete {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.v-theme--dark .edit-dialog-content .v-text-field .v-field,
+.v-theme--dark .edit-dialog-content .v-textarea .v-field,
+.v-theme--dark .edit-dialog-content .v-autocomplete .v-field {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.v-theme--dark .edit-dialog-content .v-text-field:hover .v-field,
+.v-theme--dark .edit-dialog-content .v-textarea:hover .v-field,
+.v-theme--dark .edit-dialog-content .v-autocomplete:hover .v-field {
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }

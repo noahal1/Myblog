@@ -65,6 +65,53 @@
   z-index: 10;
 }
 
+/* === 目录通用样式 === */
+.sticky-toc {
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+.toc-list {
+  padding: 8px 0;
+}
+
+.toc-item-level-1 {
+  font-weight: bold;
+}
+
+.toc-item-level-2 {
+  font-weight: 500;
+}
+
+.toc-item-level-3,
+.toc-item-level-4,
+.toc-item-level-5,
+.toc-item-level-6 {
+  font-size: 0.9em;
+}
+
+.v-list-item.active {
+  background-color: rgba(var(--v-theme-primary), 0.1);
+  color: rgb(var(--v-theme-primary));
+}
+
+.v-list-item {
+  min-height: 36px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.v-list-item:hover {
+  background-color: rgba(var(--v-theme-primary), 0.05);
+}
+
+/* 目录使用统一的细滚动条样式 */
+.sticky-toc {
+  /* 滚动条样式通过 toc-scrollbar 类应用 */
+}
+
 .glass-toc {
   background: var(--glass-gradient);
   backdrop-filter: var(--blur-lg);

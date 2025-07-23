@@ -139,26 +139,7 @@
   -webkit-backdrop-filter: var(--blur-lg) !important;
 }
 
-/* === 滚动条暗色模式 === */
-.v-theme--dark ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.v-theme--dark ::-webkit-scrollbar-track {
-  background: rgba(var(--charcoal-light), 0.3);
-  border-radius: 4px;
-}
-
-.v-theme--dark ::-webkit-scrollbar-thumb {
-  background: rgba(var(--mist-gray-dark), 0.6);
-  border-radius: 4px;
-  transition: background 0.3s ease;
-}
-
-.v-theme--dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--prussian-blue), 0.7);
-}
+/* === 滚动条暗色模式样式已移至 scrollbar.css === */
 
 /* === 选择文本暗色模式 === */
 .v-theme--dark ::selection {

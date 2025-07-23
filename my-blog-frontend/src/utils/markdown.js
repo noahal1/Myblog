@@ -58,7 +58,7 @@ md.renderer.rules.image = function (tokens, idx, options, env) {
     <div class="markdown-image-container" data-image-id="${imageId}">
       <div class="markdown-image-skeleton" id="skeleton-${imageId}">
         <div class="image-skeleton-placeholder">
-          <div class="image-skeleton-icon">📷</div>
+          <div class="image-skeleton-icon"></div>
           <div class="image-skeleton-text">加载中...</div>
         </div>
       </div>
@@ -69,17 +69,17 @@ md.renderer.rules.image = function (tokens, idx, options, env) {
         title="${title}"
         class="markdown-image"
         loading="lazy"
-        onload="window.markdownImageLoaded && window.markdownImageLoaded('${imageId}')"
-        onerror="window.markdownImageError && window.markdownImageError('${imageId}')"
+        data-image-id="${imageId}"
         style="display: none;"
       />
     </div>
   `
 }
 
-// 图片加载状态管理
-window.markdownImageLoaded = function(imageId) {
-  const img = document.getElementById(imageId)
+// 图片加载状态管理 - 使用事件监听器而不是内联事件
+function handleImageLoad(event) {
+  const img = event.target
+  const imageId = img.dataset.imageId
   const skeleton = document.getElementById(`skeleton-${imageId}`)
 
   if (img && skeleton) {
@@ -90,13 +90,15 @@ window.markdownImageLoaded = function(imageId) {
   }
 }
 
-window.markdownImageError = function(imageId) {
+function handleImageError(event) {
+  const img = event.target
+  const imageId = img.dataset.imageId
   const skeleton = document.getElementById(`skeleton-${imageId}`)
 
   if (skeleton) {
     skeleton.innerHTML = `
       <div class="image-skeleton-error">
-        <div class="image-skeleton-icon">❌</div>
+        <div class="image-skeleton-icon"></div>
         <div class="image-skeleton-text">图片加载失败</div>
       </div>
     `
@@ -104,7 +106,29 @@ window.markdownImageError = function(imageId) {
   }
 }
 
-// 导出 markdown 渲染函数 - 增强版
+// 为所有markdown图片添加事件监听器
+function attachImageEventListeners() {
+  const images = document.querySelectorAll('.markdown-image[data-image-id]')
+  images.forEach(img => {
+    // 移除旧的事件监听器（如果存在）
+    img.removeEventListener('load', handleImageLoad)
+    img.removeEventListener('error', handleImageError)
+
+    // 添加新的事件监听器
+    img.addEventListener('load', handleImageLoad)
+    img.addEventListener('error', handleImageError)
+
+    // 如果图片已经加载完成，立即触发加载事件
+    if (img.complete && img.naturalHeight !== 0) {
+      handleImageLoad({ target: img })
+    } else if (img.complete) {
+      // 图片加载失败
+      handleImageError({ target: img })
+    }
+  })
+}
+
+// 导出 markdown 渲染函数
 export function renderMarkdown(content) {
   if (!content) return ''
   try {
@@ -123,11 +147,10 @@ export function renderMarkdown(content) {
     }
 
     const rendered = md.render(content)
-    console.log('Markdown rendered:', rendered) // 调试日志
 
     // 在渲染完成后，初始化图片增强功能
     setTimeout(() => {
-      initializeImageLoading()
+      attachImageEventListeners()
       initImageEnhancements()
     }, 100)
 
@@ -138,13 +161,5 @@ export function renderMarkdown(content) {
   }
 }
 
-// 初始化图片加载
-function initializeImageLoading() {
-  const images = document.querySelectorAll('.markdown-image')
-  images.forEach(img => {
-    if (img.complete && img.naturalHeight !== 0) {
-      // 图片已经加载完成
-      window.markdownImageLoaded(img.id)
-    }
-  })
-}
+// 导出函数供外部使用
+export { attachImageEventListeners }

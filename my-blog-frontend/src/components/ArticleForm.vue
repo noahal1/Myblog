@@ -86,23 +86,57 @@ const form = ref({
   tags: []
 })
 
-watch(() => props.article, (val) => {
-  if (val) {
-    form.value = {
-      title: val.title || '',
-      content: val.content || '',
-      summary: val.summary || '',
-      tags: val.tags || []
-    }
+// 将标签名称数组转换为标签ID数组
+const convertTagsToIds = (tagNames) => {
+  if (!Array.isArray(tagNames) || tagNames.length === 0) {
+    return []
   }
-}, { immediate: true })
+
+  // 如果已经是数字数组，直接返回
+  if (typeof tagNames[0] === 'number') {
+    return tagNames
+  }
+
+  // 如果是字符串数组，需要转换为ID数组
+  if (availableTags.value.length === 0) {
+    // 如果标签还没有加载，返回空数组，稍后会重新转换
+    return []
+  }
+
+  return availableTags.value
+    .filter(tag => tagNames.includes(tag.name))
+    .map(tag => tag.id)
+}
+
+// 更新表单数据的函数
+const updateFormData = (articleData) => {
+  if (articleData) {
+    console.log('更新表单数据:', articleData)
+    form.value = {
+      title: articleData.title || '',
+      content: articleData.content || '',
+      summary: articleData.summary || '',
+      tags: convertTagsToIds(articleData.tags || [])
+    }
+    console.log('表单数据已更新:', form.value)
+  }
+}
+
+watch(() => props.article, updateFormData, { immediate: true })
 
 const fetchTags = async () => {
   loadingTags.value = true
   try {
     const res = await getTags()
     availableTags.value = res.data || []
+    console.log('标签加载完成:', availableTags.value)
+
+    // 如果有文章数据，重新更新表单数据（包括标签转换）
+    if (props.article) {
+      updateFormData(props.article)
+    }
   } catch (e) {
+    console.error('获取标签失败:', e)
     availableTags.value = []
   } finally {
     loadingTags.value = false

@@ -47,9 +47,39 @@
 }
 
 .image-skeleton-icon {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
-  opacity: 0.7;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 0.5rem;
+  background: rgba(var(--prussian-blue), 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.image-skeleton-icon::before {
+  content: '';
+  width: 24px;
+  height: 18px;
+  background: rgba(var(--prussian-blue), 0.3);
+  border-radius: 2px;
+  position: relative;
+}
+
+.image-skeleton-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: rgba(var(--prussian-blue), 0.4);
+  border-radius: 50%;
+  margin-top: -2px;
+  margin-left: -6px;
 }
 
 .image-skeleton-text {
@@ -62,6 +92,26 @@
 .image-skeleton-error {
   text-align: center;
   color: rgba(220, 53, 69, 0.8);
+}
+
+.image-skeleton-error .image-skeleton-icon {
+  background: rgba(220, 53, 69, 0.1);
+}
+
+.image-skeleton-error .image-skeleton-icon::before {
+  background: rgba(220, 53, 69, 0.3);
+}
+
+.image-skeleton-error .image-skeleton-icon::after {
+  content: '✕';
+  background: none;
+  color: rgba(220, 53, 69, 0.6);
+  font-size: 16px;
+  font-weight: bold;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  margin: 0;
 }
 
 .markdown-image-skeleton.error-state {
@@ -242,33 +292,46 @@
   .markdown-image-container {
     margin: 1.5rem 0;
   }
-  
+
   .markdown-image-skeleton {
     min-height: 150px;
   }
-  
+
   .image-skeleton-icon {
-    font-size: 2rem;
+    width: 40px;
+    height: 40px;
   }
-  
+
+  .image-skeleton-icon::before {
+    width: 20px;
+    height: 15px;
+  }
+
+  .image-skeleton-icon::after {
+    width: 7px;
+    height: 7px;
+    margin-top: -1.5px;
+    margin-left: -5px;
+  }
+
   .markdown-images-grid.grid-2,
   .markdown-images-grid.grid-3,
   .markdown-images-grid.grid-4 {
     grid-template-columns: 1fr;
   }
-  
+
   .markdown-image-container.align-left,
   .markdown-image-container.align-right {
     float: none;
     max-width: 100%;
     margin: 1rem 0;
   }
-  
+
   .image-lightbox-content {
     max-width: 95%;
     max-height: 95%;
   }
-  
+
   .image-lightbox-close {
     top: 0.5rem;
     right: 0.5rem;
@@ -282,19 +345,32 @@
     margin: 1rem 0;
     border-radius: var(--radius-organic-sm);
   }
-  
+
   .markdown-image-skeleton {
     min-height: 120px;
   }
-  
+
   .image-skeleton-icon {
-    font-size: 1.5rem;
+    width: 36px;
+    height: 36px;
   }
-  
+
+  .image-skeleton-icon::before {
+    width: 18px;
+    height: 14px;
+  }
+
+  .image-skeleton-icon::after {
+    width: 6px;
+    height: 6px;
+    margin-top: -1px;
+    margin-left: -4px;
+  }
+
   .image-skeleton-text {
     font-size: 0.8rem;
   }
-  
+
   .markdown-image-caption {
     padding: 0.75rem;
     font-size: 0.8rem;

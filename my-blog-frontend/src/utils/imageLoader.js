@@ -316,17 +316,33 @@ export function initImageEnhancements(container = document) {
   // 为所有markdown图片添加懒加载
   const images = container.querySelectorAll('.markdown-image')
   images.forEach(img => {
+    // 如果图片还没有加载完成，添加到懒加载观察器
     if (!img.complete) {
       lazyObserver.observe(img)
     }
   })
-  
+
   // 预加载关键图片（首屏图片）
   const criticalImages = container.querySelectorAll('.markdown-image[data-critical="true"]')
   criticalImages.forEach(img => {
     const src = img.dataset.src || img.src
     if (src) {
       smartLoader.loadImage(src, 10) // 最高优先级
+    }
+  })
+
+  // 为已经加载完成的图片触发显示
+  images.forEach(img => {
+    if (img.complete && img.naturalHeight !== 0) {
+      const imageId = img.dataset.imageId
+      if (imageId) {
+        const skeleton = document.getElementById(`skeleton-${imageId}`)
+        if (skeleton && skeleton.style.display !== 'none') {
+          skeleton.style.display = 'none'
+          img.style.display = 'block'
+          img.classList.add('fade-in')
+        }
+      }
     }
   })
 }

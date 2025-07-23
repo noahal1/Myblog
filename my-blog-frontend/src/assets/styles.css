@@ -1,43 +1,7 @@
+/* 导入统一的变量定义 */
+@import './styles/variables.css';
+
 :root {
-  --prussian-blue: 0, 49, 83;          
-  --prussian-blue-light: 25, 74, 108;  
-  --mist-gray: 229, 221, 215;           
-  --mist-gray-light: 207, 216, 220;    
-  --mist-gray-dark: 120, 144, 156;      
-
-  /* 高级辅助色彩 */
-  --sage-green: 129, 178, 154;        
-  --warm-beige: 242, 233, 216;        
-  --charcoal: 55, 71, 79;              
-  --pearl-white: 250, 250, 250; 
-  --accent-gold: 212, 175, 55;         
-  --soft-lavender: 159, 168, 218;   
-
-  /* 渐变色组合 */
-  --gradient-prussian: 0, 49, 83, 25, 74, 108;
-  --gradient-mist: 229, 221, 215, 207, 216, 220;
-  --gradient-sage: 129, 178, 154, 229, 221, 215;
-  --gradient-elegant: 0, 49, 83, 159, 168, 218;
-
-  /* 高级玻璃拟态效果 */
-  --glass-bg-light: rgba(var(--pearl-white), 0.85);
-  --glass-bg-dark: rgba(var(--charcoal), 0.15);
-  --glass-border-light: rgba(var(--mist-gray), 0.3);
-  --glass-border-dark: rgba(var(--mist-gray-light), 0.2);
-  --glass-shadow-light: 0 8px 32px rgba(var(--prussian-blue), 0.08);
-  --glass-shadow-dark: 0 8px 32px rgba(var(--charcoal), 0.25);
-
-  /* 精致模糊效果 */
-  --blur-sm: blur(8px);
-  --blur-md: blur(16px);
-  --blur-lg: blur(24px);
-  --blur-xl: blur(40px);
-
-  /* 优雅圆角设计 */
-  --radius-organic-sm: 8px 12px 10px 14px;
-  --radius-organic-md: 16px 20px 18px 22px;
-  --radius-organic-lg: 24px 28px 26px 30px;
-  --radius-organic-xl: 32px 36px 34px 38px;
 
   /* 高级配色主题 */
   --primary: rgb(var(--prussian-blue));
@@ -53,36 +17,7 @@
   --text-secondary: rgb(var(--mist-gray-dark));
   --text-tertiary: rgb(var(--mist-gray));
 
-  /* 高级玻璃拟态渐变 */
-  --glass-gradient: linear-gradient(135deg,
-    rgba(var(--pearl-white), 0.9) 0%,
-    rgba(var(--mist-gray-light), 0.6) 50%,
-    rgba(var(--pearl-white), 0.8) 100%);
-  --glass-gradient-hover: linear-gradient(135deg,
-    rgba(var(--pearl-white), 0.95) 0%,
-    rgba(var(--mist-gray-light), 0.7) 50%,
-    rgba(var(--pearl-white), 0.85) 100%);
 
-  /* 优雅渐变效果 */
-  --prussian-gradient: linear-gradient(135deg,
-    rgba(var(--prussian-blue), 0.9) 0%,
-    rgba(var(--prussian-blue-light), 0.7) 100%);
-  --sage-gradient: linear-gradient(135deg,
-    rgba(var(--sage-green), 0.8) 0%,
-    rgba(var(--mist-gray), 0.6) 100%);
-  --elegant-gradient: linear-gradient(135deg,
-    rgba(var(--prussian-blue), 0.8) 0%,
-    rgba(var(--soft-lavender), 0.6) 100%);
-
-  /* 精致阴影系统 */
-  --shadow-glass-sm: 0 4px 16px rgba(var(--prussian-blue), 0.06),
-                     0 1px 4px rgba(var(--mist-gray-dark), 0.04);
-  --shadow-glass-md: 0 8px 32px rgba(var(--prussian-blue), 0.1),
-                     0 2px 8px rgba(var(--mist-gray-dark), 0.06);
-  --shadow-glass-lg: 0 16px 64px rgba(var(--prussian-blue), 0.12),
-                     0 4px 16px rgba(var(--mist-gray-dark), 0.08);
-  --shadow-glass-xl: 0 24px 96px rgba(var(--prussian-blue), 0.15),
-                     0 8px 32px rgba(var(--mist-gray-dark), 0.1);
 }
 
 /* === 高级暗色模式 - 使用 Vuetify 主题类 === */
@@ -100,26 +35,7 @@
   --text-secondary: rgb(var(--mist-gray));
   --text-tertiary: rgb(var(--mist-gray-dark));
 
-  /* 暗色模式高级玻璃渐变 */
-  --glass-gradient: linear-gradient(135deg,
-    rgba(var(--charcoal), 0.8) 0%,
-    rgba(var(--prussian-blue), 0.3) 50%,
-    rgba(var(--charcoal), 0.6) 100%);
-  --glass-gradient-hover: linear-gradient(135deg,
-    rgba(var(--charcoal), 0.9) 0%,
-    rgba(var(--prussian-blue), 0.4) 50%,
-    rgba(var(--charcoal), 0.7) 100%);
 
-  /* 暗色模式优雅渐变 */
-  --prussian-gradient: linear-gradient(135deg,
-    rgba(var(--prussian-blue-light), 0.8) 0%,
-    rgba(var(--mist-gray), 0.6) 100%);
-  --sage-gradient: linear-gradient(135deg,
-    rgba(var(--sage-green), 0.7) 0%,
-    rgba(var(--mist-gray-dark), 0.5) 100%);
-  --elegant-gradient: linear-gradient(135deg,
-    rgba(var(--prussian-blue-light), 0.7) 0%,
-    rgba(var(--soft-lavender), 0.5) 100%);
 }
 
 .glass-effect {

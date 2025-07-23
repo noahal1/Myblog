@@ -219,6 +219,15 @@
                   >
                     查看
                   </v-btn>
+                  <v-btn
+                    color="info"
+                    size="small"
+                    class="mr-2 modern-btn"
+                    variant="elevated"
+                    @click="openEditDialog(item)"
+                  >
+                    编辑
+                  </v-btn>
                   <template v-if="item.status === 'pending'">
                     <v-btn
                       color="success"
@@ -344,10 +353,27 @@
           </v-dialog>
           
           <!-- 文章编辑对话框 -->
-          <v-dialog v-model="editDialog" width="800">
-            <v-card>
-              <v-card-title>编辑文章</v-card-title>
-              <v-card-text>
+          <v-dialog
+            v-model="editDialog"
+            width="900"
+            max-width="95vw"
+            class="edit-dialog"
+            persistent
+            scrollable
+          >
+            <v-card class="edit-dialog-card">
+              <v-card-title class="edit-dialog-header">
+                <span class="text-h5">编辑文章</span>
+                <v-spacer></v-spacer>
+                <v-btn
+                  icon="mdi-close"
+                  variant="text"
+                  size="small"
+                  @click="editDialog = false"
+                ></v-btn>
+              </v-card-title>
+              <v-divider></v-divider>
+              <v-card-text class="edit-dialog-content">
                 <ArticleForm
                   v-if="editArticle"
                   :article="editArticle"
@@ -355,17 +381,6 @@
                   @submit="submitEdit"
                 />
               </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn 
-                  color="primary" 
-                  class="modern-btn"
-                  variant="text"
-                  @click="editDialog = false"
-                >
-                  关闭
-                </v-btn>
-              </v-card-actions>
             </v-card>
           </v-dialog>
         </v-window-item>
@@ -407,7 +422,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { getVisitorLogs, getVisitorStats, getAdminArticles, getArticlesToProcess } from '../api'
 import ArticleForm from '../components/ArticleForm.vue'
-import { getArticleDetail, updateArticleDetail } from '../api'
+import { getArticleDetail, getAdminArticleDetail, updateArticleDetail } from '../api'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { updateArticleStatus } from '../api'
@@ -685,9 +700,11 @@ const fetchVisitorStats = async () => {
 }
 
 const openEditDialog = async (article) => {
+  console.log('打开编辑对话框，文章ID:', article.id)
   loadingArticles.value = true
   try {
-    const res = await getArticleDetail(article.id)
+    const res = await getAdminArticleDetail(article.id)
+    console.log('获取到的文章详情:', res.data)
     editArticle.value = res.data
     editDialog.value = true
   } catch (error) {

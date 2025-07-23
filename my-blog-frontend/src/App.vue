@@ -36,10 +36,7 @@ export default {
 @import './assets/styles/performance.css';
 @import './assets/styles/theme-performance.css';
 @import './assets/styles/premium-theme.css';
-@import './assets/styles/views/article.css';
-@import './assets/styles/views/about.css';
-@import './assets/styles/views/knowledge.css';
-@import './assets/styles/views/admin.css';
+/* 视图特定的样式已通过 index.css 导入，避免重复导入 */
 
 
 /* 全局样式 */

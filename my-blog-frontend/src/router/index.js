@@ -11,7 +11,7 @@ import TestUpload from '../views/TestUpload.vue'
 import TestImageList from '../views/TestImageList.vue'
 import ImageTest from '../views/ImageTest.vue'
 import ColorSchemeDemo from '../views/ColorSchemeDemo.vue'
-import ArticleDemo from '../views/ArticleDemo.vue'
+
 import { useUserStore } from '../stores/user'
 
 const routes = [
@@ -80,11 +80,7 @@ const routes = [
     name: 'color-demo',
     component: ColorSchemeDemo
   },
-  {
-    path: '/article-demo',
-    name: 'article-demo',
-    component: ArticleDemo
-  }
+
 ]
 
 const router = createRouter({

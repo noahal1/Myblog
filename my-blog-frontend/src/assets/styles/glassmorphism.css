@@ -597,23 +597,7 @@
 }
 
 /* === 增强暗色模式适配 === */
-.v-theme--dark {
-  /* 暗色模式下的玻璃效果变量重定义 */
-  --glass-bg-light: rgba(255, 255, 255, 0.08);
-  --glass-bg-dark: rgba(0, 0, 0, 0.3);
-  --glass-border-light: rgba(255, 255, 255, 0.12);
-  --glass-border-dark: rgba(255, 255, 255, 0.08);
-  --glass-shadow-light: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --glass-shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.6);
-
-  /* 暗色模式渐变 */
-  --glass-gradient: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.05) 100%);
-  --glass-gradient-hover: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0.08) 100%);
-}
+/* 玻璃效果变量已在 variables.css 中统一定义 */
 
 @media (prefers-color-scheme: dark) {
   /* 导航栏暗色优化 */

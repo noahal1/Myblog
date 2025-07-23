@@ -52,6 +52,18 @@
   --blur-lg: blur(16px);
   --blur-xl: blur(24px);
 
+  /* === 滚动条系统 === */
+  --scrollbar-width: 8px;
+  --scrollbar-width-thin: 4px;
+  --scrollbar-radius: 4px;
+  --scrollbar-radius-thin: 2px;
+  --scrollbar-track-bg: transparent;
+  --scrollbar-thumb-bg: rgba(var(--prussian-blue), 0.3);
+  --scrollbar-thumb-hover-bg: rgba(var(--prussian-blue), 0.5);
+  --scrollbar-track-bg-dark: rgba(var(--charcoal-light), 0.3);
+  --scrollbar-thumb-bg-dark: rgba(var(--mist-gray-dark), 0.6);
+  --scrollbar-thumb-hover-bg-dark: rgba(var(--prussian-blue), 0.7);
+
   /* === 撞色阴影系统 === */
   /* 基于普鲁士蓝的优雅阴影 */
   --shadow-glass-sm: 0 2px 8px rgba(var(--prussian-blue), 0.12);

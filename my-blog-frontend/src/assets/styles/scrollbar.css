@@ -1,0 +1,164 @@
+/*======================
+  统一滚动条样式系统
+======================*/
+
+/* === 全局滚动条样式 === */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+  border-radius: var(--scrollbar-radius);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: var(--scrollbar-radius);
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg);
+}
+
+/* === 细滚动条样式 (用于特定组件) === */
+.thin-scrollbar::-webkit-scrollbar {
+  width: var(--scrollbar-width-thin);
+  height: var(--scrollbar-width-thin);
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: var(--scrollbar-radius-thin);
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg);
+}
+
+/* === 暗色模式滚动条 === */
+.v-theme--dark ::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+.v-theme--dark ::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg-dark);
+  border-radius: var(--scrollbar-radius);
+}
+
+.v-theme--dark ::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg-dark);
+  border-radius: var(--scrollbar-radius);
+  transition: background 0.3s ease;
+}
+
+.v-theme--dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg-dark);
+}
+
+/* === 暗色模式细滚动条 === */
+.v-theme--dark .thin-scrollbar::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg-dark);
+}
+
+.v-theme--dark .thin-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg-dark);
+  border-radius: var(--scrollbar-radius-thin);
+}
+
+.v-theme--dark .thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg-dark);
+}
+
+/* === 隐藏滚动条样式 (保持滚动功能) === */
+.hidden-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* === 响应式滚动条 === */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .thin-scrollbar::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+}
+
+/* === 特定组件滚动条样式 === */
+
+/* 目录滚动条 */
+.toc-scrollbar::-webkit-scrollbar {
+  width: var(--scrollbar-width-thin);
+}
+
+.toc-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toc-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: var(--scrollbar-radius-thin);
+}
+
+.toc-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg);
+}
+
+/* 代码块滚动条 */
+.code-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.code-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.code-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+.code-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* === Firefox 滚动条样式 === */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
+}
+
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
+}
+
+/* === 性能优化 === */
+::-webkit-scrollbar-thumb {
+  will-change: background;
+}
+
+/* === 无障碍支持 === */
+@media (prefers-reduced-motion: reduce) {
+  ::-webkit-scrollbar-thumb {
+    transition: none;
+  }
+}

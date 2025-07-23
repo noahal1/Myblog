@@ -22,7 +22,11 @@
         ></div>
 
         <div v-if="paragraph.hasImage" class="skeleton-image-container">
-          <div class="skeleton-image skeleton"></div>
+          <div class="skeleton-image skeleton">
+            <div class="skeleton-image-placeholder">
+              <div class="skeleton-image-icon"></div>
+            </div>
+          </div>
           <div class="skeleton-image-caption skeleton"></div>
         </div>
       </div>
@@ -222,6 +226,50 @@ onMounted(() => {
   width: 100%;
   border-radius: 8px;
   margin-bottom: 0.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skeleton-image-placeholder {
+  text-align: center;
+}
+
+.skeleton-image-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+  background: rgba(var(--prussian-blue), 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-image-icon::before {
+  content: '';
+  width: 24px;
+  height: 18px;
+  background: rgba(var(--prussian-blue), 0.3);
+  border-radius: 2px;
+  position: relative;
+}
+
+.skeleton-image-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: rgba(var(--prussian-blue), 0.4);
+  border-radius: 50%;
+  margin-top: -2px;
+  margin-left: -6px;
 }
 
 .skeleton-image-caption {
@@ -346,14 +394,50 @@ onMounted(() => {
   .skeleton-title-main {
     height: 2rem;
   }
-  
+
   .skeleton-image {
     height: 150px;
   }
-  
+
+  .skeleton-image-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .skeleton-image-icon::before {
+    width: 20px;
+    height: 15px;
+  }
+
+  .skeleton-image-icon::after {
+    width: 7px;
+    height: 7px;
+    margin-top: -1.5px;
+    margin-left: -5px;
+  }
+
   .skeleton-title-meta {
     flex-direction: column;
     gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .skeleton-image-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .skeleton-image-icon::before {
+    width: 18px;
+    height: 14px;
+  }
+
+  .skeleton-image-icon::after {
+    width: 6px;
+    height: 6px;
+    margin-top: -1px;
+    margin-left: -4px;
   }
 }
 </style>
