@@ -44,10 +44,16 @@ app = FastAPI(title="Noah's Blog API",description="noah's blog api doc",version=
 # 配置CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://noahblog.top", "http://www.noahblog.top"],  # 允许的前端域
+    allow_origins=[
+        "http://localhost:5173",
+        "http://noahblog.top",
+        "http://www.noahblog.top",
+        "https://noahblog.top",
+        "https://www.noahblog.top"
+    ],  # 允许的前端域，包含HTTP和HTTPS
     allow_credentials=True,
-    allow_methods=["*"],  
-    allow_headers=["*"],  
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.add_middleware(LoggingMiddleware, db_session_maker=SessionLocal)
@@ -1025,10 +1031,80 @@ async def get_admin_article(
         'views': article.views,
         'likes': article.likes,
         'tags': tag_names,
-        'status': article.status
+        'status': article.status,
+        'is_knowledge_base': article.is_knowledge_base
     }
     
     return article_data
+
+@app.put('/api/admin/articles/{article_id}', response_model=ArticleResponse)
+async def update_article_detail(
+    article_id: int,
+    article_update: ArticleCreate,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """更新文章详情（仅管理员）"""
+    # 检查当前用户是否为管理员（ID为1）
+    if current_user_id != 1:
+        raise HTTPException(status_code=403, detail="仅管理员可以更新文章")
+
+    # 查找文章
+    article = db.query(models.Article).options(joinedload(models.Article.tags_relationship)).filter(models.Article.id == article_id).first()
+    if not article:
+        raise HTTPException(status_code=404, detail="文章不存在")
+
+    # 记录API访问日志
+    api_log.info(f"管理员 {current_user_id} 正在更新文章: {article_id}")
+
+    # 处理标签
+    tag_objects = []
+    tag_names = []
+
+    if article_update.tags:
+        # 获取所有标签
+        tag_objects = db.query(models.Tag).filter(models.Tag.id.in_(article_update.tags)).all()
+        tag_names = [tag.name for tag in tag_objects]
+
+    # 更新文章字段
+    article.title = article_update.title
+    article.content = article_update.content
+    article.summary = article_update.summary
+    article.is_knowledge_base = article_update.is_knowledge_base
+    article.tags = ",".join(tag_names) if tag_names else None
+    article.updated_at = datetime.utcnow()
+
+    # 更新标签关联
+    article.tags_relationship = tag_objects
+
+    db.commit()
+    db.refresh(article)
+
+    # 获取作者信息
+    author = db.query(models.User).filter(models.User.id == article.author_id).first()
+    author_name = author.username if author else "未知作者"
+
+    # 转换标签为字符串列表
+    tag_names = [tag.name for tag in article.tags_relationship] if article.tags_relationship else []
+
+    # 记录更新日志
+    log.info(f"管理员 {current_user_id} 在 {datetime.now()} 更新了文章 {article.title}")
+
+    return {
+        'id': article.id,
+        'title': article.title,
+        'content': article.content,
+        'summary': article.summary,
+        'author_id': article.author_id,
+        'author_name': author_name,
+        'created_at': article.created_at.isoformat(),
+        'updated_at': article.updated_at.isoformat(),
+        'views': article.views,
+        'likes': article.likes,
+        'tags': tag_names,
+        'status': article.status,
+        'is_knowledge_base': article.is_knowledge_base
+    }
 
 @app.put('/api/admin/articles/{article_id}/status')
 async def update_article_status(
@@ -1041,17 +1117,17 @@ async def update_article_status(
     # 检查当前用户是否为管理员（ID为1）
     if current_user_id != 1:
         raise HTTPException(status_code=403, detail="仅管理员可以审核文章")
-    
+
     # 检查状态值是否有效
     valid_statuses = ["pending", "published", "rejected"]
     if status not in valid_statuses:
         raise HTTPException(status_code=400, detail="无效的状态值")
-    
+
     # 查找文章
     article = db.query(models.Article).filter(models.Article.id == article_id).first()
     if not article:
         raise HTTPException(status_code=404, detail="文章不存在")
-    
+
     # 更新状态
     old_status = article.status
     article.status = status

@@ -1,7 +1,5 @@
 # Noah's blog
 
-这是一个现代化的个人博客系统，使用前后端分离架构开发。
-
 ## 项目结构
 
 - `my-blog-frontend`: Vue 3 + Vuetify 构建的前端应用
