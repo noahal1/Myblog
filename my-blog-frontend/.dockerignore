@@ -1,0 +1,45 @@
+# 忽略node_modules，让Docker重新安装
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# 忽略构建产物
+dist
+.vite
+
+# 忽略开发文件
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 忽略IDE文件
+.vscode
+.idea
+*.swp
+*.swo
+
+# 忽略系统文件
+.DS_Store
+Thumbs.db
+
+# 忽略日志文件
+logs
+*.log
+
+# 忽略临时文件
+.tmp
+.temp
+
+# 忽略Git文件
+.git
+.gitignore
+
+# 忽略测试覆盖率
+coverage
+
+# 忽略缓存
+.cache
+.parcel-cache

@@ -206,8 +206,8 @@ export default defineConfig(({ command, mode }) => {
       cssCodeSplit: true,
       // 增加小文件内联阈值，减少http请求数
       assetsInlineLimit: 8192, // 8kb
-      // 在低内存环境下使用更简单的压缩
-      minify: isLowMemoryEnv ? false : 'terser',
+      // 在低内存环境下使用更简单的压缩，使用esbuild避免Rollup兼容性问题
+      minify: isLowMemoryEnv ? false : 'esbuild',
       terserOptions: {
         compress: {
           drop_console: mode === 'production', // 生产环境下移除console

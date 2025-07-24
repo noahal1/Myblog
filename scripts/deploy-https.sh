@@ -82,12 +82,18 @@ echo_step "开始HTTPS部署..."
 
 # 检查必要的工具
 echo_step "检查必要的工具..."
-for tool in docker docker-compose curl; do
+for tool in docker curl; do
     if ! command -v $tool &> /dev/null; then
         echo_error "$tool 未安装或不在PATH中"
         exit 1
     fi
 done
+
+# 检查docker compose
+if ! docker compose version &> /dev/null; then
+    echo_error "docker compose 未安装或不可用"
+    exit 1
+fi
 echo_info "工具检查完成"
 
 # 进入项目目录

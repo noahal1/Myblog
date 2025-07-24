@@ -1,10 +1,11 @@
-# 使用Debian基础镜像以避免musl兼容性问题，使用Node 20以解决crypto.hash问题
-FROM docker.xuanyuan.me/node:20-slim AS builder
+# Alternative Alpine-based Dockerfile with Rollup fix
+FROM docker.xuanyuan.me/node:18-alpine AS builder
 
 WORKDIR /app
 
-# 更新包管理器并安装必要的构建工具
-RUN apt-get update && apt-get install -y \
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
+RUN apk update && apk add --no-cache \
     python3 \
     make \
     g++ \
@@ -12,11 +13,12 @@ RUN apt-get update && apt-get install -y \
     automake \
     libtool \
     nasm \
-    pkg-config \
+    pkgconfig \
     libpng-dev \
-    libjpeg-dev \
-    libgif-dev \
-    && rm -rf /var/lib/apt/lists/*
+    libjpeg-turbo-dev \
+    giflib-dev \
+    gcompat \
+    libc6-compat
 
 # 安装pnpm
 RUN npm install -g pnpm
@@ -34,26 +36,25 @@ COPY package.json pnpm-lock.yaml ./
 # 设置环境变量
 ENV NODE_ENV=production
 ENV VITE_NODE_ENV=production
-ENV ROLLUP_BINARY_PATH=/app/node_modules/@rollup/rollup-linux-x64-gnu/rollup.linux-x64-gnu.node
-ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-# 安装依赖
+# 安装依赖，包括可选依赖以获取正确的Rollup二进制文件
 RUN pnpm install --frozen-lockfile
 
-# 确保安装了正确的Rollup二进制文件
-RUN pnpm add @rollup/rollup-linux-x64-gnu --save-optional || true
+# 手动安装musl版本的Rollup二进制文件（如果上面的安装失败）
+RUN if [ ! -f node_modules/@rollup/rollup-linux-x64-musl/rollup.linux-x64-musl.node ]; then \
+    pnpm add @rollup/rollup-linux-x64-musl --save-optional; \
+    fi
 
 COPY . .
 
 # 构建应用
-RUN pnpm run build
+RUN pnpm run build:prod
 
-FROM docker.xuanyuan.me/node:20-slim AS production
+FROM docker.xuanyuan.me/node:18-alpine AS production
 
 WORKDIR /app
 
-# 更新包管理器
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 RUN npm install -g serve
 
