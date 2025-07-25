@@ -1,7 +1,10 @@
-# 使用Debian基础镜像以避免musl兼容性问题，使用Node 20以解决crypto.hash问题
-FROM docker.xuanyuan.me/node:20-slim AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
+
+# 更换Debian软件源为阿里云镜像
+RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources && \
+    sed -i 's/security.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources
 
 # 更新包管理器并安装必要的构建工具
 RUN apt-get update && apt-get install -y \
@@ -48,9 +51,13 @@ COPY . .
 # 构建应用
 RUN pnpm run build
 
-FROM docker.xuanyuan.me/node:20-slim AS production
+FROM node:20-slim AS production
 
 WORKDIR /app
+
+# 更换Debian软件源为阿里云镜像
+RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources && \
+    sed -i 's/security.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources
 
 # 更新包管理器
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
