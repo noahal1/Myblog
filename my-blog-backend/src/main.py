@@ -30,6 +30,7 @@ from src.utils.logger import log, api_log
 from src.utils.ip_location import get_ip_location
 from src.utils.fastapi_logging import LoggingMiddleware, setup_logging_middleware
 from starlette.datastructures import State
+from starlette.middleware.base import BaseHTTPMiddleware
 from cachetools import TTLCache
 from functools import wraps
 
@@ -62,33 +63,33 @@ app.add_middleware(LoggingMiddleware, db_session_maker=SessionLocal)
 app.include_router(upload_router, prefix="/api", tags=["upload"])
 
 # 添加速率限制中间件
-class RateLimitMiddleware:
+class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, max_requests: int = 100, window_seconds: int = 60):
-        self.app = app
+        super().__init__(app)
         self.max_requests = max_requests
         self.window_seconds = window_seconds
         self.requests = {}  # IP -> [timestamp1, timestamp2, ...]
 
-    async def __call__(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next):
         ip = request.client.host
         now = datetime.now()
-        
+
         # 清理过期的请求记录
         if ip in self.requests:
             self.requests[ip] = [ts for ts in self.requests[ip] if now - ts < timedelta(seconds=self.window_seconds)]
         else:
             self.requests[ip] = []
-        
+
         # 检查请求数量是否超过限制
         if len(self.requests[ip]) >= self.max_requests:
             return JSONResponse(
                 status_code=429,
                 content={"detail": "请求过于频繁，请稍后再试"}
             )
-        
+
         # 记录当前请求
         self.requests[ip].append(now)
-        
+
         # 继续处理请求
         response = await call_next(request)
         return response
@@ -465,8 +466,26 @@ async def create_article(
 
 @app.on_event("startup")
 async def startup():
-    redis = Redis(host="localhost", port=6379, db=0, decode_responses=True)
-    FastAPICache.init(RedisBackend(redis), prefix="myblog-cache:")
+    try:
+        # 尝试连接Redis，如果失败则跳过缓存初始化
+        redis_host = os.getenv("REDIS_HOST", "redis")
+        redis_port = int(os.getenv("REDIS_PORT", "6379"))
+        redis_password = os.getenv("REDIS_PASSWORD")
+
+        redis = Redis(
+            host=redis_host,
+            port=redis_port,
+            db=0,
+            decode_responses=True,
+            password=redis_password
+        )
+        # 测试连接
+        redis.ping()
+        FastAPICache.init(RedisBackend(redis), prefix="myblog-cache:")
+        log.info("Redis缓存初始化成功")
+    except Exception as e:
+        log.warning(f"Redis连接失败，将禁用缓存功能: {str(e)}")
+        # 不初始化缓存，应用仍可正常运行
 
 # 评论API
 @app.get('/api/articles/{article_id}/comments', response_model=list[CommentResponse])

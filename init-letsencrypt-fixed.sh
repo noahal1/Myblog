@@ -31,12 +31,6 @@ if [ -d "$data_path/conf/live/${domains[0]}" ]; then
   exit 0
 fi
 
-# 检查邮箱是否已配置
-# if [ "$email" = "noahall127@outlook.com" ]; then
-#   echo_error "请先在脚本中配置您的邮箱地址"
-#   exit 1
-# fi
-
 # 创建必要的目录
 echo_info "创建必要的目录..."
 mkdir -p "$data_path/conf"
@@ -102,6 +96,23 @@ docker-compose run --rm --entrypoint "\
 
 if [ $? -eq 0 ]; then
     echo_info "证书获取成功！"
+    
+    # 启用HTTPS配置
+    echo_info "启用HTTPS配置..."
+    
+    # 备份当前配置
+    cp nginx/conf.d/default.conf nginx/conf.d/default.conf.backup
+    
+    # 更新配置以启用HTTPS重定向
+    sed -i 's/# location \/ {/location \/ {/' nginx/conf.d/default.conf
+    sed -i 's/#     return 301 https/    return 301 https/' nginx/conf.d/default.conf
+    sed -i 's/# }/}/' nginx/conf.d/default.conf
+    
+    # 注释掉临时HTTP服务配置
+    sed -i 's/location \/ {/# location \/ {/' nginx/conf.d/default.conf
+    sed -i '/# 前端静态文件（临时HTTP服务）/,/# 健康检查/s/^/# /' nginx/conf.d/default.conf
+    
+    echo_info "HTTPS配置已启用"
 else
     echo_error "证书获取失败！"
     exit 1

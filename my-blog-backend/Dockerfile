@@ -1,4 +1,4 @@
-FROM docker.xuanyuan.me/python:3.12 AS builder
+FROM python:3.12 AS builder
 
 WORKDIR /code
 
@@ -7,7 +7,7 @@ COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
 
 # 第二阶段：运行阶段
-FROM docker.xuanyuan.me/python:3.12-slim
+FROM python:3.12-slim
 
 WORKDIR /code
 
