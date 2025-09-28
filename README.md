@@ -109,7 +109,6 @@ GITHUB_PATH=images
 
 - 图片压缩
 - 前端代码分割
-- Redis缓存常用API响应
 - PWA支持离线访问
 - CDN优化静态资源
 

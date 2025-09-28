@@ -158,18 +158,6 @@
               {{ getCategoryName(selectedCategory) }}
             </v-chip>
             
-            <v-chip
-              v-for="tagId in selectedTags"
-              :key="tagId"
-              size="small"
-              closable
-              @click:close="toggleTag(tagId)"
-              :color="getTagColor(tagId)"
-              class="me-2"
-            >
-              {{ getTagName(tagId) }}
-            </v-chip>
-            
             <v-btn
               v-if="hasActiveFilters"
               size="small"
@@ -226,22 +214,6 @@
                     </div>
 
                     <p class="list-summary">{{ article.summary }}</p>
-
-                    <div class="list-tags" v-if="article.tag_ids && article.tag_ids.length > 0">
-                      <v-chip
-                        v-for="tagId in article.tag_ids.slice(0, 4)"
-                        :key="tagId"
-                        size="x-small"
-                        class="list-tag-chip"
-                        :style="`--tag-color: var(--v-theme-${getTagColor(tagId)})`"
-                        variant="outlined"
-                      >
-                        {{ getTagName(tagId) }}
-                      </v-chip>
-                      <span v-if="article.tag_ids.length > 4" class="more-tags-list">
-                        +{{ article.tag_ids.length - 4 }}
-                      </span>
-                    </div>
                   </div>
 
                   <!-- 右侧元信息 -->
@@ -292,23 +264,6 @@
                   <!-- 文章摘要 -->
                   <p class="article-summary">{{ article.summary }}</p>
 
-                  <!-- 标签区域 -->
-                  <div class="article-tags" v-if="article.tag_ids && article.tag_ids.length > 0">
-                    <v-chip
-                      v-for="tagId in article.tag_ids.slice(0, 3)"
-                      :key="tagId"
-                      size="x-small"
-                      class="tag-chip"
-                      :style="`--tag-color: var(--v-theme-${getTagColor(tagId)})`"
-                      variant="flat"
-                    >
-                      {{ getTagName(tagId) }}
-                    </v-chip>
-                    <span v-if="article.tag_ids.length > 3" class="more-tags">
-                      +{{ article.tag_ids.length - 3 }}
-                    </span>
-                  </div>
-
                   <!-- 文章元信息 -->
                   <div class="article-meta">
                     <div class="meta-item">
@@ -353,14 +308,13 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { getArticles } from '../api'
+import { getArticles, getKnowledgeCategories } from '../api'
 
 const router = useRouter()
 const loading = ref(true)
 const articles = ref([])
 const searchQuery = ref('')
 const selectedCategory = ref('all')
-const selectedTags = ref([])
 const sortOption = ref('latest')
 const viewMode = ref('card')
 const currentPage = ref(1)
@@ -369,37 +323,14 @@ const totalArticles = ref(0)
 const isNavCollapsed = ref(false)
 const selectedSubcategory = ref(null)
 
-// 目录分类
-const categories = [
-  { id: 'all', name: '全部内容', icon: 'mdi-book-open-page-variant', count: 0 },
-  { id: 'frontend', name: '前端开发', icon: 'mdi-language-javascript', count: 0 },
-  { id: 'backend', name: '后端技术', icon: 'mdi-server', count: 0 },
-  { id: 'database', name: '数据库', icon: 'mdi-database', count: 0 },
-  { id: 'devops', name: 'DevOps', icon: 'mdi-cloud-sync', count: 0 },
-  { id: 'ai', name: '人工智能', icon: 'mdi-brain', count: 0 },
-  { id: 'tools', name: '工具技巧', icon: 'mdi-tools', count: 0 },
-  { id: 'career', name: '职业发展', icon: 'mdi-office-building', count: 0 }
-]
-
-// 标签
-const tags = [
-  { id: 1, name: 'JavaScript', count: 15, color: 'amber' },
-  { id: 2, name: 'Python', count: 12, color: 'blue' },
-  { id: 3, name: 'Vue', count: 9, color: 'green' },
-  { id: 4, name: 'React', count: 7, color: 'cyan' },
-  { id: 5, name: 'Node.js', count: 6, color: 'lime' },
-  { id: 6, name: 'Docker', count: 5, color: 'blue-grey' },
-  { id: 7, name: 'MySQL', count: 5, color: 'orange' },
-  { id: 8, name: 'Git', count: 4, color: 'red' },
-  { id: 9, name: 'CSS', count: 4, color: 'indigo' },
-  { id: 10, name: 'API', count: 4, color: 'teal' },
-  { id: 11, name: '设计模式', count: 3, color: 'purple' },
-  { id: 12, name: '安全', count: 3, color: 'red-darken-3' },
-]
+// 目录分类 - 动态从API获取
+const categories = ref([
+  { id: 'all', name: '全部内容', icon: 'mdi-book-open-page-variant', count: 0 }
+])
 
 // 获取除"全部内容"外的分类
 const categoriesWithoutAll = computed(() => {
-  return categories.filter(c => c.id !== 'all')
+  return categories.value.filter(c => c.id !== 'all')
 })
 
 // 获取文章总数
@@ -435,21 +366,11 @@ const filteredArticles = computed(() => {
   if (selectedCategory.value && selectedCategory.value !== 'all') {
     result = result.filter(article => {
       if (selectedSubcategory.value) {
-        return article.category_id === selectedCategory.value && 
+        return (article.category_id === selectedCategory.value || article.knowledge_category_id === selectedCategory.value) && 
                article.subcategory_id === selectedSubcategory.value
       }
-      return article.category_id === selectedCategory.value
+      return article.category_id === selectedCategory.value || article.knowledge_category_id === selectedCategory.value
     })
-  }
-  
-  // 根据标签过滤
-  if (selectedTags.value.length > 0) {
-    result = result.filter(article => 
-      article.tags.some(tagName => {
-        const tagId = tags.find(t => t.name === tagName)?.id
-        return tagId && selectedTags.value.includes(tagId)
-      })
-    )
   }
   
   // 排序
@@ -486,62 +407,68 @@ const resetFilters = () => {
   searchQuery.value = ''
   selectedCategory.value = 'all'
   selectedSubcategory.value = null
-  selectedTags.value = []
   sortOption.value = 'latest'
   currentPage.value = 1
 }
 
-// 切换标签选中状态
-const toggleTag = (tagId) => {
-  const index = selectedTags.value.indexOf(tagId)
-  
-  if (index === -1) {
-    selectedTags.value.push(tagId)
-  } else {
-    selectedTags.value.splice(index, 1)
+// 获取知识库分类数据
+const fetchCategories = async () => {
+  try {
+    const response = await getKnowledgeCategories(true, true)
+    const apiCategories = response.data
+    
+    // 将API返回的分类数据转换为前端需要的格式
+    const formattedCategories = apiCategories.map(cat => ({
+      id: cat.id,
+      name: cat.name,
+      icon: getCategoryIconByName(cat.name), // 根据分类名称获取图标
+      count: cat.article_count || 0,
+      subcategories: cat.children ? cat.children.map(child => ({
+        id: child.id,
+        name: child.name,
+        icon: getCategoryIconByName(child.name),
+        count: child.article_count || 0
+      })) : []
+    }))
+    
+    // 更新分类数据，保留"全部内容"选项，并添加"未分类"选项
+    categories.value = [
+      { id: 'all', name: '全部内容', icon: 'mdi-book-open-page-variant', count: 0 },
+      ...formattedCategories,
+      { id: 'uncategorized', name: '未分类', icon: 'mdi-help-circle', count: 0 }
+    ]
+  } catch (error) {
+    console.error('获取知识库分类失败:', error)
   }
-  
-  currentPage.value = 1
 }
 
-// 将文章与分类关联（根据标签）
-const mapArticlesToCategories = (articles) => {
-  const categoryMap = {
-    'frontend': ['JavaScript', 'Vue', 'React', 'Angular', 'CSS', 'HTML', '前端'],
-    'backend': ['Python', 'Java', 'Node.js', 'Go', 'PHP', 'API', '后端'],
-    'database': ['MySQL', 'MongoDB', 'PostgreSQL', 'Redis', 'SQL', '数据库'],
-    'devops': ['Docker', 'Kubernetes', 'CI/CD', 'DevOps', '运维', 'Git'],
-    'ai': ['人工智能', '机器学习', 'AI', '深度学习', 'Python'],
-    'tools': ['工具', 'Git', 'VS Code', 'IDE', '效率'],
-    'career': ['职业', '面试', '简历', '求职', '职场']
+// 根据分类名称获取图标
+const getCategoryIconByName = (name) => {
+  const iconMap = {
+    '前端开发': 'mdi-language-javascript',
+    '后端技术': 'mdi-server',
+    '数据库': 'mdi-database',
+    'DevOps': 'mdi-cloud-sync',
+    '人工智能': 'mdi-brain',
+    '工具技巧': 'mdi-tools',
+    '职业发展': 'mdi-office-building',
+    'JavaScript': 'mdi-language-javascript',
+    'Python': 'mdi-language-python',
+    'Vue': 'mdi-vuejs',
+    'React': 'mdi-react',
+    'Node.js': 'mdi-nodejs',
+    'MySQL': 'mdi-database',
+    'Docker': 'mdi-docker',
+    'Git': 'mdi-git'
   }
-  
-  const result = []
-  
-  articles.forEach(article => {
-    // 默认分类为工具
-    let category = 'tools'
-    
-    // 根据文章标签确定分类
-    for (const [cat, keywords] of Object.entries(categoryMap)) {
-      if (article.tags.some(tag => keywords.includes(tag))) {
-        category = cat
-        break
-      }
-    }
-    
-    result.push({
-      ...article,
-      category_id: category
-    })
-  })
-  
-  return result
+  return iconMap[name] || 'mdi-file-document-outline'
 }
 
-// 获取分类图标
+// 获取分类图标 - 使用默认图标
 const getCategoryIcon = (categoryId) => {
-  const category = categories.find(c => c.id === categoryId)
+  if (categoryId === 'all') return 'mdi-book-open-page-variant'
+  if (categoryId === 'uncategorized') return 'mdi-help-circle'
+  const category = categories.value.find(c => c.id === categoryId)
   return category ? category.icon : 'mdi-help-circle'
 }
 
@@ -555,32 +482,9 @@ const getCategoryColor = (categoryId) => {
     case 'ai': return 'red'
     case 'tools': return 'cyan'
     case 'career': return 'amber'
+    case 'uncategorized': return 'grey'
     default: return 'grey'
   }
-}
-
-// 获取标签名称
-const getTagName = (tagId) => {
-  const tag = tags.find(t => t.id === tagId)
-  return tag ? tag.name : ''
-}
-
-// 获取标签颜色
-const getTagColor = (tagId) => {
-  const tag = tags.find(t => t.id === tagId)
-  return tag ? tag.color : 'grey'
-}
-
-// 文章标签和标签表的映射
-const mapTagsToIds = (articleTags) => {
-  const tagIds = []
-  articleTags.forEach(tagName => {
-    const tag = tags.find(t => t.name === tagName)
-    if (tag) {
-      tagIds.push(tag.id)
-    }
-  })
-  return tagIds
 }
 
 // 格式化日期
@@ -600,7 +504,9 @@ const viewArticle = (id) => {
 
 // 获取分类名称
 const getCategoryName = (categoryId) => {
-  const category = categories.find(c => c.id === categoryId)
+  if (categoryId === 'all') return '全部内容'
+  if (categoryId === 'uncategorized') return '未分类'
+  const category = categories.value.find(c => c.id === categoryId)
   return category ? category.name : '未分类'
 }
 
@@ -609,8 +515,7 @@ const getCategoryName = (categoryId) => {
 // 是否有活动的筛选条件
 const hasActiveFilters = computed(() => {
   return searchQuery.value || 
-         selectedCategory.value !== 'all' || 
-         selectedTags.value.length > 0
+         selectedCategory.value !== 'all'
 })
 
 // 监听路由变化时重置导航折叠状态
@@ -627,25 +532,33 @@ const fetchArticles = async () => {
     const response = await getArticles(1, 100, true)
     totalArticles.value = parseInt(response.headers['x-total-count'] || 0)
     
-    // 处理文章数据
+    // 处理文章数据 - 直接使用API返回的数据，不再进行分类映射
     const articlesData = response.data
     
-    // 将文章与分类关联
-    const processedArticles = mapArticlesToCategories(articlesData)
-    
-    // 为每篇文章添加标签ID
-    processedArticles.forEach(article => {
-      article.tag_ids = mapTagsToIds(article.tags)
+    // 处理文章数据，设置分类ID
+    articlesData.forEach(article => {
+      // 对于知识库文章，如果没有分类，设置为"未分类"
+      if (article.is_knowledge_base) {
+        if (article.knowledge_category_id) {
+          article.category_id = article.knowledge_category_id
+        } else {
+          // 没有分类的知识库文章，设置为虚拟的"未分类"ID
+          article.category_id = 'uncategorized'
+        }
+      }
     })
     
-    articles.value = processedArticles
+    articles.value = articlesData
     
     // 更新各分类的文章数量
-    categories.forEach(category => {
+    categories.value.forEach(category => {
       if (category.id === 'all') {
         category.count = articles.value.length
       } else {
-        category.count = articles.value.filter(article => article.category_id === category.id).length
+        category.count = articles.value.filter(article => 
+          article.category_id === category.id || 
+          article.knowledge_category_id === category.id
+        ).length
       }
     })
   } catch (error) {
@@ -662,32 +575,11 @@ const sortOptions = [
   { value: 'alpha', label: '字母序', icon: 'mdi-sort-alphabetical-ascending' }
 ]
 
-// 子分类数据
-const subcategories = {
-  frontend: [
-    { id: 'html-css', name: 'HTML/CSS', icon: 'mdi-language-html5', count: 5 },
-    { id: 'javascript', name: 'JavaScript', icon: 'mdi-language-javascript', count: 8 },
-    { id: 'framework', name: '前端框架', icon: 'mdi-view-grid-plus', count: 6 }
-  ],
-  backend: [
-    { id: 'python', name: 'Python', icon: 'mdi-language-python', count: 7 },
-    { id: 'nodejs', name: 'Node.js', icon: 'mdi-nodejs', count: 4 },
-    { id: 'java', name: 'Java', icon: 'mdi-language-java', count: 3 }
-  ],
-  // ... 其他分类的子分类
-}
 
-// 为每个分类添加子分类
-categories.forEach(category => {
-  if (subcategories[category.id]) {
-    category.subcategories = subcategories[category.id]
-  } else {
-    category.subcategories = []
-  }
-})
-
-onMounted(() => {
-  fetchArticles()
+onMounted(async () => {
+  // 先获取分类数据，再获取文章数据
+  await fetchCategories()
+  await fetchArticles()
 })
 </script>
 

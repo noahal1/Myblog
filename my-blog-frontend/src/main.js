@@ -22,15 +22,15 @@ const vuetify = createVuetify({
     themes: {
       light: {
         colors: {
-          primary: 'rgb(0, 49, 83)',        // 普鲁士蓝 - 主色
-          secondary: 'rgb(229, 221, 215)',  // 雾灰色 - 撞色
+          primary: 'rgb(0, 49, 83)',        // 普鲁士蓝
+          secondary: 'rgb(229, 221, 215)',  // 雾灰色 
           accent: 'rgb(0, 49, 83)',         // 普鲁士蓝
-          error: '#E53E3E',                 // 优雅红 - 温和警示
-          warning: 'rgb(255, 193, 7)',      // 金色
-          info: 'rgb(0, 188, 212)',         // 青色
-          success: 'rgb(76, 175, 80)',      // 翡翠绿
-          surface: 'rgb(255, 255, 255)',    // 珍珠白
-          background: 'rgb(255, 255, 255)', // 珍珠白
+          error: '#E53E3E',                 
+          warning: 'rgb(255, 193, 7)',      
+          info: 'rgb(0, 188, 212)',         
+          success: 'rgb(76, 175, 80)',      
+          surface: 'rgb(255, 255, 255)',    
+          background: 'rgb(255, 255, 255)', 
           'surface-variant': 'rgb(245, 240, 235)', // 浅雾灰
           'on-primary': 'rgb(255, 255, 255)',
           'on-secondary': 'rgb(0, 49, 83)',

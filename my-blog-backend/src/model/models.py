@@ -51,24 +51,21 @@ class Article(Base):
     views = Column(Integer, default=0)
     likes = Column(Integer, default=0)
     comments_count = Column(Integer, default=0)
-    tags = Column(String(255))
     status = Column(String(20), default="pending")  
     is_knowledge_base = Column(Boolean, default=False)
     
-    # 知识库增强字段
-    knowledge_category = Column(String(100), nullable=True)  # 知识分类
-    knowledge_difficulty = Column(String(20), default="beginner")  # 难度级别
-    knowledge_tags = Column(Text, nullable=True)  # JSON格式的标签
-    reading_time = Column(Integer, default=0)  # 预估阅读时间（分钟）
+    # 知识库分类字段
+    knowledge_category_id = Column(Integer, ForeignKey('knowledge_categories.id'), nullable=True)
     
     # SEO优化字段
     seo_keywords = Column(String(255), nullable=True)
     seo_description = Column(String(160), nullable=True)
-    slug = Column(String(200), unique=True, nullable=True)  # URL友好的标识符
+    slug = Column(String(200), unique=True, nullable=True)
     
     author = relationship("User", back_populates="articles")
     comments = relationship("Comment", back_populates="article")
     tags_relationship = relationship('Tag', secondary='article_tags', back_populates='articles')
+    knowledge_category = relationship("KnowledgeCategory", backref="articles")
     
     # 添加索引
     __table_args__ = (

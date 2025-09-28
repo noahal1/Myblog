@@ -36,10 +36,10 @@ import {
   unref,
   watch,
   watchEffect
-} from "./chunk-HDI5JSZM.js";
-import "./chunk-OL46QLBJ.js";
+} from "./chunk-UPH3GF6B.js";
+import "./chunk-SNAQBZPT.js";
 
-// node_modules/.pnpm/@vueuse+shared@13.2.0_vue@3.5.14/node_modules/@vueuse/shared/index.mjs
+// node_modules/.pnpm/@vueuse+shared@13.5.0_vue@3.5.18/node_modules/@vueuse/shared/index.mjs
 function computedEager(fn, options) {
   var _a;
   const result = shallowRef();
@@ -51,16 +51,16 @@ function computedEager(fn, options) {
   });
   return readonly(result);
 }
-function computedWithControl(source, fn) {
+function computedWithControl(source, fn, options = {}) {
   let v = void 0;
   let track;
   let trigger;
-  const dirty = shallowRef(true);
+  let dirty = true;
   const update = () => {
-    dirty.value = true;
+    dirty = true;
     trigger();
   };
-  watch(source, update, { flush: "sync" });
+  watch(source, update, { flush: "sync", ...options });
   const get2 = typeof fn === "function" ? fn : fn.get;
   const set2 = typeof fn === "function" ? void 0 : fn.set;
   const result = customRef((_track, _trigger) => {
@@ -68,9 +68,9 @@ function computedWithControl(source, fn) {
     trigger = _trigger;
     return {
       get() {
-        if (dirty.value) {
+        if (dirty) {
           v = get2(v);
-          dirty.value = false;
+          dirty = false;
         }
         track();
         return v;
@@ -80,8 +80,7 @@ function computedWithControl(source, fn) {
       }
     };
   });
-  if (Object.isExtensible(result))
-    result.trigger = update;
+  result.trigger = update;
   return result;
 }
 function tryOnScopeDispose(fn) {
@@ -399,7 +398,7 @@ function debounceFilter(ms, options = {}) {
     if (duration <= 0 || maxDuration !== void 0 && maxDuration <= 0) {
       if (maxTimer) {
         _clearTimeout(maxTimer);
-        maxTimer = null;
+        maxTimer = void 0;
       }
       return Promise.resolve(invoke2());
     }
@@ -410,14 +409,14 @@ function debounceFilter(ms, options = {}) {
         maxTimer = setTimeout(() => {
           if (timer)
             _clearTimeout(timer);
-          maxTimer = null;
+          maxTimer = void 0;
           resolve(lastInvoker());
         }, maxDuration);
       }
       timer = setTimeout(() => {
         if (maxTimer)
           _clearTimeout(maxTimer);
-        maxTimer = null;
+        maxTimer = void 0;
         resolve(invoke2());
       }, duration);
     });
@@ -1249,11 +1248,11 @@ function useTimeoutFn(cb, interval, options = {}) {
     immediateCallback = false
   } = options;
   const isPending = shallowRef(false);
-  let timer = null;
+  let timer;
   function clear() {
     if (timer) {
       clearTimeout(timer);
-      timer = null;
+      timer = void 0;
     }
   }
   function stop() {
@@ -1267,7 +1266,7 @@ function useTimeoutFn(cb, interval, options = {}) {
     isPending.value = true;
     timer = setTimeout(() => {
       isPending.value = false;
-      timer = null;
+      timer = void 0;
       cb(...args);
     }, toValue(interval));
   }
@@ -1423,50 +1422,50 @@ function watchIgnorable(source, cb, options = {}) {
   let ignorePrevAsyncUpdates;
   let stop;
   if (watchOptions.flush === "sync") {
-    const ignore = shallowRef(false);
+    let ignore = false;
     ignorePrevAsyncUpdates = () => {
     };
     ignoreUpdates = (updater) => {
-      ignore.value = true;
+      ignore = true;
       updater();
-      ignore.value = false;
+      ignore = false;
     };
     stop = watch(
       source,
       (...args) => {
-        if (!ignore.value)
+        if (!ignore)
           filteredCb(...args);
       },
       watchOptions
     );
   } else {
     const disposables = [];
-    const ignoreCounter = shallowRef(0);
-    const syncCounter = shallowRef(0);
+    let ignoreCounter = 0;
+    let syncCounter = 0;
     ignorePrevAsyncUpdates = () => {
-      ignoreCounter.value = syncCounter.value;
+      ignoreCounter = syncCounter;
     };
     disposables.push(
       watch(
         source,
         () => {
-          syncCounter.value++;
+          syncCounter++;
         },
         { ...watchOptions, flush: "sync" }
       )
     );
     ignoreUpdates = (updater) => {
-      const syncCounterPrev = syncCounter.value;
+      const syncCounterPrev = syncCounter;
       updater();
-      ignoreCounter.value += syncCounter.value - syncCounterPrev;
+      ignoreCounter += syncCounter - syncCounterPrev;
     };
     disposables.push(
       watch(
         source,
         (...args) => {
-          const ignore = ignoreCounter.value > 0 && ignoreCounter.value === syncCounter.value;
-          ignoreCounter.value = 0;
-          syncCounter.value = 0;
+          const ignore = ignoreCounter > 0 && ignoreCounter === syncCounter;
+          ignoreCounter = 0;
+          syncCounter = 0;
           if (ignore)
             return;
           filteredCb(...args);
@@ -1574,7 +1573,7 @@ function whenever(source, cb, options) {
   return stop;
 }
 
-// node_modules/.pnpm/@vueuse+core@13.2.0_vue@3.5.14/node_modules/@vueuse/core/index.mjs
+// node_modules/.pnpm/@vueuse+core@13.5.0_vue@3.5.18/node_modules/@vueuse/core/index.mjs
 function computedAsync(evaluationCallback, initialState, optionsOrRef) {
   let options;
   if (isRef(optionsOrRef)) {
@@ -1640,10 +1639,10 @@ function computedInject(key, options, defaultSource, treatDefaultAsFactory) {
   if (treatDefaultAsFactory)
     source = inject(key, defaultSource, treatDefaultAsFactory);
   if (typeof options === "function") {
-    return computed((ctx) => options(source, ctx));
+    return computed((oldValue) => options(source, oldValue));
   } else {
     return computed({
-      get: (ctx) => options.get(source, ctx),
+      get: (oldValue) => options.get(source, oldValue),
       set: options.set
     });
   }
@@ -2613,7 +2612,8 @@ function useAsyncState(promise, initialState, options) {
     isReady,
     isLoading,
     error,
-    execute
+    execute,
+    executeImmediate: (...args) => execute(0, ...args)
   };
   function waitUntilIsLoaded() {
     return new Promise((resolve, reject) => {
@@ -3897,7 +3897,8 @@ function useRefHistory(source, options = {}) {
   const {
     deep = false,
     flush = "pre",
-    eventFilter
+    eventFilter,
+    shouldCommit = () => true
   } = options;
   const {
     eventFilter: composedFilter,
@@ -3905,6 +3906,7 @@ function useRefHistory(source, options = {}) {
     resume: resumeTracking,
     isActive: isTracking
   } = pausableFilter(eventFilter);
+  let lastRawValue = source.value;
   const {
     ignoreUpdates,
     ignorePrevAsyncUpdates,
@@ -3918,12 +3920,16 @@ function useRefHistory(source, options = {}) {
     ignorePrevAsyncUpdates();
     ignoreUpdates(() => {
       source2.value = value;
+      lastRawValue = value;
     });
   }
   const manualHistory = useManualRefHistory(source, { ...options, clone: options.clone || deep, setSource });
   const { clear, commit: manualCommit } = manualHistory;
   function commit() {
     ignorePrevAsyncUpdates();
+    if (!shouldCommit(lastRawValue, source.value))
+      return;
+    lastRawValue = source.value;
     manualCommit();
   }
   function resume(commitNow) {
@@ -4114,6 +4120,11 @@ function useDevicesList(options = {}) {
     if (state.value !== "granted") {
       let granted = true;
       try {
+        const allDevices = await navigator2.mediaDevices.enumerateDevices();
+        const hasCamera = allDevices.some((device) => device.kind === "videoinput");
+        const hasMicrophone = allDevices.some((device) => device.kind === "audioinput" || device.kind === "audiooutput");
+        constraints.video = hasCamera ? constraints.video : false;
+        constraints.audio = hasMicrophone ? constraints.audio : false;
         stream = await navigator2.mediaDevices.getUserMedia(constraints);
       } catch (e) {
         stream = null;
@@ -4820,6 +4831,7 @@ function useEventSource(url, events2 = [], options = {}) {
       useEventListener(es, event_name, (e) => {
         event.value = event_name;
         data.value = e.data || null;
+        lastEventId.value = e.lastEventId || null;
       }, { passive: true });
     }
   };
@@ -4978,7 +4990,7 @@ function createFetch(config = {}) {
   return useFactoryFetch;
 }
 function useFetch(url, ...args) {
-  var _a;
+  var _a, _b;
   const supportsAbort = typeof AbortController === "function";
   let fetchOptions = {};
   let options = {
@@ -5003,7 +5015,7 @@ function useFetch(url, ...args) {
       options = { ...options, ...args[1] };
   }
   const {
-    fetch = (_a = defaultWindow) == null ? void 0 : _a.fetch,
+    fetch = (_b = (_a = defaultWindow) == null ? void 0 : _a.fetch) != null ? _b : globalThis == null ? void 0 : globalThis.fetch,
     initialData,
     timeout
   } = options;
@@ -5020,9 +5032,9 @@ function useFetch(url, ...args) {
   const canAbort = computed(() => supportsAbort && isFetching.value);
   let controller;
   let timer;
-  const abort = () => {
+  const abort = (reason) => {
     if (supportsAbort) {
-      controller == null ? void 0 : controller.abort();
+      controller == null ? void 0 : controller.abort(reason);
       controller = new AbortController();
       controller.signal.onabort = () => aborted.value = true;
       fetchOptions = {
@@ -5039,7 +5051,7 @@ function useFetch(url, ...args) {
     timer = useTimeoutFn(abort, timeout, { immediate: false });
   let executeCounter = 0;
   const execute = async (throwOnFailed = false) => {
-    var _a2, _b;
+    var _a2, _b2;
     abort();
     loading(true);
     error.value = null;
@@ -5088,7 +5100,7 @@ function useFetch(url, ...args) {
         ...context.options,
         headers: {
           ...headersToObject(defaultFetchOptions.headers),
-          ...headersToObject((_b = context.options) == null ? void 0 : _b.headers)
+          ...headersToObject((_b2 = context.options) == null ? void 0 : _b2.headers)
         }
       }
     ).then(async (fetchResponse) => {
@@ -5792,7 +5804,8 @@ function useIdle(timeout = oneMinute, options = {}) {
           onEvent();
       }, listenerOptions);
     }
-    reset();
+    if (!initialState)
+      reset();
   }
   return {
     idle,
@@ -5869,6 +5882,9 @@ function useScroll(element, options = {}) {
       top: 0,
       bottom: 0
     },
+    observe: _observe = {
+      mutation: false
+    },
     eventListenerOptions = {
       capture: false,
       passive: true
@@ -5879,6 +5895,9 @@ function useScroll(element, options = {}) {
       console.error(e);
     }
   } = options;
+  const observe = typeof _observe === "boolean" ? {
+    mutation: _observe
+  } : _observe;
   const internalX = shallowRef(0);
   const internalY = shallowRef(0);
   const x = computed({
@@ -6001,6 +6020,22 @@ function useScroll(element, options = {}) {
       onError(e);
     }
   });
+  if ((observe == null ? void 0 : observe.mutation) && element != null && element !== window2 && element !== document) {
+    useMutationObserver(
+      element,
+      () => {
+        const _element = toValue(element);
+        if (!_element)
+          return;
+        setArrivedState(_element);
+      },
+      {
+        attributes: true,
+        childList: true,
+        subtree: true
+      }
+    );
+  }
   useEventListener(
     element,
     "scrollend",
@@ -6640,6 +6675,8 @@ function useMouse(options = {}) {
 }
 function useMouseInElement(target, options = {}) {
   const {
+    windowResize = true,
+    windowScroll = true,
     handleOutside = true,
     window: window2 = defaultWindow
   } = options;
@@ -6653,34 +6690,55 @@ function useMouseInElement(target, options = {}) {
   const elementHeight = shallowRef(0);
   const elementWidth = shallowRef(0);
   const isOutside = shallowRef(true);
-  let stop = () => {
-  };
+  function update() {
+    if (!window2)
+      return;
+    const el = unrefElement(targetRef);
+    if (!el || !(el instanceof Element))
+      return;
+    const {
+      left,
+      top,
+      width,
+      height
+    } = el.getBoundingClientRect();
+    elementPositionX.value = left + (type === "page" ? window2.pageXOffset : 0);
+    elementPositionY.value = top + (type === "page" ? window2.pageYOffset : 0);
+    elementHeight.value = height;
+    elementWidth.value = width;
+    const elX = x.value - elementPositionX.value;
+    const elY = y.value - elementPositionY.value;
+    isOutside.value = width === 0 || height === 0 || elX < 0 || elY < 0 || elX > width || elY > height;
+    if (handleOutside) {
+      elementX.value = elX;
+      elementY.value = elY;
+    }
+  }
+  const stopFnList = [];
+  function stop() {
+    stopFnList.forEach((fn) => fn());
+    stopFnList.length = 0;
+  }
+  tryOnMounted(() => {
+    update();
+  });
   if (window2) {
-    stop = watch(
+    const {
+      stop: stopResizeObserver
+    } = useResizeObserver(targetRef, update);
+    const {
+      stop: stopMutationObserver
+    } = useMutationObserver(targetRef, update, {
+      attributeFilter: ["style", "class"]
+    });
+    const stopWatch = watch(
       [targetRef, x, y],
-      () => {
-        const el = unrefElement(targetRef);
-        if (!el || !(el instanceof Element))
-          return;
-        const {
-          left,
-          top,
-          width,
-          height
-        } = el.getBoundingClientRect();
-        elementPositionX.value = left + (type === "page" ? window2.pageXOffset : 0);
-        elementPositionY.value = top + (type === "page" ? window2.pageYOffset : 0);
-        elementHeight.value = height;
-        elementWidth.value = width;
-        const elX = x.value - elementPositionX.value;
-        const elY = y.value - elementPositionY.value;
-        isOutside.value = width === 0 || height === 0 || elX < 0 || elY < 0 || elX > width || elY > height;
-        if (handleOutside || !isOutside.value) {
-          elementX.value = elX;
-          elementY.value = elY;
-        }
-      },
-      { immediate: true }
+      update
+    );
+    stopFnList.push(
+      stopResizeObserver,
+      stopMutationObserver,
+      stopWatch
     );
     useEventListener(
       document,
@@ -6688,6 +6746,16 @@ function useMouseInElement(target, options = {}) {
       () => isOutside.value = true,
       { passive: true }
     );
+    if (windowScroll) {
+      stopFnList.push(
+        useEventListener("scroll", update, { capture: true, passive: true })
+      );
+    }
+    if (windowResize) {
+      stopFnList.push(
+        useEventListener("resize", update, { passive: true })
+      );
+    }
   }
   return {
     x,
@@ -6824,11 +6892,12 @@ function useNetwork(options = {}) {
 function useNow(options = {}) {
   const {
     controls: exposeControls = false,
-    interval = "requestAnimationFrame"
+    interval = "requestAnimationFrame",
+    immediate = true
   } = options;
   const now2 = ref(/* @__PURE__ */ new Date());
   const update = () => now2.value = /* @__PURE__ */ new Date();
-  const controls = interval === "requestAnimationFrame" ? useRafFn(update, { immediate: true }) : useIntervalFn(update, interval, { immediate: true });
+  const controls = interval === "requestAnimationFrame" ? useRafFn(update, { immediate }) : useIntervalFn(update, interval, { immediate });
   if (exposeControls) {
     return {
       now: now2,
@@ -7351,7 +7420,7 @@ function useScreenSafeArea() {
     rightCssVar.value = "env(safe-area-inset-right, 0px)";
     bottomCssVar.value = "env(safe-area-inset-bottom, 0px)";
     leftCssVar.value = "env(safe-area-inset-left, 0px)";
-    update();
+    tryOnMounted(update);
     useEventListener("resize", useDebounceFn(update), { passive: true });
   }
   function update() {
@@ -7382,7 +7451,8 @@ function useScriptTag(src, onLoaded = noop, options = {}) {
     noModule,
     defer,
     document: document2 = defaultDocument,
-    attrs = {}
+    attrs = {},
+    nonce = void 0
   } = options;
   const scriptTag = shallowRef(null);
   let _promise = null;
@@ -7411,6 +7481,9 @@ function useScriptTag(src, onLoaded = noop, options = {}) {
         el.noModule = noModule;
       if (referrerPolicy)
         el.referrerPolicy = referrerPolicy;
+      if (nonce) {
+        el.nonce = nonce;
+      }
       Object.entries(attrs).forEach(([name, value]) => el == null ? void 0 : el.setAttribute(name, value));
       shouldAppend = true;
     } else if (el.hasAttribute("data-loaded")) {
@@ -7695,7 +7768,7 @@ function useSpeechSynthesis(text, options = {}) {
     utterance2.voice = toValue(options.voice) || null;
     utterance2.pitch = toValue(pitch);
     utterance2.rate = toValue(rate);
-    utterance2.volume = volume;
+    utterance2.volume = toValue(volume);
     utterance2.onstart = () => {
       isPlaying.value = true;
       status.value = "play";
@@ -8501,7 +8574,8 @@ function useUrlSearchParams(mode = "history", options = {}) {
     removeFalsyValues = false,
     write: enableWrite = true,
     writeMode = "replace",
-    window: window2 = defaultWindow
+    window: window2 = defaultWindow,
+    stringify = (params) => params.toString()
   } = options;
   if (!window2)
     return reactive(initialValue);
@@ -8518,7 +8592,7 @@ function useUrlSearchParams(mode = "history", options = {}) {
     }
   }
   function constructQuery(params) {
-    const stringified = params.toString();
+    const stringified = stringify(params);
     if (mode === "history")
       return `${stringified ? `?${stringified}` : ""}${window2.location.hash || ""}`;
     if (mode === "hash-params")

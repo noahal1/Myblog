@@ -366,6 +366,35 @@ export const getArticlesToProcess = async (page = 1, limit = 10) => {
   }
 };
 
+// 获取知识库分类
+export const getKnowledgeCategories = async (includeChildren = true, includeCount = true) => {
+  try {
+    const params = { include_children: includeChildren, include_count: includeCount };
+    return await apiClient.get('/api/knowledge-categories', { params });
+  } catch (error) {
+    return handleApiError(error, () => getKnowledgeCategories(includeChildren, includeCount));
+  }
+};
+
+// 获取所有知识库分类（扁平列表）
+export const getAllKnowledgeCategories = async (includeCount = true) => {
+  try {
+    const params = { include_count: includeCount };
+    return await apiClient.get('/api/knowledge-categories/all', { params });
+  } catch (error) {
+    return handleApiError(error, () => getAllKnowledgeCategories(includeCount));
+  }
+};
+
+// 创建知识库分类
+export const createKnowledgeCategory = async (categoryData) => {
+  try {
+    return await apiClient.post('/api/knowledge-categories', categoryData);
+  } catch (error) {
+    return handleApiError(error, () => createKnowledgeCategory(categoryData));
+  }
+};
+
 // 错误处理和重试逻辑
 const handleApiError = (error, retryCallback) => {
   const requestId = error.config?.url;

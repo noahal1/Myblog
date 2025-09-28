@@ -124,9 +124,9 @@ fi
 echo_step "构建Docker镜像..."
 docker-compose build
 
-# 启动数据库和Redis
-echo_step "启动数据库和Redis服务..."
-docker-compose up -d db redis
+# 启动数据库
+echo_step "启动数据库服务..."
+docker-compose up -d db
 
 # 等待数据库启动
 echo_info "等待数据库启动..."

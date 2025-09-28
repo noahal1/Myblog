@@ -17,9 +17,17 @@ class LogManager:
 
     def __init__(self):
         self.log_path = os.path.join(os.getcwd(), "logs")
-        # 确保日志目录存在
-        if not os.path.exists(self.log_path):
-            os.makedirs(self.log_path)
+        # 确保日志目录存在并设置正确权限
+        try:
+            if not os.path.exists(self.log_path):
+                os.makedirs(self.log_path, mode=0o755)
+            # 确保目录有写权限
+            os.chmod(self.log_path, 0o755)
+        except Exception as e:
+            print(f"创建或设置日志目录权限失败: {e}")
+            # 如果无法创建logs目录，使用临时目录
+            import tempfile
+            self.log_path = tempfile.gettempdir()
         
         # 初始化日志器
         self._init_loggers()

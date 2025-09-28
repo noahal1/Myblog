@@ -1,6 +1,6 @@
 import {
   __commonJS
-} from "./chunk-OL46QLBJ.js";
+} from "./chunk-SNAQBZPT.js";
 
 // node_modules/.pnpm/aos@2.3.4/node_modules/aos/dist/aos.js
 var require_aos = __commonJS({

@@ -29,7 +29,7 @@ log_error() {
 # 显示帮助信息
 show_help() {
     cat << EOF
-博客项目部署脚本
+/项目部署脚本/
 
 用法: $0 [选项] <环境>
 
@@ -247,7 +247,7 @@ deploy_project() {
 check_health() {
     log_info "执行健康检查..."
     
-    local services=("frontend" "backend" "db" "redis")
+    local services=("frontend" "backend" "db")
     local failed_services=()
     
     for service in "${services[@]}"; do
@@ -279,7 +279,6 @@ show_deployment_info() {
     echo "前端地址: http://localhost"
     echo "后端地址: http://localhost:8000"
     echo "数据库地址: localhost:3306"
-    echo "Redis地址: localhost:6379"
     
     if [[ "$ENVIRONMENT" == "prod" ]]; then
         echo "生产环境监控: http://localhost/health"

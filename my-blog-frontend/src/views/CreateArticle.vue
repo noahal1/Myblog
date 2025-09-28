@@ -73,7 +73,9 @@
             prepend-inner-icon="mdi-text-short"
           ></v-textarea>
           
+          <!-- 标签选择 - 仅普通文章显示 -->
           <v-autocomplete
+            v-if="!article.is_knowledge_base"
             v-model="article.tags"
             :items="availableTags"
             item-title="name"
@@ -124,7 +126,44 @@
             hint="知识库文章将在知识库页面展示，用于整理技术笔记和教程"
             persistent-hint
             class="mb-6 animated fadeIn"
+            @change="onKnowledgeBaseToggle"
           ></v-switch>
+          
+          <!-- 知识库分类选择 - 仅知识库文章显示 -->
+          <v-autocomplete
+            v-if="article.is_knowledge_base"
+            v-model="article.knowledge_category_id"
+            :items="knowledgeCategories"
+            item-title="name"
+            item-value="id"
+            label="选择知识库分类"
+            variant="outlined"
+            required
+            class="mb-6 animated fadeIn"
+            :loading="categoriesLoading"
+            :error-messages="categoriesError"
+            prepend-inner-icon="mdi-folder-outline"
+            placeholder="选择或创建分类"
+            :rules="article.is_knowledge_base ? [v => !!v || '知识库文章必须选择分类'] : []"
+          >
+            <template v-slot:prepend-item>
+              <v-list-item>
+                <v-text-field
+                  v-model="newCategoryName"
+                  label="创建新分类"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                  class="mx-2"
+                  :loading="creatingCategory"
+                  append-inner-icon="mdi-plus"
+                  @click:append-inner="createNewCategory"
+                  @keyup.enter="createNewCategory"
+                ></v-text-field>
+              </v-list-item>
+              <v-divider class="mt-2"></v-divider>
+            </template>
+          </v-autocomplete>
           
           <div class="d-flex justify-space-between mt-6">
             <v-btn
@@ -172,7 +211,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { getTags, createArticle, createTag, uploadImage } from '../api'
+import { getTags, createArticle, createTag, uploadImage, getKnowledgeCategories, createKnowledgeCategory } from '../api'
 import { MdEditor } from 'md-editor-v3'
 import ImagePicker from '../components/ImagePicker.vue'
 import { useTheme } from 'vuetify'
@@ -215,7 +254,8 @@ const article = ref({
   tags: [],
   cover_image: '',
   is_published: true,
-  is_knowledge_base: false
+  is_knowledge_base: false,
+  knowledge_category_id: null
 })
 
 const availableTags = ref([])
@@ -223,6 +263,13 @@ const tagsLoading = ref(false)
 const tagsError = ref(null)
 const newTagName = ref('')
 const creatingTag = ref(false)
+
+// 知识库分类相关
+const knowledgeCategories = ref([])
+const categoriesLoading = ref(false)
+const categoriesError = ref(null)
+const newCategoryName = ref('')
+const creatingCategory = ref(false)
 
 // 封面图片上传处理
 const handleCoverImageUpload = async () => {
@@ -337,6 +384,57 @@ const createNewTag = async () => {
   }
 }
 
+// 获取知识库分类列表
+const fetchKnowledgeCategories = async () => {
+  categoriesLoading.value = true
+  try {
+    const response = await getKnowledgeCategories(false, false) // 不需要子分类和计数
+    knowledgeCategories.value = response.data
+  } catch (error) {
+    categoriesError.value = '获取分类失败，请稍后重试'
+    console.error('获取知识库分类失败:', error)
+  } finally {
+    categoriesLoading.value = false
+  }
+}
+
+// 创建新分类
+const createNewCategory = async () => {
+  if (!newCategoryName.value.trim()) return
+  
+  creatingCategory.value = true
+  try {
+    const response = await createKnowledgeCategory({ 
+      name: newCategoryName.value.trim(),
+      description: `${newCategoryName.value.trim()}相关的知识库文章`
+    })
+    
+    const newCategory = response.data
+    knowledgeCategories.value.push(newCategory)
+    article.value.knowledge_category_id = newCategory.id
+    newCategoryName.value = ''
+  } catch (error) {
+    console.error('创建分类失败:', error)
+    categoriesError.value = '创建分类失败，请重试'
+  } finally {
+    creatingCategory.value = false
+  }
+}
+
+// 知识库开关切换处理
+const onKnowledgeBaseToggle = () => {
+  if (article.value.is_knowledge_base) {
+    // 切换到知识库文章时，清空标签，获取分类
+    article.value.tags = []
+    if (knowledgeCategories.value.length === 0) {
+      fetchKnowledgeCategories()
+    }
+  } else {
+    // 切换到普通文章时，清空分类
+    article.value.knowledge_category_id = null
+  }
+}
+
 // 获取标签颜色
 const getTagColor = (tagName) => {
   const colors = ['primary', 'secondary', 'success', 'info', 'warning']
@@ -348,9 +446,15 @@ const getTagColor = (tagName) => {
 
 // 检查表单有效性
 const checkFormValidity = () => {
-  isFormValid.value = !!article.value.title && 
-                      !!article.value.content && 
-                      !!article.value.summary
+  const baseValid = !!article.value.title && 
+                   !!article.value.content && 
+                   !!article.value.summary
+  
+  // 如果是知识库文章，还需要检查是否选择了分类
+  const categoryValid = !article.value.is_knowledge_base || 
+                        !!article.value.knowledge_category_id
+  
+  isFormValid.value = baseValid && categoryValid
 }
 
 // 保存为草稿
@@ -395,8 +499,20 @@ const submitArticle = async () => {
   try {
     // 确保发布状态为true
     article.value.is_published = true
+    
+    // 准备提交的数据
+    const submitData = { ...article.value }
+    
+    // 根据文章类型清理不需要的字段
+    if (article.value.is_knowledge_base) {
+      // 知识库文章：清空标签，保留分类
+      submitData.tags = []
+    } else {
+      // 普通文章：清空分类，保留标签
+      submitData.knowledge_category_id = null
+    }
 
-    const response = await createArticle(article.value)
+    const response = await createArticle(submitData)
     // 清除草稿
     localStorage.removeItem('article_draft')
     router.push(`/article/${response.data.id}`)
@@ -413,8 +529,13 @@ const submitArticle = async () => {
 }
 
 // 监听内容变化以验证表单
-watch([() => article.value.title, () => article.value.content, () => article.value.summary], 
-  () => checkFormValidity())
+watch([
+  () => article.value.title, 
+  () => article.value.content, 
+  () => article.value.summary,
+  () => article.value.is_knowledge_base,
+  () => article.value.knowledge_category_id
+], () => checkFormValidity())
 
 // 定时器引用
 let draftSaveInterval = null
